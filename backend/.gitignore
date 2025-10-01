@@ -23,6 +23,7 @@ backend/.idea
 *.iws
 *.iml
 *.ipr
+*.xml
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
