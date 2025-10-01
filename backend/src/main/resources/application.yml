@@ -14,3 +14,16 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         highlight_sql: true
+        use_sql_comments: true
+
+springdoc:
+  api-docs:
+    groups:
+      enabled: true
+  default-produces-media-type: application/json;charset=UTF-8
+  cache:
+    disabled: true
+  swagger-ui:
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
