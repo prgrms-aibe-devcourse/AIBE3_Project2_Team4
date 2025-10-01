@@ -22,7 +22,7 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
     private final SimpMessageSendingOperations messagingTemplate;
 
-    @MessageMapping("/chat/sendMessage")
+    @MessageMapping("/chats/sendMessage")
     public void sendMessage(MessageRequest messageRequest) {
         ChatRoom room = chatRoomService.getRoom(messageRequest.getRoomId());
         ChatMessage savedMessage = chatMessageService.saveMessage(room, messageRequest.getSender(), messageRequest.getContent());
@@ -33,19 +33,19 @@ public class ChatController {
     }
 
 
-    @PostMapping("/api/v1/chat/room")
+    @PostMapping("/api/v1/chats/rooms")
     @ResponseBody
     public ChatRoom createRoom(@RequestParam String name) {
         return chatRoomService.createRoom(name);
     }
 
-    @GetMapping("/api/v1/chat/rooms")
+    @GetMapping("/api/v1/chats/rooms")
     @ResponseBody
     public List<ChatRoom> getRooms() {
         return chatRoomService.getAllRooms();
     }
 
-    @PostMapping("/api/v1/chat/room/{roomId}/message")
+    @PostMapping("/api/v1/chats/rooms/{roomId}/message")
     @ResponseBody
     public ChatMessage sendMessage(@PathVariable Long roomId,
                                    @RequestParam String sender,
@@ -54,7 +54,7 @@ public class ChatController {
         return chatMessageService.saveMessage(room, sender, content);
     }
 
-    @GetMapping("/api/v1/chat/room/{roomId}/messages")
+    @GetMapping("/api/v1/chats/rooms/{roomId}/messages")
     @ResponseBody
     public List<ChatMessage> getMessages(@PathVariable Long roomId) {
         ChatRoom room = chatRoomService.getRoom(roomId);
