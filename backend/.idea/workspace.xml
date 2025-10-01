@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="11770402-5aff-4906-8cad-74eff1299f72" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/src/app/mypage/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/app/mypage/page.tsx" afterDir="false" />
@@ -233,7 +232,7 @@
       <workItem from="1759279849959" duration="73000" />
       <workItem from="1759279929455" duration="19675000" />
       <workItem from="1759306824845" duration="312000" />
-      <workItem from="1759307144688" duration="2016000" />
+      <workItem from="1759307144688" duration="2679000" />
     </task>
     <servers />
   </component>
