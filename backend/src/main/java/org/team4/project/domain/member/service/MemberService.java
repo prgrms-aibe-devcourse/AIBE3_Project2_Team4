@@ -1,6 +1,7 @@
 package org.team4.project.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,10 @@ public class MemberService {
 
         memberSignUpRequestDTO.setPassword(passwordEncoder.encode(memberSignUpRequestDTO.getPassword()));
 
-        memberRepository.save(memberSignUpRequestDTO.toEntity());
+        try {
+            memberRepository.save(memberSignUpRequestDTO.toEntity());
+        } catch (DataIntegrityViolationException e) {
+            throw new RegisterException("이미 사용중인 이메일 또는 닉네임 입니다.");
+        }
     }
 }

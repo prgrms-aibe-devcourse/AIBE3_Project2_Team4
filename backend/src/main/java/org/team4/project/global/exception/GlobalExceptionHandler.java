@@ -15,7 +15,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handelValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
