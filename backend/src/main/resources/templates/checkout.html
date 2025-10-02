@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
     <!-- SDK 추가 -->
@@ -8,11 +8,11 @@
 <body>
 <!-- 결제하기 버튼 -->
 <button class="button" style="margin-top: 30px" onclick="requestPayment()">결제하기</button>
-<script>
+<script th:inline="javascript">
     // ------  SDK 초기화 ------
     // @docs https://docs.tosspayments.com/sdk/v2/js#토스페이먼츠-초기화
-    const clientKey = "test_ck_26DlbXAaV0P4zY4Wola1VqY50Q9R";
-    const customerKey = "ePXyVvRHYnvw2u1idjvFq";
+    const clientKey = [[${clientKey}]]
+    const customerKey =  [[${customerKey}]]
     const tossPayments = TossPayments(clientKey);
     // 회원 결제
     // @docs https://docs.tosspayments.com/sdk/v2/js#tosspaymentspayment
