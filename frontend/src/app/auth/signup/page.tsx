@@ -1,18 +1,17 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Eye, EyeOff, User, Building } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Eye, EyeOff, User, Building } from "lucide-react";
 import Logo from "@/components/logo";
-
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -21,59 +20,59 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
     userType: "freelancer",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.")
-      setIsLoading(false)
-      return
+      setError("비밀번호가 일치하지 않습니다.");
+      setIsLoading(false);
+      return;
     }
 
     if (formData.password.length < 8) {
-      setError("비밀번호는 8자 이상이어야 합니다.")
-      setIsLoading(false)
-      return
+      setError("비밀번호는 8자 이상이어야 합니다.");
+      setIsLoading(false);
+      return;
     }
 
     try {
       // 실제 회원가입 로직 구현
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // 임시 딜레이
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 임시 딜레이
 
       // 성공 시 로그인 페이지로 리다이렉트
-      window.location.href = "/auth/login"
+      window.location.href = "/auth/login";
     } catch (err) {
-      setError("회원가입 중 오류가 발생했습니다.")
+      setError("회원가입 중 오류가 발생했습니다.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
-    <div className="flex flex-col gap-6 min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-4">
       <Logo />
 
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">회원가입</h1>
+        <div className="mb-8 text-center">
+          <h1 className="text-foreground mb-2 text-3xl font-bold">회원가입</h1>
           <p className="text-muted-foreground">새 계정을 만들어 서비스를 시작하세요</p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">계정 만들기</CardTitle>
+            <CardTitle className="text-center text-2xl">계정 만들기</CardTitle>
             <CardDescription className="text-center">필요한 정보를 입력해주세요</CardDescription>
           </CardHeader>
           <CardContent>
@@ -94,14 +93,17 @@ export default function SignupPage() {
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="freelancer" id="freelancer" />
-                    <Label htmlFor="freelancer" className="flex items-center space-x-2 cursor-pointer">
+                    <Label
+                      htmlFor="freelancer"
+                      className="flex cursor-pointer items-center space-x-2"
+                    >
                       <User className="h-4 w-4" />
                       <span>프리랜서</span>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="client" id="client" />
-                    <Label htmlFor="client" className="flex items-center space-x-2 cursor-pointer">
+                    <Label htmlFor="client" className="flex cursor-pointer items-center space-x-2">
                       <Building className="h-4 w-4" />
                       <span>클라이언트</span>
                     </Label>
@@ -151,13 +153,13 @@ export default function SignupPage() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      <EyeOff className="text-muted-foreground h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <Eye className="text-muted-foreground h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -179,26 +181,33 @@ export default function SignupPage() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      <EyeOff className="text-muted-foreground h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
+                      <Eye className="text-muted-foreground h-4 w-4" />
                     )}
                   </Button>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90 w-full"
+                disabled={isLoading}
+              >
                 {isLoading ? "가입 중..." : "회원가입"}
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground mt-6 text-center text-sm">
               이미 계정이 있으신가요?{" "}
-              <Link href="/auth/login" className="text-primary hover:text-primary/80 transition-colors font-medium">
+              <Link
+                href="/auth/login"
+                className="text-primary hover:text-primary/80 font-medium transition-colors"
+              >
                 로그인
               </Link>
             </div>
@@ -206,5 +215,5 @@ export default function SignupPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

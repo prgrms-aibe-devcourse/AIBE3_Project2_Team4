@@ -1,15 +1,21 @@
-"use client"
+"use client";
 
-import { useState, useEffect, Suspense } from "react"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
-import { Navigation } from "@/components/navigation"
-import { ServiceCard } from "@/components/service-card"
-import { Pagination } from "@/components/pagination"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Filter } from "lucide-react"
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { Navigation } from "@/components/navigation";
+import { ServiceCard } from "@/components/service-card";
+import { Pagination } from "@/components/pagination";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Filter } from "lucide-react";
 import useCategory from "@/hooks/use-catetory";
 
 // 더미 서비스 데이터 (더 많은 데이터)
@@ -158,38 +164,38 @@ const allServices = [
     tags: ["패키지디자인", "브랜딩"],
     createdAt: "2025-01-04",
   },
-]
+];
 
 function ServicesPageContent() {
-  const {categories, tagsByCategory} = useCategory();
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState("latest")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filteredServices, setFilteredServices] = useState(allServices)
+  const { categories, tagsByCategory } = useCategory();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("latest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filteredServices, setFilteredServices] = useState(allServices);
 
-  const itemsPerPage = 9
+  const itemsPerPage = 9;
 
   // URL 파라미터에서 초기값 설정
   useEffect(() => {
-    const category = searchParams.get("category")
-    const search = searchParams.get("search")
+    const category = searchParams.get("category");
+    const search = searchParams.get("search");
 
     if (category) {
-      setSelectedCategory(category)
+      setSelectedCategory(category);
     }
     if (search) {
-      setSearchQuery(search)
+      setSearchQuery(search);
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   // 필터링 및 정렬 로직
   useEffect(() => {
-    let filtered = allServices
+    let filtered = allServices;
 
     // 검색어 필터링
     if (searchQuery.trim()) {
@@ -197,93 +203,104 @@ function ServicesPageContent() {
         (service) =>
           service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           service.freelancerName.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      );
     }
 
     // 카테고리 필터링
     if (selectedCategory) {
-      filtered = filtered.filter((service) => service.category === selectedCategory)
+      filtered = filtered.filter((service) => service.category === selectedCategory);
     }
 
     // 태그 필터링
     if (selectedTags.length > 0) {
-      filtered = filtered.filter((service) => selectedTags.some((tag) => service.tags.includes(tag)))
+      filtered = filtered.filter((service) =>
+        selectedTags.some((tag) => service.tags.includes(tag)),
+      );
     }
 
     // 정렬
     if (sortBy === "latest") {
-      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      filtered = filtered.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     } else if (sortBy === "rating") {
-      filtered = filtered.sort((a, b) => b.rating - a.rating)
+      filtered = filtered.sort((a, b) => b.rating - a.rating);
     }
 
-    setFilteredServices(filtered)
-    setCurrentPage(1) // 필터 변경 시 첫 페이지로 이동
-  }, [searchQuery, selectedCategory, selectedTags, sortBy])
+    setFilteredServices(filtered);
+    setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
+  }, [searchQuery, selectedCategory, selectedTags, sortBy]);
 
   const handleCategorySelect = (categoryId: string | null) => {
-    setSelectedCategory(categoryId)
-    setSelectedTags([]) // 카테고리 변경 시 태그 초기화
+    setSelectedCategory(categoryId);
+    setSelectedTags([]); // 카테고리 변경 시 태그 초기화
 
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (categoryId) {
-      params.set("category", categoryId)
+      params.set("category", categoryId);
     } else {
-      params.delete("category")
+      params.delete("category");
     }
     // 검색어는 유지
     if (searchQuery) {
-      params.set("search", searchQuery)
+      params.set("search", searchQuery);
     }
-    router.push(`${pathname}?${params.toString()}`)
-  }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
-  }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  };
 
   const handleSearch = () => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams.toString());
     if (searchQuery.trim()) {
-      params.set("search", searchQuery.trim())
+      params.set("search", searchQuery.trim());
     } else {
-      params.delete("search")
+      params.delete("search");
     }
     // 카테고리는 유지
     if (selectedCategory) {
-      params.set("category", selectedCategory)
+      params.set("category", selectedCategory);
     }
-    router.push(`${pathname}?${params.toString()}`)
-  }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-  const currentTags = selectedCategory ? tagsByCategory[selectedCategory as keyof typeof tagsByCategory] : []
+  const currentTags = selectedCategory
+    ? tagsByCategory[selectedCategory as keyof typeof tagsByCategory]
+    : [];
 
   // 페이지네이션
-  const totalPages = Math.ceil(filteredServices.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentServices = filteredServices.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentServices = filteredServices.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Navigation />
 
       <div className="pt-16">
         {/* 검색 섹션 */}
-        <section className="py-8 bg-card border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="bg-card border-b py-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* 검색창 */}
-            <div className="max-w-2xl mx-auto mb-6">
+            <div className="mx-auto mb-6 max-w-2xl">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform" />
                 <Input
                   type="text"
                   placeholder="어떤 서비스를 찾고 계신가요?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                  className="pl-10 h-12 text-lg"
+                  className="h-12 pl-10 text-lg"
                 />
-                <Button className="absolute right-2 top-1/2 transform -translate-y-1/2" onClick={handleSearch}>
+                <Button
+                  className="absolute top-1/2 right-2 -translate-y-1/2 transform"
+                  onClick={handleSearch}
+                >
                   검색
                 </Button>
               </div>
@@ -291,7 +308,7 @@ function ServicesPageContent() {
 
             {/* 카테고리 선택 */}
             <div className="mb-6">
-              <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap justify-center gap-2">
                 <Button
                   variant={selectedCategory === null ? "default" : "outline"}
                   size="sm"
@@ -322,7 +339,7 @@ function ServicesPageContent() {
                     <Badge
                       key={tag}
                       variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                      className="hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors"
                       onClick={() => handleTagToggle(tag)}
                     >
                       {tag}
@@ -336,13 +353,14 @@ function ServicesPageContent() {
 
         {/* 서비스 목록 섹션 */}
         <section className="py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* 결과 정보 및 정렬 */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-muted-foreground" />
+                <Filter className="text-muted-foreground h-5 w-5" />
                 <span className="text-lg font-medium">
-                  총 <span className="text-primary font-bold">{filteredServices.length}</span>개의 서비스
+                  총 <span className="text-primary font-bold">{filteredServices.length}</span>개의
+                  서비스
                 </span>
               </div>
 
@@ -360,7 +378,7 @@ function ServicesPageContent() {
             {/* 서비스 목록 */}
             {currentServices.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {currentServices.map((service) => (
                     <ServiceCard
                       key={service.id}
@@ -378,22 +396,26 @@ function ServicesPageContent() {
                 {/* 페이지네이션 */}
                 {totalPages > 1 && (
                   <div className="flex justify-center">
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
                   </div>
                 )}
               </>
             ) : (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold mb-2">검색 결과가 없습니다</h3>
+              <div className="py-16 text-center">
+                <div className="mb-4 text-6xl">🔍</div>
+                <h3 className="mb-2 text-xl font-semibold">검색 결과가 없습니다</h3>
                 <p className="text-muted-foreground mb-6">다른 키워드나 카테고리로 검색해보세요</p>
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setSearchQuery("")
-                    setSelectedCategory(null)
-                    setSelectedTags([])
-                    router.push(pathname)
+                    setSearchQuery("");
+                    setSelectedCategory(null);
+                    setSelectedTags([]);
+                    router.push(pathname);
                   }}
                 >
                   전체 서비스 보기
@@ -404,7 +426,7 @@ function ServicesPageContent() {
         </section>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ServicesPage() {
@@ -412,5 +434,5 @@ export default function ServicesPage() {
     <Suspense fallback={<div>Loading...</div>}>
       <ServicesPageContent />
     </Suspense>
-  )
+  );
 }

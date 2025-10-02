@@ -1,15 +1,15 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Star, MapPin, Calendar, Building, Users, Mail, Phone, Globe } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import Image from "next/image";
+import Link from "next/link";
+import { Star, MapPin, Calendar, Building, Users, Mail, Phone, Globe } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 interface ClientProfileProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 // Mock data - 실제로는 API에서 가져올 데이터
@@ -43,7 +43,8 @@ const clientData = {
       title: "전사 ERP 시스템 구축",
       period: "2023년 3월 - 2023년 12월",
       budget: "5억원",
-      description: "기존 레거시 시스템을 현대적인 웹 기반 ERP 시스템으로 전환하는 프로젝트를 관리했습니다.",
+      description:
+        "기존 레거시 시스템을 현대적인 웹 기반 ERP 시스템으로 전환하는 프로젝트를 관리했습니다.",
       freelancersHired: 8,
       status: "완료",
     },
@@ -81,37 +82,37 @@ const clientData = {
     email: "jiyoung.park@techinnovation.com",
     phone: "+82-10-1234-5678",
   },
-}
+};
 
 export default function ClientProfile({ params }: ClientProfileProps) {
-  const client = clientData
+  const client = clientData;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="space-y-6 lg:col-span-1">
             {/* Profile Card */}
             <Card>
               <CardContent className="p-6 text-center">
-                <div className="w-32 h-32 mx-auto mb-4 relative">
+                <div className="relative mx-auto mb-4 h-32 w-32">
                   <Image
                     src={client.profileImage || "/placeholder.svg"}
                     alt={client.name}
                     fill
-                    className="object-cover rounded-full"
+                    className="rounded-full object-cover"
                   />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">{client.name}</h1>
+                <h1 className="mb-2 text-2xl font-bold">{client.name}</h1>
 
-                <div className="flex items-center justify-center space-x-1 mb-4">
+                <div className="mb-4 flex items-center justify-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{client.rating}</span>
                   <span className="text-muted-foreground">({client.reviewCount}개 리뷰)</span>
                 </div>
 
-                <div className="space-y-2 text-sm text-muted-foreground mb-6">
+                <div className="text-muted-foreground mb-6 space-y-2 text-sm">
                   <div className="flex items-center justify-center space-x-2">
                     <Calendar className="h-4 w-4" />
                     <span>가입일: {client.joinDate}</span>
@@ -134,7 +135,7 @@ export default function ClientProfile({ params }: ClientProfileProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">{client.companyInfo.description}</p>
+                <p className="text-muted-foreground text-sm">{client.companyInfo.description}</p>
               </CardContent>
             </Card>
 
@@ -147,14 +148,13 @@ export default function ClientProfile({ params }: ClientProfileProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">{client.teamInfo.focus}</p>
+                <p className="text-muted-foreground text-sm">{client.teamInfo.focus}</p>
               </CardContent>
             </Card>
-
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* About */}
             <Card>
               <CardHeader>
@@ -171,9 +171,9 @@ export default function ClientProfile({ params }: ClientProfileProps) {
                 <CardTitle>프리랜서 리뷰</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
+                <div className="py-8 text-center">
                   <p className="text-muted-foreground">아직 리뷰가 없습니다.</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     이 클라이언트와 함께 작업한 경험이 있다면 리뷰를 남겨주세요.
                   </p>
                 </div>
@@ -183,5 +183,5 @@ export default function ClientProfile({ params }: ClientProfileProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

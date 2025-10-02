@@ -39,9 +39,8 @@ import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
 
 export default function MyPage() {
-  const { isLoggedIn, member } = useLogin()
-  const userType = (member) ? member.role : null;
-
+  const { isLoggedIn, member } = useLogin();
+  const userType = member ? member.role : null;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
