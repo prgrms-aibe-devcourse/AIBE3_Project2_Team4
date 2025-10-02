@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.service.ServiceService;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class ServiceController {
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public ServiceDTO getItem(@PathVariable Long id) {
-        return serviceService.findById(id);
+        return serviceService.fromFindById(id);
     }
 
     @GetMapping
@@ -44,7 +45,25 @@ public class ServiceController {
     public void updateItem(
             @PathVariable Long id,
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
-        // 서비스 업데이트 로직 구현 필요
+        Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
+
+        ProjectService service = serviceService.findById(id);
+
+        service.checkActorCanModify(actor);
+
+        serviceService.updateService(id, serviceCreateRqBody);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void deleteItem(@PathVariable Long id) {
+        Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
+
+        ProjectService service = serviceService.findById(id);
+
+        service.checkActorCanDelete(actor);
+
+        serviceService.deleteService(id);
     }
 
 }
