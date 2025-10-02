@@ -50,7 +50,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
         String role = auth.getAuthority().replaceFirst("^ROLE_", "");
 
-        String token = jwtUtil.createJwt(email, role, 1000L * 60 * 60);
+        String token = jwtUtil.createJwt(email, role);
 
         response.addHeader("Authorization", "Bearer " + token);
     }
