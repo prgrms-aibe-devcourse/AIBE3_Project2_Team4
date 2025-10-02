@@ -16,9 +16,16 @@ spring:
         highlight_sql: true
         use_sql_comments: true
 
+  config:
+    import: optional:file:.env[.properties]
+
   h2:
     console:
       enabled: true
+
+  jwt:
+    secret: ${JWT__SECRET_KEY}
+    expiration-millis: 3600000
 
 springdoc:
   api-docs:
@@ -31,3 +38,8 @@ springdoc:
     enabled: true
     tags-sorter: alpha
     operations-sorter: alpha
+
+payment:
+  secret-key: ${PAYMENT__SECRET_KEY}
+  client-key: ${PAYMENT__CLIENT_KEY}
+  customer-key: ${PAYMENT__CUSTOMER_KEY}
