@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
+import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
 import org.team4.project.domain.payment.entity.Payment;
 import org.team4.project.domain.payment.entity.PaymentMethod;
@@ -35,7 +36,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public void confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+    public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
         String orderId = paymentConfirmRequestDTO.orderId();
         Integer amount = paymentConfirmRequestDTO.amount();
 
@@ -45,6 +46,9 @@ public class PaymentService {
 
         paymentRepository.save(convertToEntity(response));
         redisRepository.deleteValue(generateKey(orderId));
+
+        String receiptUrl = response.get("receipt").get("url").asText(null);
+        return new PaymentResponseDTO(receiptUrl);
     }
 
     public void savePayment(SavePaymentRequestDTO savePaymentRequestDTO) {

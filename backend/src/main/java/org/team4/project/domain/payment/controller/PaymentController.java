@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
+import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
 import org.team4.project.domain.payment.service.PaymentService;
 
@@ -23,9 +24,9 @@ public class PaymentController {
      */
     //TODO : 사용자 ID와 서비스 ID를 전달받아 결제 완료 후 DB 저장
     @PostMapping("/confirm")
-    public ResponseEntity<?> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
-        paymentService.confirmPayment(paymentConfirmRequestDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PaymentResponseDTO> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+        PaymentResponseDTO response = paymentService.confirmPayment(paymentConfirmRequestDTO);
+        return ResponseEntity.ok(response);
     }
 
     /**
