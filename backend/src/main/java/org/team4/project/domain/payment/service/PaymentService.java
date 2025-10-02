@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
+import org.team4.project.domain.payment.exception.PaymentException;
 import org.team4.project.domain.payment.infra.PaymentClient;
 import org.team4.project.global.redis.RedisRepository;
 
@@ -47,7 +48,8 @@ public class PaymentService {
         String storedValue = redisRepository.getValue(key);
 
         if (!Objects.equals(storedValue, String.valueOf(amount))) {
-            throw new IllegalArgumentException("결제 금액 불일치 또는 임시 데이터가 존재하지 않습니다.");
+            log.debug("orderId: {}", orderId);
+            throw new PaymentException("결제 금액 불일치 또는 임시 데이터가 존재하지 않습니다.");
         }
     }
 
