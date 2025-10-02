@@ -9,12 +9,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+
 @Component
 public class JwtUtil {
 
     private final SecretKey secretKey;
-    @Value("${spring.jwt.expiration-millis}")
-    private long expirationMillis;
 
     public JwtUtil(@Value("${spring.jwt.secret}")String secret) {
 
@@ -31,17 +30,23 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
+    public String getType(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("type", String.class);
+    }
+
     public Boolean isExpired(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String email, String role) {
+    public String createJwt(String type, String email, String role, long expire) {
         return Jwts.builder()
+                .claim("type", type)
                 .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .expiration(new Date(System.currentTimeMillis() + expire))
                 .signWith(secretKey)
                 .compact();
     }
