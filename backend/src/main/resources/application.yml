@@ -25,7 +25,6 @@ spring:
 
   jwt:
     secret: ${JWT__SECRET_KEY}
-    expiration-millis: 3600000
 
   data:
     redis:
