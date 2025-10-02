@@ -14,7 +14,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ newMessageCount = 0 }: NavigationProps) {
-  const { isLoggedIn, member } = useLogin();
+  const { isLoggedIn, member, logout } = useLogin();
 
   const userType = (member) ? member.role : null;
   
@@ -110,7 +110,7 @@ export function Navigation({ newMessageCount = 0 }: NavigationProps) {
                 </Button>
 
                 {/* 로그아웃 버튼 */}
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={()=>logout()}>
                   <LogOut className="h-5 w-5" />
                 </Button>
               </>

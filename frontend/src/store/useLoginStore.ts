@@ -8,10 +8,10 @@ interface Member {
 
 interface LoginState {
     member: Member | null;
-    setMember: (member: Member) => void;
+    setMember: (member: Member | null) => void;
 }
 
 export const useLoginStore = create<LoginState>((set, get)=>({
     member : {email : "aaa@naver.com", nickname : "정다솔", role : "client"},
-    setMember : (member : Member) => set({member}),
+    setMember : (member) => set({member}),
 }));

@@ -5,5 +5,7 @@ export default function useLogin() {
 
     const isLoggedIn = member !== null;
 
-    return {member, setMember, isLoggedIn}
+    const logout = () => setMember(null)
+
+    return {member, setMember, isLoggedIn, logout}
 }

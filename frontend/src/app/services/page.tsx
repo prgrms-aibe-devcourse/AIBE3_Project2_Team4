@@ -9,27 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart, Filter } from "lucide-react"
-
-// 카테고리 데이터
-const categories = [
-  { id: "development", name: "개발·프로그래밍", icon: Code, color: "bg-blue-100 text-blue-700" },
-  { id: "design", name: "디자인", icon: Palette, color: "bg-purple-100 text-purple-700" },
-  { id: "video", name: "영상·사진·음향", icon: Camera, color: "bg-green-100 text-green-700" },
-  { id: "writing", name: "번역·통역·글쓰기", icon: PenTool, color: "bg-orange-100 text-orange-700" },
-  { id: "marketing", name: "마케팅", icon: Megaphone, color: "bg-red-100 text-red-700" },
-  { id: "business", name: "비즈니스", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
-]
-
-// 태그 데이터 (카테고리별)
-const tagsByCategory = {
-  development: ["웹개발", "앱개발", "AI/ML", "데이터분석", "게임개발"],
-  design: ["로고디자인", "UI/UX", "브랜딩", "일러스트", "패키지디자인"],
-  video: ["영상편집", "모션그래픽", "사진촬영", "음향편집", "애니메이션"],
-  writing: ["번역", "콘텐츠작성", "카피라이팅", "교정·교열", "네이밍"],
-  marketing: ["SNS마케팅", "SEO", "광고운영", "브랜드마케팅", "이벤트기획"],
-  business: ["사업계획서", "재무관리", "법무자문", "HR컨설팅", "창업컨설팅"],
-}
+import { Search, Filter } from "lucide-react"
+import useCategory from "@/hooks/use-catetory";
 
 // 더미 서비스 데이터 (더 많은 데이터)
 const allServices = [
@@ -180,6 +161,7 @@ const allServices = [
 ]
 
 function ServicesPageContent() {
+  const {categories, tagsByCategory} = useCategory();
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -283,7 +265,7 @@ function ServicesPageContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation isLoggedIn={false} />
+      <Navigation />
 
       <div className="pt-16">
         {/* 검색 섹션 */}
@@ -314,7 +296,7 @@ function ServicesPageContent() {
                   variant={selectedCategory === null ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleCategorySelect(null)}
-                  className="transition-all duration-200 hover:scale-105"
+                  className="cursor-pointer transition-all duration-200 hover:scale-105"
                 >
                   전체
                 </Button>
@@ -324,7 +306,7 @@ function ServicesPageContent() {
                     variant={selectedCategory === category.id ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleCategorySelect(category.id)}
-                    className="transition-all duration-200 hover:scale-105"
+                    className="cursor-pointer transition-all duration-200 hover:scale-105"
                   >
                     {category.name}
                   </Button>

@@ -114,6 +114,9 @@ export default function ServiceDetailPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false) // 실제로는 auth context에서 가져올 값
   const [currentReviewPage, setCurrentReviewPage] = useState(1)
 
+
+
+
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % mockService.images.length)
   }
