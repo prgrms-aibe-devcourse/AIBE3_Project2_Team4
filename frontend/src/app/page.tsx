@@ -7,6 +7,8 @@ import { ServiceCard } from "@/components/service-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart } from "lucide-react"
+import Image from "next/image";
+import banner from "@/public/main_banner.jpg"
 
 // 카테고리 데이터
 const categories = [
@@ -97,23 +99,19 @@ export default function HomePage() {
       <Navigation />
 
       {/* 플랫폼 소개 섹션 */}
-      <section className="relative pt-16 pb-20 overflow-hidden">
+      <section className="relative h-80 mt-16 overflow-hidden items-center flex flex-col justify-center items-center">
         <div
-          className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"
-          style={{
-            backgroundImage: `url('/------------.jpg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay",
-          }}
-        />
+          className="absolute flex justify-center inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"
+        >
+          <Image src={banner} alt={"대표 이미지"} className="absolute" />
+        </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
             전문가와 함께하는
             <br />
-            <span className="text-primary">프리랜스 플랫폼</span>
+            <span className="text-primary">프리랜서 매칭 플랫폼</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
             다양한 분야의 전문 프리랜서들과 연결되어 당신의 프로젝트를 성공으로 이끌어보세요
           </p>
         </div>

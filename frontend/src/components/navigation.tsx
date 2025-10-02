@@ -25,7 +25,7 @@ export function Navigation({ isLoggedIn = true, userType = "client", newMessageC
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">F</span>
             </div>
-            <span className="text-xl font-bold text-foreground">FreelanceHub</span>
+            <span className="text-xl font-bold text-foreground">이바닥 고수들</span>
           </Link>
 
           {/* 네비게이션 메뉴 */}
@@ -41,7 +41,7 @@ export function Navigation({ isLoggedIn = true, userType = "client", newMessageC
               // 비회원 전용 버튼들
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/login">로그인xzff</Link>
+                  <Link href="/login">로그인</Link>
                 </Button>
                 <Button asChild>
                   <Link href="/signup">회원가입</Link>
