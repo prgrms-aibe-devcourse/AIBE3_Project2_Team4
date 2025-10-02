@@ -42,5 +42,5 @@ yarn-error.log*
 next-env.d.ts
 
 # intelli
-.idea
+/.idea
 frontend.iml

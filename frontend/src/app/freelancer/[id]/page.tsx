@@ -1,15 +1,25 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Star, MapPin, Calendar, Award, Briefcase, ExternalLink, Github, Linkedin, Mail } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Star,
+  MapPin,
+  Calendar,
+  Award,
+  Briefcase,
+  ExternalLink,
+  Github,
+  Linkedin,
+  Mail,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 interface FreelancerProfileProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 // Mock data - 실제로는 API에서 가져올 데이터
@@ -94,42 +104,38 @@ const freelancerData = {
     linkedin: "https://linkedin.com/in/example",
     email: "example@email.com",
   },
-}
+};
 
 export default function FreelancerProfile({ params }: FreelancerProfileProps) {
-  const freelancer = freelancerData
+  const freelancer = freelancerData;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="space-y-6 lg:col-span-1">
             {/* Profile Card */}
             <Card>
               <CardContent className="p-6 text-center">
-                <div className="w-32 h-32 mx-auto mb-4 relative">
+                <div className="relative mx-auto mb-4 h-32 w-32">
                   <Image
                     src={freelancer.profileImage || "/placeholder.svg"}
                     alt={freelancer.name}
                     fill
-                    className="object-cover rounded-full"
+                    className="rounded-full object-cover"
                   />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">{freelancer.name}</h1>
-                <p className="text-lg text-muted-foreground mb-4">{freelancer.title}</p>
+                <h1 className="mb-2 text-2xl font-bold">{freelancer.name}</h1>
+                <p className="text-muted-foreground mb-4 text-lg">{freelancer.title}</p>
 
-                <div className="flex items-center justify-center space-x-1 mb-4">
+                <div className="mb-4 flex items-center justify-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{freelancer.rating}</span>
                   <span className="text-muted-foreground">({freelancer.reviewCount}개 리뷰)</span>
                 </div>
 
-                <div className="space-y-2 text-sm text-muted-foreground mb-6">
-                  <div className="flex items-center justify-center space-x-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{freelancer.location}</span>
-                  </div>
+                <div className="text-muted-foreground mb-6 space-y-2 text-sm">
                   <div className="flex items-center justify-center space-x-2">
                     <Calendar className="h-4 w-4" />
                     <span>가입일: {freelancer.joinDate}</span>
@@ -140,25 +146,7 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
                   </div>
                 </div>
 
-                <div className="flex justify-center space-x-3 mb-6">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={freelancer.socialLinks.github}>
-                      <Github className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={freelancer.socialLinks.linkedin}>
-                      <Linkedin className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={`mailto:${freelancer.socialLinks.email}`}>
-                      <Mail className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-
-                <Button className="w-full">연락하기</Button>
+                <Button className="w-full">채팅하기</Button>
               </CardContent>
             </Card>
 
@@ -190,8 +178,6 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
                 {freelancer.certifications.map((cert, index) => (
                   <div key={index}>
                     <h4 className="font-medium">{cert.name}</h4>
-                    <p className="text-sm text-muted-foreground">{cert.issuer}</p>
-                    <p className="text-sm text-muted-foreground">{cert.date}</p>
                   </div>
                 ))}
               </CardContent>
@@ -199,7 +185,7 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* About */}
             <Card>
               <CardHeader>
@@ -218,14 +204,16 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
               <CardContent className="space-y-6">
                 {freelancer.experience.map((exp, index) => (
                   <div key={index}>
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="mb-2 flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold">{exp.title}</h3>
                         <p className="text-muted-foreground">{exp.company}</p>
                       </div>
                       <Badge variant="outline">{exp.period}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{exp.description}</p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {exp.description}
+                    </p>
                     {index < freelancer.experience.length - 1 && <Separator className="mt-6" />}
                   </div>
                 ))}
@@ -245,14 +233,16 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent hover:border-primary transition-colors group"
+                      className="hover:bg-accent hover:border-primary group flex items-center gap-3 rounded-lg border p-3 transition-colors"
                     >
-                      <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium group-hover:text-primary transition-colors truncate">
+                      <ExternalLink className="text-muted-foreground group-hover:text-primary h-5 w-5 flex-shrink-0 transition-colors" />
+                      <div className="min-w-0 flex-1">
+                        <p className="group-hover:text-primary truncate font-medium transition-colors">
                           {project.title}
                         </p>
-                        <p className="text-sm text-muted-foreground truncate">{project.description}</p>
+                        <p className="text-muted-foreground truncate text-sm">
+                          {project.description}
+                        </p>
                       </div>
                     </Link>
                   ))}
@@ -263,5 +253,5 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

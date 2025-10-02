@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useParams } from "next/navigation"
-import { Star, MessageCircle, Share2, Bookmark, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ReviewCard } from "@/components/review-card"
-import { Pagination } from "@/components/pagination"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { Star, MessageCircle, Share2, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ReviewCard } from "@/components/review-card";
+import { Pagination } from "@/components/pagination";
 
 // Mock data - 실제로는 API에서 가져올 데이터
 const mockService = {
@@ -57,7 +63,7 @@ const mockService = {
   },
   tags: ["웹개발", "React", "Next.js", "디자인"],
   category: "웹개발",
-}
+};
 
 const mockReviews = [
   {
@@ -104,58 +110,60 @@ const mockReviews = [
     authorProfileImage: "/client-profile-4.jpg",
     createdAt: "2023.12.28",
   },
-]
+];
 
 export default function ServiceDetailPage() {
-  const params = useParams()
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [reviewSort, setReviewSort] = useState("latest")
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // 실제로는 auth context에서 가져올 값
-  const [currentReviewPage, setCurrentReviewPage] = useState(1)
+  const params = useParams();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reviewSort, setReviewSort] = useState("latest");
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 실제로는 auth context에서 가져올 값
+  const [currentReviewPage, setCurrentReviewPage] = useState(1);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % mockService.images.length)
-  }
+    setCurrentImageIndex((prev) => (prev + 1) % mockService.images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + mockService.images.length) % mockService.images.length)
-  }
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + mockService.images.length) % mockService.images.length,
+    );
+  };
 
   const handleChatClick = () => {
     if (!isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다.")
-      return
+      alert("로그인이 필요한 서비스입니다.");
+      return;
     }
     // 채팅 생성 로직
-    console.log("채팅 시작")
-  }
+    console.log("채팅 시작");
+  };
 
   const handleBookmarkClick = () => {
     if (!isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다.")
-      return
+      alert("로그인이 필요한 서비스입니다.");
+      return;
     }
-    setIsBookmarked(!isBookmarked)
-  }
+    setIsBookmarked(!isBookmarked);
+  };
 
   const handleShareClick = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
-      alert("링크가 복사되었습니다!")
+      await navigator.clipboard.writeText(window.location.href);
+      alert("링크가 복사되었습니다!");
     } catch (err) {
-      console.error("링크 복사 실패:", err)
+      console.error("링크 복사 실패:", err);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="bg-background min-h-screen">
+      <div className="mx-auto max-w-6xl px-4 py-8">
         {/* 서비스 소개 섹션 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* 이미지 갤러리 */}
           <div className="space-y-4">
-            <div className="relative aspect-video rounded-lg overflow-hidden">
+            <div className="relative aspect-video overflow-hidden rounded-lg">
               <Image
                 src={mockService.images[currentImageIndex] || "/placeholder.svg"}
                 alt={`${mockService.title} - 이미지 ${currentImageIndex + 1}`}
@@ -167,7 +175,7 @@ export default function ServiceDetailPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                    className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
                     onClick={prevImage}
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -175,7 +183,7 @@ export default function ServiceDetailPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+                    className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
                     onClick={nextImage}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -191,7 +199,7 @@ export default function ServiceDetailPage() {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                    className={`h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 ${
                       currentImageIndex === index ? "border-primary" : "border-transparent"
                     }`}
                   >
@@ -211,7 +219,7 @@ export default function ServiceDetailPage() {
           {/* 서비스 정보 */}
           <div className="space-y-6">
             <div>
-              <div className="flex items-center space-x-2 mb-2">
+              <div className="mb-2 flex items-center space-x-2">
                 <Badge variant="secondary">{mockService.category}</Badge>
                 {mockService.tags.map((tag) => (
                   <Badge key={tag} variant="outline">
@@ -219,15 +227,17 @@ export default function ServiceDetailPage() {
                   </Badge>
                 ))}
               </div>
-              <h1 className="text-2xl font-bold mb-4">{mockService.title}</h1>
-              <div className="flex items-center space-x-4 mb-4">
+              <h1 className="mb-4 text-2xl font-bold">{mockService.title}</h1>
+              <div className="mb-4 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">{mockService.rating}</span>
                   <span className="text-muted-foreground">({mockService.reviewCount}개 리뷰)</span>
                 </div>
               </div>
-              <div className="text-3xl font-bold text-primary mb-6">{mockService.price.toLocaleString()}원</div>
+              <div className="text-primary mb-6 text-3xl font-bold">
+                {mockService.price.toLocaleString()}원
+              </div>
             </div>
 
             {/* 프리랜서 정보 */}
@@ -235,16 +245,18 @@ export default function ServiceDetailPage() {
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
                   <Link href={`/freelancer/${mockService.freelancer.id}`}>
-                    <Avatar className="h-12 w-12 cursor-pointer hover:ring-2 hover:ring-primary">
+                    <Avatar className="hover:ring-primary h-12 w-12 cursor-pointer hover:ring-2">
                       <AvatarImage src={mockService.freelancer.avatar || "/placeholder.svg"} />
                       <AvatarFallback>{mockService.freelancer.name[0]}</AvatarFallback>
                     </Avatar>
                   </Link>
                   <div className="flex-1">
                     <Link href={`/freelancer/${mockService.freelancer.id}`}>
-                      <h3 className="font-medium hover:text-primary cursor-pointer">{mockService.freelancer.name}</h3>
+                      <h3 className="hover:text-primary cursor-pointer font-medium">
+                        {mockService.freelancer.name}
+                      </h3>
                     </Link>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center space-x-4 text-sm">
                       <div className="flex items-center space-x-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                         <span>{mockService.freelancer.rating}</span>
@@ -259,7 +271,7 @@ export default function ServiceDetailPage() {
             {/* 인터랙션 버튼들 */}
             <div className="flex space-x-3">
               <Button onClick={handleChatClick} className="flex-1">
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <MessageCircle className="mr-2 h-4 w-4" />
                 채팅하기
               </Button>
               <Button variant="outline" onClick={handleBookmarkClick}>
@@ -275,8 +287,10 @@ export default function ServiceDetailPage() {
         {/* 서비스 상세 설명 */}
         <Card className="mb-12">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">서비스 상세 설명</h2>
-            <div className="whitespace-pre-line text-muted-foreground leading-relaxed">{mockService.description}</div>
+            <h2 className="mb-4 text-xl font-bold">서비스 상세 설명</h2>
+            <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
+              {mockService.description}
+            </div>
           </CardContent>
         </Card>
 
@@ -285,10 +299,10 @@ export default function ServiceDetailPage() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold">리뷰</h2>
-              <div className="flex items-center space-x-4 mt-2">
+              <div className="mt-2 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium text-lg">{mockService.rating}</span>
+                  <span className="text-lg font-medium">{mockService.rating}</span>
                 </div>
                 <span className="text-muted-foreground">총 {mockService.reviewCount}개 리뷰</span>
               </div>
@@ -319,9 +333,13 @@ export default function ServiceDetailPage() {
             ))}
           </div>
 
-          <Pagination currentPage={currentReviewPage} totalPages={5} onPageChange={setCurrentReviewPage} />
+          <Pagination
+            currentPage={currentReviewPage}
+            totalPages={5}
+            onPageChange={setCurrentReviewPage}
+          />
         </div>
       </div>
     </div>
-  )
+  );
 }
