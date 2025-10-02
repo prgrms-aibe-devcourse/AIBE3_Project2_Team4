@@ -11,8 +11,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 public class RedisConfig {
 
     @Bean
-    public RedisConnectionFactory chatPubSubFactory(@Value("${spring.data.redis.host}") String host,
-                                                    @Value("${spring.data.redis.port}") int port) {
+    public RedisConnectionFactory redisConnectionFactory(@Value("${spring.data.redis.host}") String host,
+                                                         @Value("${spring.data.redis.port}") int port) {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
 
         config.setHostName(host);
