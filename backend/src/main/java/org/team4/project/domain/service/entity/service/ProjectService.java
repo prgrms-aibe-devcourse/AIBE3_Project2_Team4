@@ -36,13 +36,6 @@ public class ProjectService extends BaseEntity {
                 .build();
     }
 
-    public ProjectService(Long id, String title, String content, Integer price) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.price = price;
-    }
-
     public void modify(String newTitle, String newContent, Integer newPrice) {
         this.title = newTitle;
         this.content = newContent;

@@ -61,4 +61,12 @@ public class ServiceService {
         serviceRepository.save(existingService);
     }
 
+    //서비스 삭제
+    public void deleteService(Long id) {
+        if (!serviceRepository.existsById(id)) {
+            throw new IllegalArgumentException("해당 서비스가 존재하지 않습니다.");
+        }
+        serviceRepository.deleteById(id);
+    }
+
 }
