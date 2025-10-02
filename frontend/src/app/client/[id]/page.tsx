@@ -104,8 +104,6 @@ export default function ClientProfile({ params }: ClientProfileProps) {
                   />
                 </div>
                 <h1 className="text-2xl font-bold mb-2">{client.name}</h1>
-                <p className="text-lg text-muted-foreground mb-1">{client.title}</p>
-                <p className="text-sm text-muted-foreground mb-4">{client.team}</p>
 
                 <div className="flex items-center justify-center space-x-1 mb-4">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -115,10 +113,6 @@ export default function ClientProfile({ params }: ClientProfileProps) {
 
                 <div className="space-y-2 text-sm text-muted-foreground mb-6">
                   <div className="flex items-center justify-center space-x-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{client.location}</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
                     <Calendar className="h-4 w-4" />
                     <span>가입일: {client.joinDate}</span>
                   </div>
@@ -127,23 +121,7 @@ export default function ClientProfile({ params }: ClientProfileProps) {
                     <span>완료 프로젝트: {client.completedProjects}개</span>
                   </div>
                 </div>
-
-                <div className="space-y-2 mb-6">
-                  <Button size="sm" variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href={`mailto:${client.contact.email}`}>
-                      <Mail className="h-4 w-4 mr-2" />
-                      이메일
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href={`tel:${client.contact.phone}`}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      전화
-                    </Link>
-                  </Button>
-                </div>
-
-                <Button className="w-full">연락하기</Button>
+                <Button className="w-full">채팅하기</Button>
               </CardContent>
             </Card>
 
@@ -152,27 +130,10 @@ export default function ClientProfile({ params }: ClientProfileProps) {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Building className="h-5 w-5" />
-                  <span>회사 정보</span>
+                  <span>회사</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div>
-                  <h4 className="font-medium">{client.companyInfo.name}</h4>
-                  <p className="text-sm text-muted-foreground">{client.companyInfo.industry}</p>
-                </div>
-                <div>
-                  <p className="text-sm">
-                    <span className="font-medium">규모:</span> {client.companyInfo.size}
-                  </p>
-                </div>
-                <div>
-                  <Button size="sm" variant="outline" className="w-full bg-transparent" asChild>
-                    <Link href={client.companyInfo.website}>
-                      <Globe className="h-4 w-4 mr-2" />
-                      웹사이트 방문
-                    </Link>
-                  </Button>
-                </div>
                 <p className="text-sm text-muted-foreground">{client.companyInfo.description}</p>
               </CardContent>
             </Card>
@@ -182,38 +143,14 @@ export default function ClientProfile({ params }: ClientProfileProps) {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
-                  <span>팀 정보</span>
+                  <span>팀</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div>
-                  <h4 className="font-medium">{client.teamInfo.name}</h4>
-                  <p className="text-sm text-muted-foreground">팀 규모: {client.teamInfo.size}</p>
-                </div>
-                <div>
-                  <p className="text-sm">
-                    <span className="font-medium">주요 업무:</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">{client.teamInfo.focus}</p>
-                </div>
+                <p className="text-sm text-muted-foreground">{client.teamInfo.focus}</p>
               </CardContent>
             </Card>
 
-            {/* Preferred Skills */}
-            <Card>
-              <CardHeader>
-                <CardTitle>선호 기술 스택</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {client.preferredSkills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Main Content */}
@@ -225,34 +162,6 @@ export default function ClientProfile({ params }: ClientProfileProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">{client.bio}</p>
-              </CardContent>
-            </Card>
-
-            {/* Project History */}
-            <Card>
-              <CardHeader>
-                <CardTitle>프로젝트 이력</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {client.projectHistory.map((project, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="font-semibold">{project.title}</h3>
-                        <p className="text-sm text-muted-foreground">{project.period}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={project.status === "완료" ? "default" : "secondary"}>{project.status}</Badge>
-                        <p className="text-sm text-muted-foreground mt-1">예산: {project.budget}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-2">{project.description}</p>
-                    <p className="text-sm">
-                      <span className="font-medium">참여 프리랜서:</span> {project.freelancersHired}명
-                    </p>
-                    {index < client.projectHistory.length - 1 && <Separator className="mt-6" />}
-                  </div>
-                ))}
               </CardContent>
             </Card>
 

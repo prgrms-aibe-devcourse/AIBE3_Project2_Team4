@@ -127,10 +127,6 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
 
                 <div className="space-y-2 text-sm text-muted-foreground mb-6">
                   <div className="flex items-center justify-center space-x-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>{freelancer.location}</span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
                     <Calendar className="h-4 w-4" />
                     <span>가입일: {freelancer.joinDate}</span>
                   </div>
@@ -140,25 +136,7 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
                   </div>
                 </div>
 
-                <div className="flex justify-center space-x-3 mb-6">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={freelancer.socialLinks.github}>
-                      <Github className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={freelancer.socialLinks.linkedin}>
-                      <Linkedin className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={`mailto:${freelancer.socialLinks.email}`}>
-                      <Mail className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-
-                <Button className="w-full">연락하기</Button>
+                <Button className="w-full">채팅하기</Button>
               </CardContent>
             </Card>
 
@@ -190,8 +168,6 @@ export default function FreelancerProfile({ params }: FreelancerProfileProps) {
                 {freelancer.certifications.map((cert, index) => (
                   <div key={index}>
                     <h4 className="font-medium">{cert.name}</h4>
-                    <p className="text-sm text-muted-foreground">{cert.issuer}</p>
-                    <p className="text-sm text-muted-foreground">{cert.date}</p>
                   </div>
                 ))}
               </CardContent>

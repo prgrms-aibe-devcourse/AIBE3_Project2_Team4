@@ -2,23 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Navigation } from "@/components/navigation"
 import { ServiceCard } from "@/components/service-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart } from "lucide-react"
 import Image from "next/image";
+import { Search } from "lucide-react"
 import banner from "@/public/main_banner.jpg"
-
-// 카테고리 데이터
-const categories = [
-  { id: "development", name: "개발·프로그래밍", icon: Code, color: "bg-blue-100 text-blue-700" },
-  { id: "design", name: "디자인", icon: Palette, color: "bg-purple-100 text-purple-700" },
-  { id: "video", name: "영상·사진·음향", icon: Camera, color: "bg-green-100 text-green-700" },
-  { id: "writing", name: "번역·통역·글쓰기", icon: PenTool, color: "bg-orange-100 text-orange-700" },
-  { id: "marketing", name: "마케팅", icon: Megaphone, color: "bg-red-100 text-red-700" },
-  { id: "business", name: "비즈니스", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
-]
+import useCategory from "@/hooks/use-catetory";
 
 // 추천 서비스 더미 데이터
 const recommendedServices = [
@@ -79,6 +69,7 @@ const recommendedServices = [
 ]
 
 export default function HomePage() {
+  const { categories } = useCategory();
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
@@ -96,10 +87,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
 
       {/* 플랫폼 소개 섹션 */}
-      <section className="relative h-80 mt-16 overflow-hidden items-center flex flex-col justify-center items-center">
+      <section className="relative h-80 overflow-hidden flex flex-col justify-center items-center">
         <div
           className="absolute flex justify-center inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"
         >
@@ -148,7 +138,7 @@ export default function HomePage() {
                   <Button
                     key={category.id}
                     variant="outline"
-                    className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
+                    className="cursor-pointer h-auto p-4 flex flex-col items-center space-y-2 hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
                     onClick={() => handleCategorySelect(category.id)}
                   >
                     <div className={`p-2 rounded-lg ${category.color}`}>
@@ -194,20 +184,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 푸터 */}
-      <footer className="bg-muted py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">F</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">FreelanceHub</span>
-            </div>
-            <p className="text-muted-foreground">© 2025 FreelanceHub. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+
     </div>
   )
 }
