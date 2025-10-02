@@ -2,6 +2,7 @@ package org.team4.project.domain.service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
@@ -16,20 +17,34 @@ import java.util.List;
 public class ServiceController {
     private final ServiceService serviceService;
 
-    @GetMapping("/{id}")
-    public ServiceDTO getItem(@PathVariable Long id) {
-        return serviceService.findById(id);
-    }
-
     @PostMapping
+    @Transactional
     public void createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
         Member freeLancer = new Member(); // = 인증된 사용자 정보로 대체 필요
         serviceService.createService(serviceCreateRqBody, freeLancer);
     }
 
-    @GetMapping
-    public List<ServiceDTO> getServices(@RequestParam(required = false) Long lastId) {
-        return serviceService.getServices(lastId);
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    public ServiceDTO getItem(@PathVariable Long id) {
+        return serviceService.findById(id);
     }
+
+    @GetMapping
+    @Transactional(readOnly = true)
+    public List<ServiceDTO> getServices(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return serviceService.getServices(page, size);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public void updateItem(
+            @PathVariable Long id,
+            @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
+        // 서비스 업데이트 로직 구현 필요
+    }
+
 }

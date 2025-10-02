@@ -1,6 +1,9 @@
 package org.team4.project.domain.service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
@@ -35,15 +38,11 @@ public class ServiceService {
                         .orElseThrow(() -> new IllegalArgumentException("해당 서비스가 존재하지 않습니다.")));
     }
 
-    //서비스 다건 조회 (스크롤링)
-    public List<ServiceDTO> getServices(Long lastId) {
-        List<ProjectService> services;
-        if (lastId == null) {
-            services = serviceRepository.findTop10ByOrderByIdDesc();
-        } else {
-            services = serviceRepository.findTop10ByIdLessThanOrderByIdDesc(lastId);
-        }
-        return services.stream()
+    //서비스 다건 조회
+    public List<ServiceDTO> getServices(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        return serviceRepository.findAllWithFreelancer(pageable).stream()
                 .map(ServiceDTO::from)
                 .toList();
     }

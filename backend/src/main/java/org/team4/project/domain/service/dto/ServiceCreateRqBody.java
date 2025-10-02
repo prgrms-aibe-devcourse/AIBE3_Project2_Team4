@@ -1,7 +1,6 @@
 package org.team4.project.domain.service.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record ServiceCreateRqBody(
         @NotBlank
@@ -10,8 +9,9 @@ public record ServiceCreateRqBody(
         @NotBlank
         @Size(min = 2, max = 1000)
         String content,
-        @NotBlank
-        @Size(min = 2, max = 100)
+        @NotNull
+        @Min(0)
+        @Max(1000000000)
         Integer price
 ) {
 }
