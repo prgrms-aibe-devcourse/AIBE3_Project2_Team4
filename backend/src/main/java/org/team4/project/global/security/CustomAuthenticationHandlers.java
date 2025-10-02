@@ -30,7 +30,7 @@ public class CustomAuthenticationHandlers {
             redisRepository.setValue(refreshToken, "value", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
 
             response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
-            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_REISSUE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
+            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_COOKIE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
             response.setStatus(200);
         };
     }

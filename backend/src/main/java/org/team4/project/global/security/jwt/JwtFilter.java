@@ -15,7 +15,7 @@ import org.team4.project.global.security.CustomUserDetails;
 
 import java.io.IOException;
 
-import static org.team4.project.global.security.jwt.JwtContents.REFRESH_REISSUE_PATH;
+import static org.team4.project.global.security.jwt.JwtContents.REFRESH_COOKIE_PATH;
 import static org.team4.project.global.security.jwt.JwtContents.TOKEN_TYPE_ACCESS;
 
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals(REFRESH_REISSUE_PATH)) {
+        if (request.getRequestURI().equals(REFRESH_COOKIE_PATH)) {
             filterChain.doFilter(request, response);
             return;
         }
