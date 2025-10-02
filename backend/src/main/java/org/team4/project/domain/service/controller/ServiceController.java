@@ -29,7 +29,7 @@ public class ServiceController {
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public ServiceDTO getItem(@PathVariable Long id) {
-        return serviceService.findById(id);
+        return serviceService.fromFindById(id);
     }
 
     @GetMapping
@@ -47,7 +47,7 @@ public class ServiceController {
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
         Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
 
-        ServiceDTO service = serviceService.findById(id);
+        ProjectService service = serviceService.findById(id);
 
         service.checkActorCanModify(actor);
 
@@ -59,7 +59,7 @@ public class ServiceController {
     public void deleteItem(@PathVariable Long id) {
         Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
 
-        ServiceDTO service = serviceService.findById(id);
+        ProjectService service = serviceService.findById(id);
 
         service.checkActorCanDelete(actor);
 

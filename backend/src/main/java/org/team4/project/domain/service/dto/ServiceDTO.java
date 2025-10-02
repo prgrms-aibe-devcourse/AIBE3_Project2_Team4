@@ -23,17 +23,4 @@ public record ServiceDTO(
     public static ServiceDTO from(ProjectService service) {
         return new ServiceDTO(service);
     }
-
-
-    public void checkActorCanModify(Member actor) {
-        if (!actor.getId().equals(freelancer.id())) {
-            throw new IllegalArgumentException("%d번 글 수정 권한이 없습니다.".formatted(id()));
-        }
-    }
-
-    public void checkActorCanDelete(Member actor) {
-        if (!actor.getId().equals(freelancer.id())) {
-            throw new IllegalArgumentException("%d번 글을 삭제할 권한이 없습니다.".formatted(id()));
-        }
-    }
 }
