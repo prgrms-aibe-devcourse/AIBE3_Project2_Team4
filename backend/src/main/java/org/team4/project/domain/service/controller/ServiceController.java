@@ -40,6 +40,12 @@ public class ServiceController {
         return serviceService.getServices(page, size);
     }
 
+    /**
+     * Updates an existing service identified by the given id using the provided request data after verifying the caller is allowed to modify it.
+     *
+     * @param id the identifier of the service to update
+     * @param serviceCreateRqBody the request body containing the updated service fields
+     */
     @PutMapping("/{id}")
     @Transactional
     public void updateItem(
@@ -54,6 +60,11 @@ public class ServiceController {
         serviceService.updateService(id, serviceCreateRqBody);
     }
 
+    /**
+     * Deletes the service identified by the given ID after verifying the caller is authorized to delete it.
+     *
+     * @param id the ID of the service to delete
+     */
     @DeleteMapping("/{id}")
     @Transactional
     public void deleteItem(@PathVariable Long id) {

@@ -38,7 +38,13 @@ public class ServiceService {
                         .orElseThrow(() -> new IllegalArgumentException("해당 서비스가 존재하지 않습니다.")));
     }
 
-    //서비스 다건 조회
+    /**
+     * Retrieve a paginated list of services ordered by id descending.
+     *
+     * @param page zero-based page index to retrieve
+     * @param size number of items per page
+     * @return a list of ServiceDTO for the requested page ordered by id descending
+     */
     public List<ServiceDTO> getServices(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
@@ -47,7 +53,13 @@ public class ServiceService {
                 .toList();
     }
 
-    //서비스 수정
+    /**
+     * Update an existing service's title, content, and price.
+     *
+     * @param id the identifier of the service to update
+     * @param serviceCreateRqBody request body containing the new title, content, and price
+     * @throws IllegalArgumentException if no service exists with the given id
+     */
     public void updateService(Long id, ServiceCreateRqBody serviceCreateRqBody) {
         ProjectService existingService = serviceRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 서비스가 존재하지 않습니다."));
@@ -61,7 +73,12 @@ public class ServiceService {
         serviceRepository.save(existingService);
     }
 
-    //서비스 삭제
+    /**
+     * Delete the service with the given id.
+     *
+     * @param id the identifier of the service to delete
+     * @throws IllegalArgumentException if no service exists with the given id
+     */
     public void deleteService(Long id) {
         if (!serviceRepository.existsById(id)) {
             throw new IllegalArgumentException("해당 서비스가 존재하지 않습니다.");

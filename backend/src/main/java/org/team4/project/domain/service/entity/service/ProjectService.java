@@ -27,6 +27,13 @@ public class ProjectService extends BaseEntity {
     private String content;
     private Integer price;
 
+    /**
+     * Create a ProjectService populated from the given request body and associated with the given freelancer.
+     *
+     * @param serviceCreateRqBody request body containing the service title, content, and price
+     * @param freelancer the member providing the service
+     * @return a ProjectService populated with values from the request and linked to the freelancer
+     */
     public static ProjectService addService(ServiceCreateRqBody serviceCreateRqBody, Member freelancer) {
         return ProjectService.builder()
                 .freelancer(freelancer)
@@ -36,6 +43,13 @@ public class ProjectService extends BaseEntity {
                 .build();
     }
 
+    /**
+     * Updates this service's title, content, and price.
+     *
+     * @param newTitle   the title to set (may be null)
+     * @param newContent the content/description to set (may be null)
+     * @param newPrice   the price to set in integer units (may be null)
+     */
     public void modify(String newTitle, String newContent, Integer newPrice) {
         this.title = newTitle;
         this.content = newContent;
