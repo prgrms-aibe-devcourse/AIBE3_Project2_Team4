@@ -11,5 +11,5 @@ public class JwtContents {
     public static final long REFRESH_TOKEN_EXPIRE_MILLIS = 1000L * 60 * 60 * 24;
     public static final int REFRESH_TOKEN_EXPIRE_SECONDS = 60 * 60 * 24;
 
-    public static final String REFRESH_REISSUE_PATH = "/api/v1/auth/token/refresh";
+    public static final String REFRESH_REISSUE_PATH = "/api/v1/auth/token";
 }

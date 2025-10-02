@@ -33,20 +33,26 @@ public class MemberController {
 
     @PostMapping("/token/refresh")
     public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+        String cookieToken = getRefreshToken(request);
+
+        String accessToken = authService.reissueAccessToken(cookieToken);
+        String refreshToken = authService.reissueRefreshToken(cookieToken);
+        response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
+        response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_REISSUE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
+    }
+
+    @PostMapping("/token/logout")
+    public void logout(HttpServletRequest request) {
+        String cookieToken = getRefreshToken(request);
+        authService.logout(cookieToken);
+    }
+
+    private static String getRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        String cookieToken = Arrays.stream(cookies != null ? cookies : new Cookie[0])
+        return Arrays.stream(cookies != null ? cookies : new Cookie[0])
                 .filter(c -> c.getName().equals(TOKEN_TYPE_REFRESH))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);
-
-        try {
-            String accessToken = authService.reissueAccessToken(cookieToken);
-            String refreshToken = authService.reissueRefreshToken(cookieToken);
-            response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
-            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_REISSUE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
-        } catch (RuntimeException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
     }
 }

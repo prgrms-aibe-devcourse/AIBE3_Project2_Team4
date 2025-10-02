@@ -2,33 +2,55 @@ package org.team4.project.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.team4.project.domain.member.exception.RefreshTokenException;
+import org.team4.project.global.redis.RedisRepository;
+import org.team4.project.global.security.jwt.JwtContents;
 import org.team4.project.global.security.jwt.JwtUtil;
 
-import static org.team4.project.global.security.jwt.JwtContents.*;
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final JwtUtil jwtUtil;
+    private final RedisRepository redisRepository;
 
-    public String reissueAccessToken(String cookieToken) {
-        return reissueTokenInternal(cookieToken, TOKEN_TYPE_ACCESS, ACCESS_TOKEN_EXPIRE_MILLIS);
+    public String reissueAccessToken(String refreshToken) {
+        validateRefreshToken(refreshToken);
+        return jwtUtil.createJwt(JwtContents.TOKEN_TYPE_ACCESS,
+                jwtUtil.getEmail(refreshToken),
+                jwtUtil.getRole(refreshToken),
+                JwtContents.ACCESS_TOKEN_EXPIRE_MILLIS);
     }
 
-    public String reissueRefreshToken(String cookieToken) {
-        return reissueTokenInternal(cookieToken, TOKEN_TYPE_REFRESH, REFRESH_TOKEN_EXPIRE_MILLIS);
+    public String reissueRefreshToken(String oldRefreshToken) {
+        validateRefreshToken(oldRefreshToken);
+
+        redisRepository.deleteValue(oldRefreshToken);
+
+        String newRefreshToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_REFRESH,
+                jwtUtil.getEmail(oldRefreshToken),
+                jwtUtil.getRole(oldRefreshToken),
+                JwtContents.REFRESH_TOKEN_EXPIRE_MILLIS);
+
+        redisRepository.setValue(newRefreshToken, "valid", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
+
+        return newRefreshToken;
     }
 
-    private String reissueTokenInternal(String cookieToken, String tokenType, long expireMillis) {
-        if (cookieToken == null || jwtUtil.isExpired(cookieToken) ||
-                !jwtUtil.getType(cookieToken).equals(TOKEN_TYPE_REFRESH)) {
-            throw new RuntimeException("Refresh token invalid");
+    public void logout(String refreshToken) {
+        if (refreshToken != null) {
+            redisRepository.deleteValue(refreshToken);
         }
+    }
 
-        String email = jwtUtil.getEmail(cookieToken);
-        String role = jwtUtil.getRole(cookieToken);
-
-        return jwtUtil.createJwt(tokenType, email, role, expireMillis);
+    private void validateRefreshToken(String refreshToken) {
+        if (refreshToken == null
+                || jwtUtil.isExpired(refreshToken)
+                || !jwtUtil.getType(refreshToken).equals(JwtContents.TOKEN_TYPE_REFRESH)
+                || redisRepository.getValue(refreshToken) == null) {
+            throw new RefreshTokenException("토큰이 만료 되었거나, 형식이 올바르지 않습니다.");
+        }
     }
 }
