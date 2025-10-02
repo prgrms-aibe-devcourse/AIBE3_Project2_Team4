@@ -20,8 +20,8 @@ public class CustomAuthenticationHandlers {
             String email = userDetails.getEmail();
             String role = userDetails.getAuthorities().iterator().next().getAuthority().replaceFirst("^ROLE_", "");
 
-            String accessToken = jwtUtil.createJwt(TOKEN_TYPE_ACCESS, email, role);
-            String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role);
+            String accessToken = jwtUtil.createJwt(TOKEN_TYPE_ACCESS, email, role, ACCESS_TOKEN_EXPIRE_MILLIS);
+            String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role, REFRESH_TOKEN_EXPIRE_MILLIS);
 
             response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
             response.addCookie(createRefreshCookie(refreshToken));

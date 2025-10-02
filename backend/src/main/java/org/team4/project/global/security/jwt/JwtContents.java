@@ -8,5 +8,6 @@ public class JwtContents {
     public static final String TOKEN_TYPE_REFRESH = "refresh";
 
     public static final long ACCESS_TOKEN_EXPIRE_MILLIS = 1000L * 60 * 10;
+    public static final long REFRESH_TOKEN_EXPIRE_MILLIS = 1000L * 60 * 60 * 24;
     public static final int REFRESH_TOKEN_EXPIRE_SECONDS = 60 * 60 * 24;
 }

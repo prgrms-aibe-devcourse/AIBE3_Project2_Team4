@@ -41,13 +41,13 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String type, String email, String role) {
+    public String createJwt(String type, String email, String role, long expire) {
         return Jwts.builder()
                 .claim("type", type)
                 .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_MILLIS))
+                .expiration(new Date(System.currentTimeMillis() + expire))
                 .signWith(secretKey)
                 .compact();
     }
