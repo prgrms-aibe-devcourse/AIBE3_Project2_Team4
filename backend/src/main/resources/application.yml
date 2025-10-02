@@ -27,6 +27,11 @@ spring:
     secret: ${JWT__SECRET_KEY}
     expiration-millis: 3600000
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 springdoc:
   api-docs:
     groups:
