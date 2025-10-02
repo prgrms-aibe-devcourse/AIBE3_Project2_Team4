@@ -9,7 +9,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-import static org.team4.project.global.security.jwt.JwtContents.ACCESS_TOKEN_EXPIRE_MILLIS;
 
 @Component
 public class JwtUtil {

@@ -15,6 +15,7 @@ import org.team4.project.global.security.CustomUserDetails;
 
 import java.io.IOException;
 
+import static org.team4.project.global.security.jwt.JwtContents.REFRESH_REISSUE_PATH;
 import static org.team4.project.global.security.jwt.JwtContents.TOKEN_TYPE_ACCESS;
 
 @RequiredArgsConstructor
@@ -24,6 +25,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (request.getRequestURI().equals(REFRESH_REISSUE_PATH)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authorization = request.getHeader("Authorization");
 
         if (authorization == null) {
@@ -39,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = authorization.split(" ")[1];
 
         try {
-            if (jwtUtil.isExpired(token) && !jwtUtil.getType(token).equals(TOKEN_TYPE_ACCESS)) {
+            if (jwtUtil.isExpired(token) || !jwtUtil.getType(token).equals(TOKEN_TYPE_ACCESS)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

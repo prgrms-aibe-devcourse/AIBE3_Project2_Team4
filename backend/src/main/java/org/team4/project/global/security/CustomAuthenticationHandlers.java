@@ -1,10 +1,10 @@
 package org.team4.project.global.security;
 
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.team4.project.global.security.jwt.JwtUtil;
+import org.team4.project.global.util.CookieUtil;
 
 import static org.team4.project.global.security.jwt.JwtContents.*;
 
@@ -24,17 +24,9 @@ public class CustomAuthenticationHandlers {
             String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role, REFRESH_TOKEN_EXPIRE_MILLIS);
 
             response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
-            response.addCookie(createRefreshCookie(refreshToken));
+            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_REISSUE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
             response.setStatus(200);
         };
-    }
-
-    private Cookie createRefreshCookie(String token) {
-        Cookie cookie = new Cookie(TOKEN_TYPE_REFRESH, token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/api/v1/auth/token/refresh");
-        cookie.setMaxAge(REFRESH_TOKEN_EXPIRE_SECONDS);
-        return cookie;
     }
 
     public AuthenticationFailureHandler failureHandler() {
