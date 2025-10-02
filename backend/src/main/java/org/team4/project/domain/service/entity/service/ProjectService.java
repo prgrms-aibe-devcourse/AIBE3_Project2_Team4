@@ -36,16 +36,21 @@ public class ProjectService extends BaseEntity {
                 .build();
     }
 
-    public ProjectService(Long id, String title, String content, Integer price) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.price = price;
-    }
-
     public void modify(String newTitle, String newContent, Integer newPrice) {
         this.title = newTitle;
         this.content = newContent;
         this.price = newPrice;
+    }
+
+    public void checkActorCanModify(Member actor) {
+        if (!actor.getId().equals(freelancer.getId())) {
+            throw new IllegalArgumentException("%d번 글 수정 권한이 없습니다.".formatted(getId()));
+        }
+    }
+
+    public void checkActorCanDelete(Member actor) {
+        if (!actor.getId().equals(freelancer.getId())) {
+            throw new IllegalArgumentException("%d번 글을 삭제할 권한이 없습니다.".formatted(getId()));
+        }
     }
 }
