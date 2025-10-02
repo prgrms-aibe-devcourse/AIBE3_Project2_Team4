@@ -46,11 +46,18 @@ public class AuthService {
     }
 
     private void validateRefreshToken(String refreshToken) {
-        if (refreshToken == null
-                || jwtUtil.isExpired(refreshToken)
-                || !jwtUtil.getType(refreshToken).equals(JwtContents.TOKEN_TYPE_REFRESH)
-                || redisRepository.getValue(refreshToken) == null) {
-            throw new RefreshTokenException("토큰이 만료 되었거나, 형식이 올바르지 않습니다.");
+        if (refreshToken == null) {
+            throw new RefreshTokenException("토큰이 존재하지 않습니다.");
+        }
+
+        try {
+            if (jwtUtil.isExpired(refreshToken) ||
+                    !jwtUtil.getType(refreshToken).equals(JwtContents.TOKEN_TYPE_REFRESH) ||
+                    redisRepository.getValue(refreshToken) == null) {
+                throw new RefreshTokenException("토큰이 유효하지 않습니다.");
+            }
+        } catch (Exception e) {
+            throw new RefreshTokenException("토큰이 유효하지 않습니다.");
         }
     }
 }
