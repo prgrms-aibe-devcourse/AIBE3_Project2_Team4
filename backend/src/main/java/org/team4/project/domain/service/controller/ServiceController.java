@@ -44,7 +44,7 @@ public class ServiceController {
     public void updateItem(
             @PathVariable Long id,
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
-        // 서비스 업데이트 로직 구현 필요
+        serviceService.updateService(id, serviceCreateRqBody);
     }
 
 }

@@ -47,4 +47,18 @@ public class ServiceService {
                 .toList();
     }
 
+    //서비스 수정
+    public void updateService(Long id, ServiceCreateRqBody serviceCreateRqBody) {
+        ProjectService existingService = serviceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 서비스가 존재하지 않습니다."));
+
+        existingService.modify(
+                serviceCreateRqBody.title(),
+                serviceCreateRqBody.content(),
+                serviceCreateRqBody.price()
+        );
+
+        serviceRepository.save(existingService);
+    }
+
 }
