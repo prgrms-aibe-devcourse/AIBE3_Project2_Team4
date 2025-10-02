@@ -5,6 +5,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.team4.project.global.security.jwt.JwtUtil;
 
+import static org.team4.project.global.security.jwt.JwtContents.*;
+
 
 @RequiredArgsConstructor
 public class CustomAuthenticationHandlers {
@@ -17,7 +19,7 @@ public class CustomAuthenticationHandlers {
             String email = userDetails.getEmail();
             String role = userDetails.getAuthorities().iterator().next().getAuthority().replaceFirst("^ROLE_", "");
             String token = jwtUtil.createJwt(email, role);
-            response.addHeader("Authorization", "Bearer " + token);
+            response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
             response.setStatus(200);
         };
     }
