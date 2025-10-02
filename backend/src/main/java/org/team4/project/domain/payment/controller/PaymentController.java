@@ -1,5 +1,6 @@
 package org.team4.project.domain.payment.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class PaymentController {
      */
     //TODO : 사용자 ID와 서비스 ID를 전달받아 결제 완료 후 DB 저장
     @PostMapping("/confirm")
-    public ResponseEntity<?> confirmPayment(@RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+    public ResponseEntity<?> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
         paymentService.confirmPayment(paymentConfirmRequestDTO);
         return ResponseEntity.ok().build();
     }
@@ -31,7 +32,7 @@ public class PaymentController {
      * 결제 요청 전 요청할 데이터 임시 저장, 결제 승인보다 먼저 호출
      */
     @PostMapping("/save")
-    public ResponseEntity<?> savePayment(@RequestBody SavePaymentRequestDTO savePaymentRequestDTO) {
+    public ResponseEntity<?> savePayment(@Valid @RequestBody SavePaymentRequestDTO savePaymentRequestDTO) {
         paymentService.savePayment(savePaymentRequestDTO);
         return ResponseEntity.ok().build();
     }
