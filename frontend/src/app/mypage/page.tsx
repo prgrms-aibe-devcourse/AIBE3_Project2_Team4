@@ -37,8 +37,10 @@ import {
 } from "lucide-react";
 import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
+import {useRouter} from "next/navigation";
 
 export default function MyPage() {
+  const router = useRouter();
   const { isLoggedIn, member } = useLogin();
   const userType = member ? member.role : null;
 
@@ -902,7 +904,7 @@ export default function MyPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>내가 등록한 서비스</CardTitle>
-                  <Button>
+                  <Button onClick={()=> router.push("/services/register")}>
                     <Plus className="mr-2 h-4 w-4" />새 서비스 등록
                   </Button>
                 </CardHeader>

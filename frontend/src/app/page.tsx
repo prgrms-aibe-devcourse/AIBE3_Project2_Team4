@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import banner from "@/public/main_banner.jpg";
-import useCategory from "@/hooks/use-catetory";
+import useCategory from "@/hooks/use-category";
 
 // 추천 서비스 더미 데이터
 const recommendedServices = [

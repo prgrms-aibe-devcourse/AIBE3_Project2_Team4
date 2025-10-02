@@ -22,8 +22,9 @@ export function ReviewCard({
   authorProfileImage,
   createdAt,
 }: ReviewCardProps) {
+  // TODO: derive authorType from props or user context
   const authorType = "client";
-  const link = authorType === "client" ? `/client/client-1` : `/freelancer/freelancer-1`;
+  const link = `/${authorType}/${authorId}`;
   return (
     <Card>
       <CardContent className="p-4">

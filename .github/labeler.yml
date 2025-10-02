@@ -1,4 +1,3 @@
 # .github/labeler.yml
 hotfix:
-  - any: ['*']
-    branches: ['hotfix/**']
+    - head-branch: ["hotfix/**"]

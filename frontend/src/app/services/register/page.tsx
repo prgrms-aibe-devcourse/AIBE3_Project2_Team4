@@ -184,8 +184,6 @@ export default function ServiceRegisterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation isLoggedIn={true} />
-
       <div className="mx-auto max-w-4xl px-4 py-12">
         {/* 헤더 */}
         <div className="mb-12 text-center">

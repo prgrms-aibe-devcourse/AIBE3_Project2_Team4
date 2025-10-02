@@ -12,6 +12,6 @@ interface LoginState {
 }
 
 export const useLoginStore = create<LoginState>((set) => ({
-  member: { email: "aaa@naver.com", nickname: "정다솔", role: "client" },
+  member: { email: "aaa@naver.com", nickname: "정다솔", role: "freelancer" },
   setMember: (member) => set({ member }),
 }));

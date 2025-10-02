@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Award, Star } from "lucide-react";
 import Image from "next/image";
+import useLogin from "@/hooks/use-Login";
 
 interface RankedFreelancer {
   id: string;
@@ -15,13 +16,12 @@ interface RankedFreelancer {
   reviewCount: number;
   completedProjects: number;
   rank: number;
-  specialty: string;
   totalEarnings: number;
 }
 
 export default function RankingPage() {
-  const [isLoggedIn] = useState(true); // 실제로는 auth context에서 가져올 값
-  const [userType] = useState<"freelancer" | "client">("freelancer");
+  const { isLoggedIn, member } = useLogin();
+  const userType = member?.role;
   const [freelancers, setFreelancers] = useState<RankedFreelancer[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -35,7 +35,6 @@ export default function RankingPage() {
     reviewCount: 156,
     completedProjects: 89,
     profileImage: "/professional-developer-portrait.png",
-    specialty: "웹 개발",
     totalEarnings: 15600000,
   };
 
@@ -60,9 +59,6 @@ export default function RankingPage() {
         reviewCount: Math.floor(Math.random() * 200) + 50,
         completedProjects: Math.floor(Math.random() * 150) + 20,
         rank,
-        specialty: ["웹 개발", "모바일 앱", "UI/UX 디자인", "데이터 분석", "마케팅"][
-          Math.floor(Math.random() * 5)
-        ],
         totalEarnings: Math.floor(Math.random() * 50000000) + 5000000,
       };
     });
@@ -105,8 +101,6 @@ export default function RankingPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      <Navigation isLoggedIn={isLoggedIn} userType={userType} newMessageCount={3} />
-
       <main className="pt-20 pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* 페이지 헤더 */}
@@ -144,7 +138,6 @@ export default function RankingPage() {
                           </span>
                         </div>
                         <span>작업 수: {myRanking.completedProjects}개</span>
-                        <Badge variant="secondary">{myRanking.specialty}</Badge>
                       </div>
                     </div>
 
@@ -179,9 +172,6 @@ export default function RankingPage() {
                       />
                     </div>
                     <h3 className="text-foreground mb-2 text-lg font-bold">{freelancer.name}</h3>
-                    <Badge variant="secondary" className="mb-3">
-                      {freelancer.specialty}
-                    </Badge>
                     <div className="mb-2 flex items-center justify-center space-x-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span className="text-sm font-medium">{freelancer.rating.toFixed(1)}</span>
@@ -222,9 +212,6 @@ export default function RankingPage() {
                           <h3 className="text-foreground truncate font-medium">
                             {freelancer.name}
                           </h3>
-                          <Badge variant="secondary" className="text-xs">
-                            {freelancer.specialty}
-                          </Badge>
                         </div>
                       </div>
 

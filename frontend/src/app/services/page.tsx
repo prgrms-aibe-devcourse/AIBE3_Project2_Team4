@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
-import useCategory from "@/hooks/use-catetory";
+import useCategory from "@/hooks/use-category";
 
 // 더미 서비스 데이터 (더 많은 데이터)
 const allServices = [
