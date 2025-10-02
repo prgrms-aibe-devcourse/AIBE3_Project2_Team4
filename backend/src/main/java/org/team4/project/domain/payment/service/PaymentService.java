@@ -7,7 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
+import org.team4.project.domain.payment.exception.PaymentException;
 import org.team4.project.domain.payment.infra.PaymentClient;
+import org.team4.project.global.redis.RedisRepository;
+
+import java.time.Duration;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -16,16 +21,39 @@ import org.team4.project.domain.payment.infra.PaymentClient;
 public class PaymentService {
 
     private final PaymentClient paymentClient;
+    private final RedisRepository redisRepository;
 
     public void confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
-        //TODO : 레디스(or 세션)에 임시 저장한 값과 일치하는지 판단 후 결제 승인 요청
+        String orderId = paymentConfirmRequestDTO.orderId();
+        Integer amount = paymentConfirmRequestDTO.amount();
+
+        verifyTempPayment(orderId, amount);
 
         JsonNode response = paymentClient.confirmPayment(paymentConfirmRequestDTO);
+        redisRepository.deleteValue(generateKey(orderId));
         log.info("response = {}", response);
     }
 
     public void savePayment(SavePaymentRequestDTO savePaymentRequestDTO) {
-        log.info("savePaymentRequestDTO = {}", savePaymentRequestDTO);
-        //TODO : 레디스(or 세션)에 임시 저장
+        String orderId = savePaymentRequestDTO.orderId();
+        Integer amount = savePaymentRequestDTO.amount();
+
+        String key = generateKey(orderId);
+        String value = amount.toString();
+        redisRepository.setValue(key, value, Duration.ofMinutes(10));
+    }
+
+    private void verifyTempPayment(String orderId, Integer amount) {
+        String key = generateKey(orderId);
+        String storedValue = redisRepository.getValue(key);
+
+        if (!Objects.equals(storedValue, String.valueOf(amount))) {
+            log.debug("orderId: {}", orderId);
+            throw new PaymentException("결제 금액 불일치 또는 임시 데이터가 존재하지 않습니다.");
+        }
+    }
+
+    private String generateKey(String orderId) {
+        return "payment:" + orderId;
     }
 }
