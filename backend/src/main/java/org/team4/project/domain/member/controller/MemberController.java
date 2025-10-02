@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.service.AuthService;
 import org.team4.project.domain.member.service.MemberService;
+import org.team4.project.global.util.CookieUtil;
 
 import java.util.Arrays;
 
@@ -41,7 +42,9 @@ public class MemberController {
 
         try {
             String accessToken = authService.reissueAccessToken(cookieToken);
+            String refreshToken = authService.reissueRefreshToken(cookieToken);
             response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
+            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_REISSUE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
         } catch (RuntimeException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }

@@ -13,6 +13,14 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public String reissueAccessToken(String cookieToken) {
+        return reissueTokenInternal(cookieToken, TOKEN_TYPE_ACCESS, ACCESS_TOKEN_EXPIRE_MILLIS);
+    }
+
+    public String reissueRefreshToken(String cookieToken) {
+        return reissueTokenInternal(cookieToken, TOKEN_TYPE_REFRESH, REFRESH_TOKEN_EXPIRE_MILLIS);
+    }
+
+    private String reissueTokenInternal(String cookieToken, String tokenType, long expireMillis) {
         if (cookieToken == null || jwtUtil.isExpired(cookieToken) ||
                 !jwtUtil.getType(cookieToken).equals(TOKEN_TYPE_REFRESH)) {
             throw new RuntimeException("Refresh token invalid");
@@ -21,6 +29,6 @@ public class AuthService {
         String email = jwtUtil.getEmail(cookieToken);
         String role = jwtUtil.getRole(cookieToken);
 
-        return jwtUtil.createJwt(TOKEN_TYPE_ACCESS, email, role, ACCESS_TOKEN_EXPIRE_MILLIS);
+        return jwtUtil.createJwt(tokenType, email, role, expireMillis);
     }
 }
