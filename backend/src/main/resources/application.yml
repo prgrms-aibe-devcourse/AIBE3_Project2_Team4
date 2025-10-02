@@ -31,3 +31,8 @@ springdoc:
     enabled: true
     tags-sorter: alpha
     operations-sorter: alpha
+
+payment:
+  secret-key: ${PAYMENT__SECRET_KEY}
+  client-key: ${PAYMENT__CLIENT_KEY}
+  customer-key: ${PAYMENT__CUSTOMER_KEY}
