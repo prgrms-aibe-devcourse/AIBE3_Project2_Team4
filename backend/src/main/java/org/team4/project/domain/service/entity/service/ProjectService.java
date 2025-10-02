@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.global.jpa.entity.BaseEntity;
 
 @Entity
@@ -23,17 +24,15 @@ public class ProjectService extends BaseEntity {
     private Member freelancer;
 
     private String title;
-
     private String content;
-
     private Integer price;
 
-    public static ProjectService addService(Member freelancer, String title, String content, Integer price) {
+    public static ProjectService addService(ServiceCreateRqBody serviceCreateRqBody, Member freelancer) {
         return ProjectService.builder()
                 .freelancer(freelancer)
-                .title(title)
-                .content(content)
-                .price(price)
+                .title(serviceCreateRqBody.title())
+                .content(serviceCreateRqBody.content())
+                .price(serviceCreateRqBody.price())
                 .build();
     }
 

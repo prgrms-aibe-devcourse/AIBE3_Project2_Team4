@@ -3,6 +3,7 @@ package org.team4.project.domain.service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.repository.ServiceRepository;
@@ -20,9 +21,9 @@ public class ServiceService {
     }
 
     // 서비스 생성 (혹시 반환값 필요할까봐 반환값 작성 필요 없을 시 추후 void로 변경)
-    public ProjectService createService(Member freeLancer, String title, String content, Integer price) {
-        return serviceRepository.save(
-                ProjectService.addService(freeLancer, title, content, price)
+    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
+        serviceRepository.save(
+            ProjectService.addService(serviceCreateRqBody, freeLancer)
         );
     }
 
@@ -32,6 +33,19 @@ public class ServiceService {
                 serviceRepository
                         .findById(id)
                         .orElseThrow(() -> new IllegalArgumentException("해당 서비스가 존재하지 않습니다.")));
+    }
+
+    //서비스 다건 조회 (스크롤링)
+    public List<ServiceDTO> getServices(Long lastId) {
+        List<ProjectService> services;
+        if (lastId == null) {
+            services = serviceRepository.findTop10ByOrderByIdDesc();
+        } else {
+            services = serviceRepository.findTop10ByIdLessThanOrderByIdDesc(lastId);
+        }
+        return services.stream()
+                .map(ServiceDTO::from)
+                .toList();
     }
 
 }

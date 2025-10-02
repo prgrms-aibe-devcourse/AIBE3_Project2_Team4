@@ -19,4 +19,7 @@ public record ServiceDTO(
             service.getPrice()
         );
     }
+    public static ServiceDTO from(ProjectService service) {
+        return new ServiceDTO(service);
+    }
 }
