@@ -40,9 +40,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-        CustomUsernamePasswordAuthenticationFilter customFilter =
-                new CustomUsernamePasswordAuthenticationFilter(authenticationManager, objectMapper, jwtUtil);
-        customFilter.setFilterProcessesUrl("/api/v1/auth/login");
+        CustomAuthenticationFilter customFilter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
+        customFilter.setAuthenticationManager(authenticationManager);
+        customFilter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil).successHandler());
+        customFilter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil).failureHandler());
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -55,7 +56,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new JwtFilter(jwtUtil), CustomUsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
                 //TODO : OAuth 설정 필요
 
