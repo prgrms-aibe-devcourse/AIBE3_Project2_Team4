@@ -1,16 +1,16 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Star } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image";
+import Link from "next/link";
+import { Star } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ReviewCardProps {
-  rating: number
-  content: string
-  images?: string[]
-  authorName: string
-  authorId: string
-  authorProfileImage: string
-  createdAt: string
+  rating: number;
+  content: string;
+  images?: string[];
+  authorName: string;
+  authorId: string;
+  authorProfileImage: string;
+  createdAt: string;
 }
 
 export function ReviewCard({
@@ -22,29 +22,35 @@ export function ReviewCard({
   authorProfileImage,
   createdAt,
 }: ReviewCardProps) {
+  // TODO: derive authorType from props or user context
+  const authorType = "client";
+  const link = `/${authorType}/${authorId}`;
   return (
     <Card>
       <CardContent className="p-4">
         {/* 평점 */}
-        <div className="flex items-center space-x-1 mb-2">
+        <div className="mb-2 flex items-center space-x-1">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+            <Star
+              key={i}
+              className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+            />
           ))}
         </div>
 
         {/* 리뷰 내용 */}
-        <p className="text-sm mb-3 leading-relaxed">{content}</p>
+        <p className="mb-3 text-sm leading-relaxed">{content}</p>
 
         {/* 리뷰 이미지 */}
         {images.length > 0 && (
-          <div className="flex space-x-2 mb-3">
+          <div className="mb-3 flex space-x-2">
             {images.map((image, index) => (
-              <div key={index} className="w-16 h-16 relative">
+              <div key={index} className="relative h-16 w-16">
                 <Image
                   src={image || "/placeholder.svg"}
                   alt={`리뷰 이미지 ${index + 1}`}
                   fill
-                  className="object-cover rounded"
+                  className="rounded object-cover"
                 />
               </div>
             ))}
@@ -53,22 +59,22 @@ export function ReviewCard({
 
         {/* 작성자 정보 */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 relative">
+          <div className="relative h-8 w-8">
             <Image
               src={authorProfileImage || "/placeholder.svg"}
               alt={authorName}
               fill
-              className="object-cover rounded-full"
+              className="rounded-full object-cover"
             />
           </div>
           <div>
-            <Link href={`/user/${authorId}`} className="text-sm font-medium hover:text-primary transition-colors">
+            <Link href={link} className="hover:text-primary text-sm font-medium transition-colors">
               {authorName}
             </Link>
-            <p className="text-xs text-muted-foreground">{createdAt}</p>
+            <p className="text-muted-foreground text-xs">{createdAt}</p>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
