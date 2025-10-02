@@ -6,27 +6,25 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { MessageCircle, Bookmark, LogOut, User, Trophy } from "lucide-react"
+import useLogin from "@/hooks/use-Login";
+import Logo from "@/components/logo";
 
 interface NavigationProps {
-  isLoggedIn?: boolean
-  userType?: "freelancer" | "client"
   newMessageCount?: number
 }
 
-export function Navigation({ isLoggedIn = true, userType = "client", newMessageCount = 0 }: NavigationProps) {
+export function Navigation({ newMessageCount = 0 }: NavigationProps) {
+  const { isLoggedIn, member } = useLogin();
+
+  const userType = (member) ? member.role : null;
+  
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* 메인 로고 */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">F</span>
-            </div>
-            <span className="text-xl font-bold text-foreground">이바닥 고수들</span>
-          </Link>
+          <Logo />
 
           {/* 네비게이션 메뉴 */}
           <div className="flex items-center space-x-4">
@@ -41,10 +39,10 @@ export function Navigation({ isLoggedIn = true, userType = "client", newMessageC
               // 비회원 전용 버튼들
               <>
                 <Button variant="ghost" asChild>
-                  <Link href="/login">로그인</Link>
+                  <Link href="/auth/login">로그인</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/signup">회원가입</Link>
+                  <Link href="/auth/signup">회원가입</Link>
                 </Button>
               </>
             ) : (

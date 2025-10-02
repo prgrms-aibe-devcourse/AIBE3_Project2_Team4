@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
+import Logo from "@/components/logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -39,7 +40,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="flex flex-col gap-6 min-h-screen bg-background flex items-center justify-center p-4">
+      <Logo />
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">로그인</h1>

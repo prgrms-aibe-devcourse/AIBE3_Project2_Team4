@@ -3,7 +3,7 @@ import { create } from 'zustand';
 interface Member {
     email : string;
     nickname : string;
-    role : string;
+    role : "freelancer" | "client" | "admin";
 }
 
 interface LoginState {
@@ -11,7 +11,7 @@ interface LoginState {
     setMember: (member: Member) => void;
 }
 
-export const useLogin = create<LoginState>((set, get)=>({
-    member : null,
+export const useLoginStore = create<LoginState>((set, get)=>({
+    member : {email : "aaa@naver.com", nickname : "정다솔", role : "client"},
     setMember : (member : Member) => set({member}),
 }));

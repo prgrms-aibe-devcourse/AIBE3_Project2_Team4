@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Eye, EyeOff, User, Building } from "lucide-react"
+import Logo from "@/components/logo";
+
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -60,7 +62,9 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="flex flex-col gap-6 min-h-screen bg-background flex items-center justify-center p-4">
+      <Logo />
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">회원가입</h1>

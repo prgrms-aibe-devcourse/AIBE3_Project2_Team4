@@ -36,13 +36,16 @@ import {
   MessageCircle,
 } from "lucide-react";
 import ChatTab from "./ChatTab";
+import useLogin from "@/hooks/use-Login";
 
 export default function MyPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, member } = useLogin()
+  const userType = (member) ? member.role : null;
+
+
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [userType] = useState<"freelancer" | "client">("freelancer"); // This would come from auth context
   const [isPortfolioDialogOpen, setIsPortfolioDialogOpen] = useState(false);
   const [editingPortfolioIndex, setEditingPortfolioIndex] = useState<number | null>(null);
   const [portfolioTitle, setPortfolioTitle] = useState("");
@@ -240,7 +243,6 @@ export default function MyPage() {
   ];
 
   useEffect(() => {
-    setIsLoggedIn(true); // Always set to true for v0 preview
     setIsLoading(false);
   }, []);
 
