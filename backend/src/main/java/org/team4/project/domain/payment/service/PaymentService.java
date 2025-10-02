@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
 import org.team4.project.domain.payment.infra.PaymentClient;
+import org.team4.project.global.redis.RedisRepository;
+
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -16,6 +19,7 @@ import org.team4.project.domain.payment.infra.PaymentClient;
 public class PaymentService {
 
     private final PaymentClient paymentClient;
+    private final RedisRepository redisRepository;
 
     public void confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
         //TODO : 레디스(or 세션)에 임시 저장한 값과 일치하는지 판단 후 결제 승인 요청
@@ -25,7 +29,11 @@ public class PaymentService {
     }
 
     public void savePayment(SavePaymentRequestDTO savePaymentRequestDTO) {
-        log.info("savePaymentRequestDTO = {}", savePaymentRequestDTO);
-        //TODO : 레디스(or 세션)에 임시 저장
+        String orderId = savePaymentRequestDTO.orderId();
+        Integer amount = savePaymentRequestDTO.amount();
+
+        String key = "payment:" + orderId;
+        String value = amount.toString();
+        redisRepository.setValue(key, value, Duration.ofMinutes(10));
     }
 }
