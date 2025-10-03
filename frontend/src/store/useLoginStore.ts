@@ -9,9 +9,15 @@ interface Member {
 interface LoginState {
   member: Member | null;
   setMember: (member: Member | null) => void;
+  accessToken: string | null;
+  setAccessToken: (token: string | null) => void;
+  clearAccessToken: () => void;
 }
 
 export const useLoginStore = create<LoginState>((set) => ({
-  member: { email: "aaa@naver.com", nickname: "정다솔", role: "freelancer" },
+  member: null,
   setMember: (member) => set({ member }),
+  accessToken: null,
+  setAccessToken: (token) => set({ accessToken: token }),
+  clearAccessToken: () => set({ accessToken: null }),
 }));

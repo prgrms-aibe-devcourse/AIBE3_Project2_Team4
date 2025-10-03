@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { FieldErrors } from "@/lib/validation/auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
 } from "@/lib/validation/auth";
 
 export default function SignupPage() {
+  const router = useRouter();
   type SignupForm = {
     nickname: string;
     email: string;
@@ -107,8 +109,8 @@ export default function SignupPage() {
         throw new Error(message);
       }
 
-      // 성공 시 로그인 페이지로 리다이렉트
-      window.location.href = "/auth/login";
+      // 성공 시 로그인 페이지로 리다이렉트 (클라이언트 라우팅)
+      router.replace("/auth/login");
     } catch (err) {
       const message = err instanceof Error ? err.message : "회원가입 중 오류가 발생했습니다.";
       setError(message);
