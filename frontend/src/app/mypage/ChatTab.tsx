@@ -27,7 +27,7 @@ export default function ChatTab() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/chat/rooms")
+    fetch("http://localhost:8080/api/v1/chats/rooms")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -53,7 +53,7 @@ export default function ChatTab() {
     if (!selectedChat) return;
 
     setLoadingMessages(true);
-    fetch(`http://localhost:8080/api/v1/chat/room/${selectedChat.id}/messages`)
+    fetch(`http://localhost:8080/api/v1/chats/rooms/${selectedChat.id}/messages`)
       .then((res) => res.json())
       .then((data) => {
         setMessages(data);
@@ -77,7 +77,7 @@ export default function ChatTab() {
       reconnectDelay: 5000,
       onConnect: () => {
         console.log("웹소켓 연결 성공!");
-        client.subscribe(`/topic/room/${selectedChat.id}`, (message) => {
+        client.subscribe(`/topic/rooms/${selectedChat.id}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
           setMessages((prevMessages) => [...prevMessages, receivedMessage]);
         });
@@ -102,7 +102,7 @@ export default function ChatTab() {
       return;
     }
     clientRef.current.publish({
-      destination: "/app/chat/sendMessage",
+      destination: "/app/chats/sendMessage",
       body: JSON.stringify({
         roomId: selectedChat.id,
         sender: "User1", // TODO: 실제 사용자 이름으로 변경 필요
