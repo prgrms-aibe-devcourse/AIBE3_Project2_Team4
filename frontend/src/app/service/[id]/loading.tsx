@@ -1,18 +1,18 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function ServiceDetailLoading() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="bg-background min-h-screen">
+      <div className="mx-auto max-w-6xl px-4 py-8">
         {/* 서비스 소개 섹션 스켈레톤 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* 이미지 갤러리 스켈레톤 */}
           <div className="space-y-4">
             <Skeleton className="aspect-video rounded-lg" />
             <div className="flex space-x-2">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="w-20 h-20 rounded-lg" />
+                <Skeleton key={i} className="h-20 w-20 rounded-lg" />
               ))}
             </div>
           </div>
@@ -56,7 +56,7 @@ export default function ServiceDetailLoading() {
 
         {/* 상세 설명 스켈레톤 */}
         <Card className="mb-12">
-          <CardContent className="p-6 space-y-4">
+          <CardContent className="space-y-4 p-6">
             <Skeleton className="h-6 w-48" />
             <div className="space-y-2">
               {[...Array(8)].map((_, i) => (
@@ -79,7 +79,7 @@ export default function ServiceDetailLoading() {
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <Card key={i}>
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="space-y-3 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Skeleton className="h-4 w-20" />
@@ -96,5 +96,5 @@ export default function ServiceDetailLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,22 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Navigation } from "@/components/navigation"
-import { ServiceCard } from "@/components/service-card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart } from "lucide-react"
-
-// 카테고리 데이터
-const categories = [
-  { id: "development", name: "개발·프로그래밍", icon: Code, color: "bg-blue-100 text-blue-700" },
-  { id: "design", name: "디자인", icon: Palette, color: "bg-purple-100 text-purple-700" },
-  { id: "video", name: "영상·사진·음향", icon: Camera, color: "bg-green-100 text-green-700" },
-  { id: "writing", name: "번역·통역·글쓰기", icon: PenTool, color: "bg-orange-100 text-orange-700" },
-  { id: "marketing", name: "마케팅", icon: Megaphone, color: "bg-red-100 text-red-700" },
-  { id: "business", name: "비즈니스", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
-]
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ServiceCard } from "@/components/service-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import { Search } from "lucide-react";
+import banner from "@/public/main_banner.jpg";
+import useCategory from "@/hooks/use-category";
 
 // 추천 서비스 더미 데이터
 const recommendedServices = [
@@ -74,67 +66,63 @@ const recommendedServices = [
     reviewCount: 234,
     freelancerName: "한번역가",
   },
-]
+];
 
 export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const router = useRouter()
+  const { categories } = useCategory();
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   const handleCategorySelect = (categoryId: string) => {
-    router.push(`/services?category=${categoryId}`)
-  }
+    router.push(`/services?category=${categoryId}`);
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      router.push(`/services?search=${encodeURIComponent(searchQuery)}`)
+      router.push(`/services?search=${encodeURIComponent(searchQuery)}`);
     } else {
-      router.push("/services")
+      router.push("/services");
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <div className="bg-background min-h-screen">
       {/* 플랫폼 소개 섹션 */}
-      <section className="relative pt-16 pb-20 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"
-          style={{
-            backgroundImage: `url('/------------.jpg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundBlendMode: "overlay",
-          }}
-        />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 text-balance">
+      <section className="relative flex h-80 flex-col items-center justify-center overflow-hidden">
+        <div className="from-primary/10 to-secondary/10 absolute inset-0 flex justify-center bg-gradient-to-br">
+          <Image src={banner} alt={"대표 이미지"} className="absolute" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <h1 className="text-foreground mb-6 text-4xl font-bold text-balance md:text-6xl">
             전문가와 함께하는
             <br />
-            <span className="text-primary">프리랜스 플랫폼</span>
+            <span className="text-primary">프리랜서 매칭 플랫폼</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
+          <p className="text-muted-foreground mx-auto max-w-2xl text-xl text-pretty">
             다양한 분야의 전문 프리랜서들과 연결되어 당신의 프로젝트를 성공으로 이끌어보세요
           </p>
         </div>
       </section>
 
       {/* 검색 섹션 */}
-      <section className="py-12 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-card py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* 검색창 */}
-          <div className="max-w-2xl mx-auto mb-8">
+          <div className="mx-auto mb-8 max-w-2xl">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform" />
               <Input
                 type="text"
                 placeholder="어떤 서비스를 찾고 계신가요?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                className="pl-10 h-12 text-lg"
+                className="h-12 pl-10 text-lg"
               />
-              <Button className="absolute right-2 top-1/2 transform -translate-y-1/2" onClick={handleSearch}>
+              <Button
+                className="absolute top-1/2 right-2 -translate-y-1/2 transform"
+                onClick={handleSearch}
+              >
                 검색
               </Button>
             </div>
@@ -142,23 +130,23 @@ export default function HomePage() {
 
           {/* 카테고리 선택 */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-center">카테고리</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <h3 className="mb-4 text-center text-lg font-semibold">카테고리</h3>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               {categories.map((category) => {
-                const Icon = category.icon
+                const Icon = category.icon;
                 return (
                   <Button
                     key={category.id}
                     variant="outline"
-                    className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-primary hover:text-primary-foreground transition-colors bg-transparent"
+                    className="hover:bg-primary hover:text-primary-foreground flex h-auto cursor-pointer flex-col items-center space-y-2 bg-transparent p-4 transition-colors"
                     onClick={() => handleCategorySelect(category.id)}
                   >
-                    <div className={`p-2 rounded-lg ${category.color}`}>
+                    <div className={`rounded-lg p-2 ${category.color}`}>
                       <Icon className="h-6 w-6" />
                     </div>
                     <span className="text-sm font-medium">{category.name}</span>
                   </Button>
-                )
+                );
               })}
             </div>
           </div>
@@ -167,13 +155,13 @@ export default function HomePage() {
 
       {/* 추천 서비스 섹션 */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">추천 서비스</h2>
-            <p className="text-lg text-muted-foreground">인기 있는 서비스들을 만나보세요</p>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-foreground mb-4 text-3xl font-bold">추천 서비스</h2>
+            <p className="text-muted-foreground text-lg">인기 있는 서비스들을 만나보세요</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {recommendedServices.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -188,28 +176,13 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="mt-12 text-center">
             <Button size="lg" variant="outline" onClick={() => router.push("/services")}>
               더 많은 서비스 보기
             </Button>
           </div>
         </div>
       </section>
-
-      {/* 푸터 */}
-      <footer className="bg-muted py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">F</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">FreelanceHub</span>
-            </div>
-            <p className="text-muted-foreground">© 2025 FreelanceHub. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
-  )
+  );
 }
