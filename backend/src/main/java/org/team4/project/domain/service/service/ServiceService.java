@@ -8,9 +8,15 @@ import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.entity.category.Tag;
+import org.team4.project.domain.service.entity.category.TagService;
+import org.team4.project.domain.service.entity.category.type.CategoryType;
+import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.domain.service.repository.ServiceRepository;
+import org.team4.project.domain.service.repository.TagRepository;
+import org.team4.project.domain.service.repository.TagServiceRepository;
 
 import java.util.List;
 
@@ -18,17 +24,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ServiceService {
     private final ServiceRepository serviceRepository;
+    private final TagServiceRepository tagServiceRepository;
+    private final TagRepository tagRepository;
 
     //서비스 개수 조회
     public Integer count() {
         return (int) serviceRepository.count();
     }
 
-    // 서비스 생성 (혹시 반환값 필요할까봐 반환값 작성 필요 없을 시 추후 void로 변경)
-    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
-        serviceRepository.save(
+    // 서비스 생성
+    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer, TagType tagName) {
+        ProjectService service =  serviceRepository.save(
             ProjectService.addService(serviceCreateRqBody, freeLancer)
         );
+        Tag tag = tagRepository.findByName(tagName);
+        TagService tagService = new TagService(tag, service);
+        tagServiceRepository.save(tagService);
     }
 
     //서비스 단건 조회 엔티티
@@ -51,6 +62,24 @@ public class ServiceService {
 
         return serviceRepository.findAllWithFreelancer(pageable).stream()
                 .map(ServiceDTO::from)
+                .toList();
+    }
+
+    //서비스 다건 조회 (카테고리)
+    public List<ServiceDTO> getServicesByCategory(int page, int size, CategoryType category) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        return tagServiceRepository.findByCategory(category, pageable).stream()
+                .map(e -> new ServiceDTO(e.getService()))
+                .toList();
+    }
+
+    //서비스 다건 조회 (태그)
+    public List<ServiceDTO> getServicesByTags(int page, int size, List<TagType> tags) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        return tagServiceRepository.findByTags(tags, pageable).stream()
+                .map(e -> new ServiceDTO(e.getService()))
                 .toList();
     }
 

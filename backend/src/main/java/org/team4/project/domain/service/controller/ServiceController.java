@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.entity.category.type.CategoryType;
+import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.service.ServiceService;
 
@@ -23,7 +25,7 @@ public class ServiceController {
     public void createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
         Member freeLancer = new Member(); // = 인증된 사용자 정보로 대체 필요
-        serviceService.createService(serviceCreateRqBody, freeLancer);
+        serviceService.createService(serviceCreateRqBody, freeLancer, serviceCreateRqBody.tagName());
     }
 
     @GetMapping("/{id}")
@@ -39,6 +41,25 @@ public class ServiceController {
             @RequestParam(defaultValue = "10") int size) {
         return serviceService.getServices(page, size);
     }
+
+    @GetMapping("/category")
+    @Transactional(readOnly = true)
+    public List<ServiceDTO> getServicesByCategory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam CategoryType category) {
+        return serviceService.getServicesByCategory(page, size, category);
+    }
+
+    @GetMapping("/tags")
+    @Transactional(readOnly = true)
+    public List<ServiceDTO> getServicesByTags(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam List<TagType> tags) {
+        return serviceService.getServicesByTags(page, size, tags);
+    }
+
 
     @PutMapping("/{id}")
     @Transactional

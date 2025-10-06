@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
+import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.global.jpa.entity.BaseEntity;
 
 @Entity
@@ -44,13 +45,13 @@ public class ProjectService extends BaseEntity {
 
     public void checkActorCanModify(Member actor) {
         if (!actor.getId().equals(freelancer.getId())) {
-            throw new IllegalArgumentException("%d번 글 수정 권한이 없습니다.".formatted(getId()));
+            throw new ServiceException("%d번 글 수정 권한이 없습니다.".formatted(getId()));
         }
     }
 
     public void checkActorCanDelete(Member actor) {
         if (!actor.getId().equals(freelancer.getId())) {
-            throw new IllegalArgumentException("%d번 글을 삭제할 권한이 없습니다.".formatted(getId()));
+            throw new ServiceException("%d번 글을 삭제할 권한이 없습니다.".formatted(getId()));
         }
     }
 }
