@@ -3,12 +3,14 @@ package org.team4.project.domain.profile.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @DiscriminatorValue("FREELANCER")
 public class FreelancerProfile extends Profile {
@@ -25,4 +27,16 @@ public class FreelancerProfile extends Profile {
 
     @OneToMany(mappedBy = "freelancerProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Portfolio> portfolios = new ArrayList<>();
+
+    // careers 연관관계 편의 메서드
+    public void addCareer(Career career) {
+        this.careers.add(career);
+        career.setFreelancerProfile(this); // career 객체에도 freelancer 자신을 설정
+    }
+
+    // portfolios 연관관계 편의 메서드
+    public void addPortfolio(Portfolio portfolio) {
+        this.portfolios.add(portfolio);
+        portfolio.setFreelancerProfile(this); // portfolio 객체에도 freelancer 자신을 설정
+    }
 }

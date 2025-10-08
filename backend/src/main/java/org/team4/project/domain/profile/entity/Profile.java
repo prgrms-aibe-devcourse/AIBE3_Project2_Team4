@@ -25,4 +25,8 @@ public abstract class Profile {
     private String introduction;
     private double averageRating = 0.0;
 
+    public void updateProfile(String nickname, String introduction) {
+        this.nickname = nickname;
+        this.introduction = introduction;
+    }
 }
