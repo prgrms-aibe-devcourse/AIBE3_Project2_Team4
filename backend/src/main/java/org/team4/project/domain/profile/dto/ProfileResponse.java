@@ -12,22 +12,21 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class ProfileResponse {
-    // 공통
+    // 공통 필드
     private final String nickname;
     private final String introduction;
     private final double averageRating;
     private final String profileType; // "CLIENT" or "FREELANCER"
 
-    // 클라이언트
+    // 클라이언트 필드
     private final String companyName;
     private final String teamName;
 
-    // 프리랜서
+    // 프리랜서 필드
     private final List<String> techStacks;
     private final List<String> certificates;
     private final List<CareerResponseDto> careers;
     private final List<PortfolioResponseDto> portfolios;
-
 
     // Profile -> ProfileResponse
     public static ProfileResponse from(Profile profile) {
