@@ -1,5 +1,10 @@
 package org.team4.project.domain.payment.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
+import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
 import org.team4.project.domain.payment.service.PaymentService;
+import org.team4.project.global.exception.ErrorResponse;
 
+@Tag(name = "Payment API", description = "결제 기능 관련 API")
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
@@ -18,19 +26,23 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /**
-     * 결제 승인
-     */
     //TODO : 사용자 ID와 서비스 ID를 전달받아 결제 완료 후 DB 저장
+    @Operation(
+            summary = "결제 승인 요청 API",
+            description = "실제 토스 결제 승인 API를 요청합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "결제 승인 요청 성공", content = @Content(schema = @Schema(implementation = PaymentResponseDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "결제 승인 요청 실패, 요청 데이터와 임시 저장된 데이터 불일치", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            }
+    )
     @PostMapping("/confirm")
-    public ResponseEntity<?> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
-        paymentService.confirmPayment(paymentConfirmRequestDTO);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PaymentResponseDTO> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+        PaymentResponseDTO response = paymentService.confirmPayment(paymentConfirmRequestDTO);
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * 결제 요청 전 요청할 데이터 임시 저장, 결제 승인보다 먼저 호출
-     */
+    @Operation(summary = "결제 요청 데이터 임시 저장 API", description = "결제를 요청하기 전에 서버에 임시로 저장합니다. 결제 승인 요청 전에 반드시 요청해야 하며, 결제 요청과 승인 사이에 데이터 무결성을 위함입니다.")
+    @ApiResponse(responseCode = "200", description = "데이터 임시 저장 성공")
     @PostMapping("/save")
     public ResponseEntity<?> savePayment(@Valid @RequestBody SavePaymentRequestDTO savePaymentRequestDTO) {
         paymentService.savePayment(savePaymentRequestDTO);

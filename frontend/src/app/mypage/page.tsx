@@ -36,13 +36,17 @@ import {
   MessageCircle,
 } from "lucide-react";
 import ChatTab from "./ChatTab";
+import useLogin from "@/hooks/use-Login";
+import {useRouter} from "next/navigation";
 
 export default function MyPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
+  const { isLoggedIn, member } = useLogin();
+  const userType = member ? member.role : null;
+
   const [isLoading, setIsLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [userType] = useState<"freelancer" | "client">("freelancer"); // This would come from auth context
   const [isPortfolioDialogOpen, setIsPortfolioDialogOpen] = useState(false);
   const [editingPortfolioIndex, setEditingPortfolioIndex] = useState<number | null>(null);
   const [portfolioTitle, setPortfolioTitle] = useState("");
@@ -240,7 +244,6 @@ export default function MyPage() {
   ];
 
   useEffect(() => {
-    setIsLoggedIn(true); // Always set to true for v0 preview
     setIsLoading(false);
   }, []);
 
@@ -901,7 +904,7 @@ export default function MyPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>내가 등록한 서비스</CardTitle>
-                  <Button>
+                  <Button onClick={()=> router.push("/services/register")}>
                     <Plus className="mr-2 h-4 w-4" />새 서비스 등록
                   </Button>
                 </CardHeader>
