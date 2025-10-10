@@ -3,45 +3,45 @@ package org.team4.project.domain.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.team4.project.domain.chat.entity.ChatMessage;
-import org.team4.project.domain.chat.entity.ChatRoom;
-import org.team4.project.domain.chat.repository.ChatMessageRepository;
-import org.team4.project.domain.chat.repository.ChatRoomRepository;
+import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.entity.MemberRole;
+import org.team4.project.domain.member.repository.MemberRepository;
 
-@Component
-@Profile("test")  // test 환경에서만 실행
+@Profile("local") // "local" 프로필이 활성화될 때만 실행됩니다.
+@Component      // 이 클래스를 스프링이 관리하는 부품으로 등록합니다.
 @RequiredArgsConstructor
 public class TestDataInitializer implements CommandLineRunner {
 
-    private final ChatRoomRepository chatRoomRepository;
-    private final ChatMessageRepository chatMessageRepository;
-    public static Long testRoomId;
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
-        // 채팅방 생성
-        ChatRoom room1 = new ChatRoom();
-        room1.setName("테스트방1");
-        chatRoomRepository.save(room1);
+        // 1. 기존 회원 데이터 모두 삭제
+        memberRepository.deleteAll();
 
-        testRoomId = room1.getId();
+        // 2. 새로운 테스트용 회원 2명 생성 및 저장
+        Member user1 = Member.builder()
+                .email("user1@test.com")
+                .nickname("User1")
+                .password(passwordEncoder.encode("testtest"))
+                .memberRole(MemberRole.CLIENT)
+                .build();
 
-        ChatRoom room2 = new ChatRoom();
-        room2.setName("테스트방2");
-        chatRoomRepository.save(room2);
+        Member user2 = Member.builder()
+                .email("user2@test.com")
+                .nickname("User2")
+                .password(passwordEncoder.encode("testtest"))
+                .memberRole(MemberRole.FREELANCER)
+                .build();
 
-        // 메시지 생성
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setRoom(room1);
-        msg1.setSender("User1");
-        msg1.setContent("안녕하세요!");
-        chatMessageRepository.save(msg1);
+        memberRepository.save(user1);
+        memberRepository.save(user2);
 
-        ChatMessage msg2 = new ChatMessage();
-        msg2.setRoom(room1);
-        msg2.setSender("User2");
-        msg2.setContent("반갑습니다!");
-        chatMessageRepository.save(msg2);
+        System.out.println("==========================================");
+        System.out.println("테스트 유저(user1, user2) 생성을 완료했습니다.");
+        System.out.println("==========================================");
     }
 }
