@@ -1,7 +1,6 @@
 package org.team4.project.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.team4.project.global.redis.RedisRepository;
 import org.team4.project.global.security.jwt.JwtFilter;
 import org.team4.project.global.security.jwt.JwtUtil;
 
@@ -27,13 +25,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private static final String[] SWAGGER_RESOURCES = {"/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**"};
-    private final ObjectMapper objectMapper;
-    private final JwtUtil jwtUtil;
-    private final RedisRepository redisRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -41,16 +35,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtFilter jwtFilter() {
+    public JwtFilter jwtFilter(JwtUtil jwtUtil) {
         return new JwtFilter(jwtUtil);
     }
 
     @Bean
-    public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager, CustomAuthenticationHandlers handlers, ObjectMapper objectMapper) {
         CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
         filter.setAuthenticationManager(authenticationManager);
-        filter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).successHandler());
-        filter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).failureHandler());
+        filter.setAuthenticationSuccessHandler(handlers.successHandler());
+        filter.setAuthenticationFailureHandler(handlers.failureHandler());
         return filter;
     }
 

@@ -3,6 +3,7 @@ package org.team4.project.global.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 import org.team4.project.global.redis.RedisRepository;
 import org.team4.project.global.security.jwt.JwtContents;
 import org.team4.project.global.security.jwt.JwtUtil;
@@ -12,7 +13,7 @@ import java.time.Duration;
 
 import static org.team4.project.global.security.jwt.JwtContents.*;
 
-
+@Component
 @RequiredArgsConstructor
 public class CustomAuthenticationHandlers {
 
