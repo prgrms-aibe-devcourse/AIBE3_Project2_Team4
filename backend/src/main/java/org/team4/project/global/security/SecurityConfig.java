@@ -41,12 +41,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-        CustomAuthenticationFilter customFilter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
-        customFilter.setAuthenticationManager(authenticationManager);
-        customFilter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).successHandler());
-        customFilter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).failureHandler());
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(jwtUtil);
+    }
 
+    @Bean
+    public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager) {
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
+        filter.setAuthenticationManager(authenticationManager);
+        filter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).successHandler());
+        filter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).failureHandler());
+        return filter;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthenticationFilter customAuthenticationFilter, JwtFilter jwtFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -58,8 +67,8 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 //TODO : OAuth 설정 필요
 
                 .authorizeHttpRequests(auth -> auth
