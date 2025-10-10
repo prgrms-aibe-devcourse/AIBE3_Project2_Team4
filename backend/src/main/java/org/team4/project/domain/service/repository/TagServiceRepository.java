@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.team4.project.domain.service.entity.category.TagService;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
+import org.team4.project.domain.service.entity.service.ProjectService;
 
 import java.util.List;
 
@@ -30,4 +31,10 @@ public interface TagServiceRepository extends JpaRepository<TagService, Long> {
     """)
     List<TagService> findByTags(@Param("tags") List<TagType> tagType,
                                 Pageable pageable);
+    @Query("""
+        select ts from TagService ts
+        join fetch ts.service s
+        where s = :service
+    """)
+    List<TagService> findByService(@Param("service") ProjectService service);
 }

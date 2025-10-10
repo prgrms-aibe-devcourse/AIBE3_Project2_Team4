@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.entity.category.Category;
 import org.team4.project.domain.service.entity.category.Tag;
 import org.team4.project.domain.service.entity.category.TagService;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
@@ -33,13 +34,18 @@ public class ServiceService {
     }
 
     // 서비스 생성
-    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer, TagType tagName) {
+    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer, List<TagType> tagName) {
         ProjectService service =  serviceRepository.save(
             ProjectService.addService(serviceCreateRqBody, freeLancer)
         );
-        Tag tag = tagRepository.findByName(tagName);
-        TagService tagService = new TagService(tag, service);
-        tagServiceRepository.save(tagService);
+        tagName.stream().map(e -> {
+            Tag tag = tagRepository.findByName(e);
+            if(tag == null) {
+                throw new ServiceException("해당 태그가 존재하지 않습니다.");
+            }
+            TagService tagService = new TagService(tag, service);
+            return tagServiceRepository.save(tagService);
+        });
     }
 
     //서비스 단건 조회 엔티티
@@ -51,9 +57,10 @@ public class ServiceService {
 
     //서비스 단건 조회 DTO
     public ServiceDTO fromFindById(Long id) {
-        return new ServiceDTO(serviceRepository
-                    .findById(id)
-                    .orElseThrow(() -> new ServiceException("해당 서비스가 존재하지 않습니다.")));
+        ProjectService service = findById(id);
+        List<TagService> tagServices = findByService(service);
+        Category category = tagServices.getFirst().getTag().getCategory();
+        return new ServiceDTO(service, tagServices, category);
     }
 
     //서비스 다건 조회
@@ -61,7 +68,11 @@ public class ServiceService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         return serviceRepository.findAllWithFreelancer(pageable).stream()
-                .map(ServiceDTO::from)
+                .map(service -> {
+                    List<TagService> tagServices = findByService(service);
+                    Category category = tagServices.getFirst().getTag().getCategory();
+                    return new ServiceDTO(service, tagServices, category);
+                })
                 .toList();
     }
 
@@ -70,7 +81,11 @@ public class ServiceService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         return tagServiceRepository.findByCategory(category, pageable).stream()
-                .map(e -> new ServiceDTO(e.getService()))
+                .map(e -> {
+                    List<TagService> tagServices = findByService(e.getService());
+                    Category c = tagServices.getFirst().getTag().getCategory();
+                    return new ServiceDTO(e.getService(), tagServices, c);
+                })
                 .toList();
     }
 
@@ -79,7 +94,11 @@ public class ServiceService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         return tagServiceRepository.findByTags(tags, pageable).stream()
-                .map(e -> new ServiceDTO(e.getService()))
+                .map(e -> {
+                    List<TagService> tagServices = findByService(e.getService());
+                    Category category = tagServices.getFirst().getTag().getCategory();
+                    return new ServiceDTO(e.getService(), tagServices, category);
+                })
                 .toList();
     }
 
@@ -103,6 +122,15 @@ public class ServiceService {
             throw new ServiceException("해당 서비스가 존재하지 않습니다.");
         }
         serviceRepository.deleteById(id);
+    }
+
+    //서비스 내부 로직
+    private List<TagService> findByService(ProjectService service) {
+        List<TagService> tagServices = tagServiceRepository.findByService(service);
+        if (tagServices == null || tagServices.isEmpty()) {
+            throw new ServiceException("해당 서비스의 태그가 존재하지 않습니다.");
+        }
+        return tagServices;
     }
 
 }

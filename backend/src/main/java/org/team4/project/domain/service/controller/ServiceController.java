@@ -25,7 +25,7 @@ public class ServiceController {
     public void createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
         Member freeLancer = new Member(); // = 인증된 사용자 정보로 대체 필요
-        serviceService.createService(serviceCreateRqBody, freeLancer, serviceCreateRqBody.tagName());
+        serviceService.createService(serviceCreateRqBody, freeLancer, serviceCreateRqBody.tagNames());
     }
 
     @GetMapping("/{id}")

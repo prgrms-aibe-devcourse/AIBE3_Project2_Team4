@@ -3,6 +3,8 @@ package org.team4.project.domain.service.dto;
 import jakarta.validation.constraints.*;
 import org.team4.project.domain.service.entity.category.type.TagType;
 
+import java.util.List;
+
 public record ServiceCreateRqBody(
         @NotBlank
         @Size(min = 2, max = 100)
@@ -15,6 +17,6 @@ public record ServiceCreateRqBody(
         @Max(1000000000)
         Integer price,
         @NotNull
-        TagType tagName
+        List<TagType> tagNames
 ) {
 }
