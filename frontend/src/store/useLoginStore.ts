@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface Member {
   email: string;
@@ -14,10 +15,26 @@ interface LoginState {
   clearAccessToken: () => void;
 }
 
-export const useLoginStore = create<LoginState>((set) => ({
-  member: null,
-  setMember: (member) => set({ member }),
-  accessToken: null,
-  setAccessToken: (token) => set({ accessToken: token }),
-  clearAccessToken: () => set({ accessToken: null }),
-}));
+// export const useLoginStore = create<LoginState>((set) => ({
+//   member: null,
+//   setMember: (member) => set({ member }),
+//   accessToken: null,
+//   setAccessToken: (token) => set({ accessToken: token }),
+//   clearAccessToken: () => set({ accessToken: null }),
+// }));
+
+export const useLoginStore = create<LoginState>()(
+  persist(
+    (set) => ({
+      member: null,
+      setMember: (member) => set({ member }),
+      accessToken: null,
+      setAccessToken: (token) => set({ accessToken: token }),
+      clearAccessToken: () => set({ accessToken: null, member: null }),
+    }),
+    {
+      name: "token",
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
+);

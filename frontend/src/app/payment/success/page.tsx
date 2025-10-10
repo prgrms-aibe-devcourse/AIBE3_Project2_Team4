@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Home, MessageSquare, Loader2 } from "lucide-react";
+import { authorizedFetch } from "@/lib/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -38,7 +39,7 @@ export default function PaymentSuccessPage() {
       };
 
       try {
-        const response = await fetch(`${baseUrl}/api/v1/payments/confirm`, {
+        const response = await authorizedFetch(`${baseUrl}/api/v1/payments/confirm`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
