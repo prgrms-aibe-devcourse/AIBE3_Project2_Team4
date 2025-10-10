@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.team4.project.global.redis.RedisRepository;
 import org.team4.project.global.security.jwt.JwtFilter;
 import org.team4.project.global.security.jwt.JwtUtil;
 
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private static final String[] SWAGGER_RESOURCES = {"/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**"};
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
+    private final RedisRepository redisRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -42,8 +44,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         CustomAuthenticationFilter customFilter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
         customFilter.setAuthenticationManager(authenticationManager);
-        customFilter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil).successHandler());
-        customFilter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil).failureHandler());
+        customFilter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).successHandler());
+        customFilter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).failureHandler());
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -80,6 +82,7 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

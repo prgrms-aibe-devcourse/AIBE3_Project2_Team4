@@ -1,55 +1,108 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Eye, EyeOff } from "lucide-react"
+import type React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff } from "lucide-react";
+import Logo from "@/components/logo";
+import { validateEmail, validatePassword } from "@/lib/validation/auth";
+import { setAccessToken, authorizedFetch } from "@/lib/api";
+import { useLoginStore } from "@/store/useLoginStore";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  type LoginForm = { email: string; password: string };
+
+  const [formData, setFormData] = useState<LoginForm>({ email: "", password: "" });
+  const [fieldErrors, setFieldErrors] = useState<LoginForm>({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const setMember = useLoginStore((s) => s.setMember);
+
+  const validateAll = (state: LoginForm): LoginForm => ({
+    email: validateEmail(state.email),
+    password: validatePassword(state.password),
+  });
+
+  const isValid = Object.values(fieldErrors).every((v) => !v);
+
+  const handleInputChange = (field: keyof LoginForm, value: string) => {
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      setFieldErrors(validateAll(next));
+      return next;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    const latestErrors = validateAll(formData);
+    setFieldErrors(latestErrors);
+    if (Object.values(latestErrors).some(Boolean)) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // 실제 로그인 로직 구현
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // 임시 딜레이
+      const resp = await fetch("http://localhost:8080/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: formData.email.trim(), password: formData.password }),
+      });
 
-      // 성공 시 쿠키 설정 및 리다이렉트
-      document.cookie = "auth-token=sample-token; path=/"
-      document.cookie = "user-role=freelancer; path=/"
-      window.location.href = "/"
+      if (resp.status === 401) {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+        return;
+      }
+      if (!resp.ok) {
+        setError("로그인 중 오류가 발생했습니다.");
+        return;
+      }
+
+      const authHeader = resp.headers.get("Authorization");
+      const token = authHeader?.split(" ")[1] || authHeader || "";
+      if (!token) throw new Error("로그인 중 오류가 발생했습니다.");
+      setAccessToken(token);
+
+      const meResp = await authorizedFetch("http://localhost:8080/api/v1/auth/me");
+      if (!meResp.ok) throw new Error("프로필 조회 중 오류가 발생했습니다.");
+      const me = await meResp.json();
+      setMember({ email: me.email, nickname: me.nickname, role: me.role });
+      router.replace("/");
     } catch (err) {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.")
+      setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+      <Logo />
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">로그인</h1>
+        <div className="mb-8 text-center">
+          <h1 className="text-foreground mb-2 text-3xl font-bold">로그인</h1>
           <p className="text-muted-foreground">계정에 로그인하여 서비스를 이용하세요</p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">환영합니다</CardTitle>
-            <CardDescription className="text-center">이메일과 비밀번호를 입력해주세요</CardDescription>
+            <CardTitle className="text-center text-2xl">환영합니다</CardTitle>
+            <CardDescription className="text-center">
+              이메일과 비밀번호를 입력해주세요
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,11 +118,13 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="example@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   className="bg-input border-border"
                 />
+                {fieldErrors.email && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -79,45 +134,49 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="비밀번호를 입력하세요"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
                     className="bg-input border-border pr-10"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.password}</p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90 w-full"
+                disabled={!isValid || isLoading}
+              >
                 {isLoading ? "로그인 중..." : "로그인"}
               </Button>
             </form>
 
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <Link href="/auth/find-id" className="text-primary hover:text-primary/80 transition-colors">
+            <div className="mt-6 space-y-4 text-center text-sm">
+              <div className="flex justify-between">
+                <Link href="/auth/find-id" className="text-primary hover:text-primary/80">
                   아이디 찾기
                 </Link>
-                <Link href="/auth/find-password" className="text-primary hover:text-primary/80 transition-colors">
+                <Link href="/auth/find-password" className="text-primary hover:text-primary/80">
                   비밀번호 찾기
                 </Link>
               </div>
-
-              <div className="text-center text-sm text-muted-foreground">
+              <div>
                 계정이 없으신가요?{" "}
-                <Link href="/auth/signup" className="text-primary hover:text-primary/80 transition-colors font-medium">
+                <Link
+                  href="/auth/signup"
+                  className="text-primary hover:text-primary/80 font-medium"
+                >
                   회원가입
                 </Link>
               </div>
@@ -126,5 +185,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
