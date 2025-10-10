@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
+import { WebsocketService, DrawingAction } from "./websocket-service";
 
 export default function ChatCanvasPage() {
   const containerRef = useRef<HTMLDivElement>(null); // 전체 캔버스
@@ -12,6 +13,9 @@ export default function ChatCanvasPage() {
   const [lineWidth, setLineWidth] = useState(2);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape"); // 가로/세로 모드
+
+  const websocketService = useRef(new WebsocketService()); //한 객체 계속 사용
+  const [canvasId, setCanvasId] = useState("my-drawing-room"); // 임시 이름
 
   // 도구 설정을 캔버스 컨텍스트에 적용하는 함수
   const applyToolSettings = () => {
@@ -103,6 +107,46 @@ export default function ChatCanvasPage() {
     redrawCanvas(true); // orientation 변경 시 기존 그림 유지
   }, [orientation]);
 
+  useEffect(() => {
+    const handleRemteDrawingAction = (action: DrawingAction) => {
+      const canvas = drawCanvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      if (action.type == "START" || action.type == "DRAW") {
+        ctx.strokeStyle = action.color;
+        ctx.lineWidth = action.lineWidth;
+        ctx.globalCompositeOperation = action.tool === "pen" ? "source-over" : "destination-out";
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+      }
+
+      switch (action.type) {
+        case "START":
+          ctx.beginPath();
+          ctx.moveTo(action.x, action.y);
+          break;
+        case "DRAW":
+          ctx.lineTo(action.x, action.y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(action.x, action.y);
+          break;
+        case "END":
+          ctx.beginPath();
+          break;
+        case "CLEAR":
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          break;
+      }
+    };
+    websocketService.current.connect(canvasId, handleRemteDrawingAction);
+    return () => {
+      websocketService.current.disconnect();
+    };
+  }, [canvasId]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!imageLoaded) return;
     const canvas = drawCanvasRef.current;
@@ -113,6 +157,17 @@ export default function ChatCanvasPage() {
     isDrawing.current = true;
     ctx.beginPath();
     ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+
+    const action: DrawingAction = {
+      canvasId,
+      type: "START",
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY,
+      color,
+      lineWidth,
+      tool,
+    };
+    websocketService.current.sendDrawingAction(canvasId, action);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -138,22 +193,57 @@ export default function ChatCanvasPage() {
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+
+    const action: DrawingAction = {
+      canvasId,
+      type: "DRAW",
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY,
+      color,
+      lineWidth,
+      tool,
+    };
+    websocketService.current.sendDrawingAction(canvasId, action);
   };
 
   const handleMouseUp = () => {
     isDrawing.current = false;
+
+    const action: DrawingAction = {
+      canvasId,
+      type: "END",
+      x: 0,
+      y: 0,
+      color: "",
+      lineWidth: 0,
+      tool: "pen",
+    };
+    websocketService.current.sendDrawingAction(canvasId, action);
   };
 
   const handleMouseLeave = () => {
     isDrawing.current = false;
   };
 
-  const clearDrawing = () => {
+  const clearDrawing = (sendAction = true) => {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (sendAction) {
+      const action: DrawingAction = {
+        canvasId,
+        type: "CLEAR",
+        x: 0,
+        y: 0,
+        color: "",
+        lineWidth: 0,
+        tool: "pen",
+      };
+      websocketService.current.sendDrawingAction(canvasId, action);
+    }
   };
 
   // 캔버스 가로/세로 비율 변경
