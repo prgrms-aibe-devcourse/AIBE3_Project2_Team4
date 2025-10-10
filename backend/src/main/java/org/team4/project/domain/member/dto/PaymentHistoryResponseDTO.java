@@ -1,0 +1,14 @@
+package org.team4.project.domain.member.dto;
+
+import org.team4.project.domain.payment.entity.PaymentStatus;
+
+import java.time.LocalDateTime;
+
+public record PaymentHistoryResponseDTO(
+        Long freelancerId,
+        Long serviceId,
+        String serviceTitle,
+        Integer price,
+        LocalDateTime approvedAt,
+        PaymentStatus paymentStatus) {
+}
