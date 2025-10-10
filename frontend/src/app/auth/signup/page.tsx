@@ -3,6 +3,8 @@
 import type React from "react";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import type { FieldErrors } from "@/lib/validation/auth";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +14,24 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff, User, Building } from "lucide-react";
 import Logo from "@/components/logo";
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirmPassword,
+  validateNickname,
+} from "@/lib/validation/auth";
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState({
+  const router = useRouter();
+  type SignupForm = {
+    nickname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    userType: "client" | "freelancer";
+  };
+
+  const [formData, setFormData] = useState<SignupForm>({
     nickname: "",
     email: "",
     password: "",
@@ -26,38 +43,89 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const validateAll = (state: typeof formData): FieldErrors => ({
+    email: validateEmail(state.email),
+    password: validatePassword(state.password),
+    confirmPassword: validateConfirmPassword(state.password, state.confirmPassword),
+    nickname: validateNickname(state.nickname),
+  });
+
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>(() =>
+    validateAll({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      nickname: "",
+      userType: "freelancer",
+    }),
+  );
+
+  const isValid = Object.values(fieldErrors).every((v) => !v);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError("비밀번호는 8자 이상이어야 합니다.");
+    // 제출 시 최종 검증 (한 번 더 동기화)
+    const latestErrors = validateAll(formData);
+    setFieldErrors(latestErrors);
+    const latestValid = Object.values(latestErrors).every((v) => !v);
+    if (!latestValid) {
       setIsLoading(false);
       return;
     }
 
     try {
-      // 실제 회원가입 로직 구현
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 임시 딜레이
+      const payload = {
+        email: formData.email.trim(),
+        password: formData.password,
+        nickname: formData.nickname.trim(),
+        role: formData.userType === "client" ? "CLIENT" : "FREELANCER",
+      };
 
-      // 성공 시 로그인 페이지로 리다이렉트
-      window.location.href = "/auth/login";
+      const response = await fetch("http://localhost:8080/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        // 서버가 표준 에러 응답을 JSON으로 내려주는 경우 처리
+        let message = "회원가입 중 오류가 발생했습니다.";
+        try {
+          const data = await response.json();
+          // 가능한 필드들에서 메시지 추출 (message, error, errors[0].defaultMessage 등)
+          if (data?.message) message = data.message;
+          else if (data?.error) message = data.error;
+          else if (Array.isArray(data?.errors) && data.errors.length > 0) {
+            message = data.errors[0]?.defaultMessage || data.errors[0]?.message || message;
+          }
+        } catch (_) {
+          // json 파싱 실패 시 기본 메시지 유지
+        }
+        throw new Error(message);
+      }
+
+      // 성공 시 로그인 페이지로 리다이렉트 (클라이언트 라우팅)
+      router.replace("/auth/login");
     } catch (err) {
-      setError("회원가입 중 오류가 발생했습니다.");
+      const message = err instanceof Error ? err.message : "회원가입 중 오류가 발생했습니다.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      const nextErrors = validateAll(next);
+      setFieldErrors(nextErrors);
+      return next;
+    });
   };
 
   return (
@@ -76,7 +144,7 @@ export default function SignupPage() {
             <CardDescription className="text-center">필요한 정보를 입력해주세요</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -119,9 +187,11 @@ export default function SignupPage() {
                   placeholder="닉네임을 입력하세요"
                   value={formData.nickname}
                   onChange={(e) => handleInputChange("nickname", e.target.value)}
-                  required
                   className="bg-input border-border"
                 />
+                {fieldErrors.nickname && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.nickname}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -132,9 +202,12 @@ export default function SignupPage() {
                   placeholder="example@email.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  required
                   className="bg-input border-border"
+                  autoComplete="email"
                 />
+                {fieldErrors.email && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -146,7 +219,6 @@ export default function SignupPage() {
                     placeholder="8자 이상 입력하세요"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    required
                     className="bg-input border-border pr-10"
                   />
                   <Button
@@ -163,6 +235,9 @@ export default function SignupPage() {
                     )}
                   </Button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.password}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -174,7 +249,6 @@ export default function SignupPage() {
                     placeholder="비밀번호를 다시 입력하세요"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    required
                     className="bg-input border-border pr-10"
                   />
                   <Button
@@ -191,12 +265,15 @@ export default function SignupPage() {
                     )}
                   </Button>
                 </div>
+                {fieldErrors.confirmPassword && (
+                  <p className="text-destructive mt-1 text-sm">{fieldErrors.confirmPassword}</p>
+                )}
               </div>
 
               <Button
                 type="submit"
                 className="bg-primary hover:bg-primary/90 w-full"
-                disabled={isLoading}
+                disabled={!isValid || isLoading}
               >
                 {isLoading ? "가입 중..." : "회원가입"}
               </Button>
