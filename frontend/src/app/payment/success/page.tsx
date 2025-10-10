@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Home, MessageSquare, Loader2 } from "lucide-react";
+import { authorizedFetch } from "@/lib/api";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -20,6 +21,7 @@ export default function PaymentSuccessPage() {
   const orderId = searchParams.get("orderId");
   const amount = searchParams.get("amount");
   const chatId = searchParams.get("chatId");
+  const memo = searchParams.get("memo");
 
   // 결제 승인 요청
   useEffect(() => {
@@ -35,10 +37,11 @@ export default function PaymentSuccessPage() {
         orderId: orderId,
         amount: parseInt(amount),
         paymentKey: paymentKey,
+        memo: memo || "",
       };
 
       try {
-        const response = await fetch(`${baseUrl}/api/v1/payments/confirm`, {
+        const response = await authorizedFetch(`${baseUrl}/api/v1/payments/confirm`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

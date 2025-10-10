@@ -83,7 +83,7 @@ export default function PaymentPage() {
         },
         orderId: orderId,
         orderName: serviceName,
-        successUrl: `${window.location.origin}/payment/success?chatId=${chatId}`,
+        successUrl: `${window.location.origin}/payment/success?chatId=${chatId}&memo=${encodeURIComponent(memo)}`,
         failUrl: `${window.location.origin}/payment/fail`,
         // TODO: 실제 사용자 정보로 변경
         customerEmail: "customer@example.com",
@@ -254,12 +254,12 @@ export default function PaymentPage() {
                           <div className="mr-2 h-5 w-5 animate-spin rounded-full border-b-2 border-white" />
                           결제 진행중...
                         </>
-                      ) :
+                      ) : (
                         <>
                           <Lock className="mr-2 h-5 w-5" />
                           결제하기
                         </>
-                      }
+                      )}
                     </Button>
 
                     <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4">
