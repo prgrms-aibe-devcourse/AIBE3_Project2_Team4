@@ -27,9 +27,9 @@ public interface TagServiceRepository extends JpaRepository<TagService, Long> {
     @Query(""" 
         select distinct ts from TagService ts
         join fetch ts.tag t
-        where t.name in :tagType
+        where t.name in :tags
     """)
-    List<TagService> findByTags(@Param("tags") List<TagType> tagType,
+    List<TagService> findByTags(@Param("tags") List<TagType> tags,
                                 Pageable pageable);
     @Query("""
         select ts from TagService ts

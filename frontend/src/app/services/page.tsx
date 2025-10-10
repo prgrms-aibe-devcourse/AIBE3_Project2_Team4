@@ -18,153 +18,9 @@ import {
 import { Search, Filter } from "lucide-react";
 import useCategory from "@/hooks/use-category";
 
-// 더미 서비스 데이터 (더 많은 데이터)
-const allServices = [
-  {
-    id: "1",
-    thumbnail: "/-------.jpg",
-    title: "반응형 웹사이트 개발해드립니다",
-    price: 500000,
-    rating: 4.9,
-    reviewCount: 127,
-    freelancerName: "김개발자",
-    category: "development",
-    tags: ["웹개발"],
-    createdAt: "2025-01-15",
-  },
-  {
-    id: "2",
-    thumbnail: "/------.jpg",
-    title: "브랜드 로고 디자인 작업",
-    price: 150000,
-    rating: 4.8,
-    reviewCount: 89,
-    freelancerName: "박디자이너",
-    category: "design",
-    tags: ["로고디자인", "브랜딩"],
-    createdAt: "2025-01-14",
-  },
-  {
-    id: "3",
-    thumbnail: "/-----.jpg",
-    title: "유튜브 영상 편집 및 썸네일 제작",
-    price: 80000,
-    rating: 4.7,
-    reviewCount: 156,
-    freelancerName: "이편집자",
-    category: "video",
-    tags: ["영상편집"],
-    createdAt: "2025-01-13",
-  },
-  {
-    id: "4",
-    thumbnail: "/-----.jpg",
-    title: "모바일 앱 개발 (iOS/Android)",
-    price: 1200000,
-    rating: 4.9,
-    reviewCount: 43,
-    freelancerName: "최앱개발",
-    category: "development",
-    tags: ["앱개발"],
-    createdAt: "2025-01-12",
-  },
-  {
-    id: "5",
-    thumbnail: "/------.jpg",
-    title: "SNS 마케팅 전략 수립 및 운영",
-    price: 300000,
-    rating: 4.6,
-    reviewCount: 72,
-    freelancerName: "정마케터",
-    category: "marketing",
-    tags: ["SNS마케팅", "브랜드마케팅"],
-    createdAt: "2025-01-11",
-  },
-  {
-    id: "6",
-    thumbnail: "/translation-service.png",
-    title: "전문 번역 서비스 (한↔영)",
-    price: 50000,
-    rating: 4.8,
-    reviewCount: 234,
-    freelancerName: "한번역가",
-    category: "writing",
-    tags: ["번역"],
-    createdAt: "2025-01-10",
-  },
-  {
-    id: "7",
-    thumbnail: "/-------.jpg",
-    title: "AI 챗봇 개발 서비스",
-    price: 800000,
-    rating: 4.9,
-    reviewCount: 67,
-    freelancerName: "AI개발자",
-    category: "development",
-    tags: ["AI/ML", "웹개발"],
-    createdAt: "2025-01-09",
-  },
-  {
-    id: "8",
-    thumbnail: "/------.jpg",
-    title: "UI/UX 디자인 및 프로토타입 제작",
-    price: 400000,
-    rating: 4.7,
-    reviewCount: 98,
-    freelancerName: "UX디자이너",
-    category: "design",
-    tags: ["UI/UX"],
-    createdAt: "2025-01-08",
-  },
-  {
-    id: "9",
-    thumbnail: "/-----.jpg",
-    title: "기업 홍보영상 제작",
-    price: 600000,
-    rating: 4.8,
-    reviewCount: 45,
-    freelancerName: "영상제작자",
-    category: "video",
-    tags: ["영상편집", "모션그래픽"],
-    createdAt: "2025-01-07",
-  },
-  {
-    id: "10",
-    thumbnail: "/------.jpg",
-    title: "콘텐츠 마케팅 전략 및 글쓰기",
-    price: 250000,
-    rating: 4.6,
-    reviewCount: 123,
-    freelancerName: "콘텐츠작가",
-    category: "writing",
-    tags: ["콘텐츠작성", "카피라이팅"],
-    createdAt: "2025-01-06",
-  },
-  {
-    id: "11",
-    thumbnail: "/-------.jpg",
-    title: "데이터 분석 및 시각화",
-    price: 350000,
-    rating: 4.8,
-    reviewCount: 76,
-    freelancerName: "데이터분석가",
-    category: "development",
-    tags: ["데이터분석"],
-    createdAt: "2025-01-05",
-  },
-  {
-    id: "12",
-    thumbnail: "/------.jpg",
-    title: "패키지 디자인 및 브랜딩",
-    price: 200000,
-    rating: 4.7,
-    reviewCount: 54,
-    freelancerName: "패키지디자이너",
-    category: "design",
-    tags: ["패키지디자인", "브랜딩"],
-    createdAt: "2025-01-04",
-  },
-];
+import { components } from "@/app/services/backend/schemas";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function ServicesPageContent() {
   const { categories, tagsByCategory } = useCategory();
@@ -176,26 +32,47 @@ function ServicesPageContent() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredServices, setFilteredServices] = useState(allServices);
+  type ServiceDTO = components["schemas"]["ServiceDTO"];
+  const [allServices, setAllServices] = useState<ServiceDTO[]>([]);
+  const [filteredServices, setFilteredServices] = useState<ServiceDTO[]>([]);
 
   const itemsPerPage = 9;
 
-  // URL 파라미터에서 초기값 설정
+  // 서비스 목록 가져오기
   useEffect(() => {
-    const category = searchParams.get("category");
-    const search = searchParams.get("search");
+    const fetchServices = async () => {
+      let url = `${API_BASE_URL}/api/v1/service?page=0&size=10`;
 
-    if (category) {
-      setSelectedCategory(category);
-    }
-    if (search) {
-      setSearchQuery(search);
-    }
-  }, [searchParams]);
+      // 카테고리만 선택
+      if (selectedCategory && selectedTags.length === 0) {
+        url = `${API_BASE_URL}/api/v1/service/category?page=0&size=10&category=${selectedCategory}`;
+      }
+
+      // 태그 선택
+      if (selectedTags.length > 0) {
+        const tagQuery = selectedTags.map((tag) => `&tags=${encodeURIComponent(tag)}`).join("");
+        url = `${API_BASE_URL}/api/v1/service/tags?page=0&size=10${tagQuery}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("서비스 목록 불러오기 실패");
+        const data = await res.json();
+        setAllServices(data);
+        setFilteredServices(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchServices();
+  }, [selectedCategory, selectedTags]);
 
   // 필터링 및 정렬 로직
   useEffect(() => {
-    let filtered = allServices;
+    if (!allServices) return;
+
+    let filtered = [...allServices];
 
     // 검색어 필터링
     if (searchQuery.trim()) {
@@ -214,7 +91,7 @@ function ServicesPageContent() {
     // 태그 필터링
     if (selectedTags.length > 0) {
       filtered = filtered.filter((service) =>
-        selectedTags.some((tag) => service.tags.includes(tag)),
+        selectedTags.some((tag) => service.tags?.includes(tag)),
       );
     }
 
@@ -224,12 +101,12 @@ function ServicesPageContent() {
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
     } else if (sortBy === "rating") {
-      filtered = filtered.sort((a, b) => b.rating - a.rating);
+      filtered = filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
     }
 
     setFilteredServices(filtered);
     setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
-  }, [searchQuery, selectedCategory, selectedTags, sortBy]);
+  }, [searchQuery, selectedCategory, selectedTags, sortBy, allServices]);
 
   const handleCategorySelect = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
@@ -337,12 +214,12 @@ function ServicesPageContent() {
                 <div className="flex flex-wrap justify-center gap-2">
                   {currentTags.map((tag) => (
                     <Badge
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? "default" : "outline"}
+                      key={tag.id}
+                      variant={selectedTags.includes(tag.id) ? "default" : "outline"}
                       className="hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors"
-                      onClick={() => handleTagToggle(tag)}
+                      onClick={() => handleTagToggle(tag.id)}
                     >
-                      {tag}
+                      {tag.name}
                     </Badge>
                   ))}
                 </div>
