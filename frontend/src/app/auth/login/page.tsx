@@ -26,6 +26,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const setMember = useLoginStore((s) => s.setMember);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const validateAll = (state: LoginForm): LoginForm => ({
     email: validateEmail(state.email),
@@ -55,7 +56,7 @@ export default function LoginPage() {
     }
 
     try {
-      const resp = await fetch("http://localhost:8080/api/v1/auth/login", {
+      const resp = await fetch(`${baseUrl}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -76,7 +77,7 @@ export default function LoginPage() {
       if (!token) throw new Error("로그인 중 오류가 발생했습니다.");
       setAccessToken(token);
 
-      const meResp = await authorizedFetch("http://localhost:8080/api/v1/auth/me");
+      const meResp = await authorizedFetch(`${baseUrl}/api/v1/auth/me`);
       if (!meResp.ok) throw new Error("프로필 조회 중 오류가 발생했습니다.");
       const me = await meResp.json();
       setMember({ email: me.email, nickname: me.nickname, role: me.role });

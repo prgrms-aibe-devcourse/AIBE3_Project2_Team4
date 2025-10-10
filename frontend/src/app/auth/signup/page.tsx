@@ -42,6 +42,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const validateAll = (state: typeof formData): FieldErrors => ({
     email: validateEmail(state.email),
@@ -84,7 +85,7 @@ export default function SignupPage() {
         role: formData.userType === "client" ? "CLIENT" : "FREELANCER",
       };
 
-      const response = await fetch("http://localhost:8080/api/v1/auth/register", {
+      const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
