@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
+import org.team4.project.domain.payment.dto.PaymentConfirmDTO;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
@@ -43,13 +44,15 @@ public class PaymentService {
     public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO, String email) {
         String orderId = paymentConfirmRequestDTO.orderId();
         Integer amount = paymentConfirmRequestDTO.amount();
+        String memo = paymentConfirmRequestDTO.memo();
 
         verifyTempPayment(orderId, amount);
 
-        JsonNode response = paymentClient.confirmPayment(paymentConfirmRequestDTO);
+        PaymentConfirmDTO paymentConfirmDTO = paymentConfirmRequestDTO.convert();
+        JsonNode response = paymentClient.confirmPayment(paymentConfirmDTO);
 
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다. email : " + email));
-        paymentRepository.save(convertToEntity(response, member));
+        paymentRepository.save(convertToEntity(response, member, memo));
         redisRepository.deleteValue(generateKey(orderId));
 
         String receiptUrl = response.get("receipt").get("url").asText(null);
@@ -75,7 +78,7 @@ public class PaymentService {
         }
     }
 
-    private Payment convertToEntity(JsonNode response, Member member) {
+    private Payment convertToEntity(JsonNode response, Member member, String memo) {
         String orderId = response.get("orderId").asText();
         String paymentKey = response.get("paymentKey").asText();
 
@@ -96,6 +99,7 @@ public class PaymentService {
                       .requestedAt(requestedAt)
                       .approvedAt(approvedAt)
                       .totalAmount(totalAmount)
+                      .memo(memo)
                       .build();
     }
 

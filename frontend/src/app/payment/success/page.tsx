@@ -21,6 +21,7 @@ export default function PaymentSuccessPage() {
   const orderId = searchParams.get("orderId");
   const amount = searchParams.get("amount");
   const chatId = searchParams.get("chatId");
+  const memo = searchParams.get("memo");
 
   // 결제 승인 요청
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function PaymentSuccessPage() {
         orderId: orderId,
         amount: parseInt(amount),
         paymentKey: paymentKey,
+        memo: memo || "",
       };
 
       try {
