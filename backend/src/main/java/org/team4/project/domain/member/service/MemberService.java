@@ -1,11 +1,14 @@
 package org.team4.project.domain.member.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.exception.RegisterException;
 import org.team4.project.domain.member.repository.MemberRepository;
 
@@ -34,5 +37,10 @@ public class MemberService {
         } catch (DataIntegrityViolationException e) {
             throw new RegisterException("이미 사용중인 이메일 또는 닉네임 입니다.");
         }
+    }
+
+    public MemberProfileResponseDTO getProfile(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
+        return MemberProfileResponseDTO.of(member);
     }
 }
