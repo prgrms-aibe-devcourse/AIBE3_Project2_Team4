@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/services")
+@RequestMapping("/api/v1/service")
 public class ServiceController {
     private final ServiceService serviceService;
 
@@ -25,7 +25,7 @@ public class ServiceController {
     public void createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
         Member freeLancer = new Member(); // = 인증된 사용자 정보로 대체 필요
-        serviceService.createService(serviceCreateRqBody, freeLancer, serviceCreateRqBody.tagNames());
+        serviceService.createService(serviceCreateRqBody, freeLancer);
     }
 
     @GetMapping("/{id}")

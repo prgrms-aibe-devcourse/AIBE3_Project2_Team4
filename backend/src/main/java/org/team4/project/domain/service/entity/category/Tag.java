@@ -23,4 +23,9 @@ public class Tag extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
     private TagType name;
+
+    public Tag(Category category, TagType name) {
+        this.category = category;
+        this.name = name;
+    }
 }

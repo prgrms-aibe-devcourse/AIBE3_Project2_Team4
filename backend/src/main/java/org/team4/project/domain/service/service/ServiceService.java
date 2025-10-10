@@ -34,17 +34,17 @@ public class ServiceService {
     }
 
     // 서비스 생성
-    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer, List<TagType> tagName) {
+    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
         ProjectService service =  serviceRepository.save(
             ProjectService.addService(serviceCreateRqBody, freeLancer)
         );
-        tagName.stream().map(e -> {
+        serviceCreateRqBody.tagNames().forEach(e -> {
             Tag tag = tagRepository.findByName(e);
-            if(tag == null) {
+            if (tag == null) {
                 throw new ServiceException("해당 태그가 존재하지 않습니다.");
             }
             TagService tagService = new TagService(tag, service);
-            return tagServiceRepository.save(tagService);
+            tagServiceRepository.save(tagService);
         });
     }
 

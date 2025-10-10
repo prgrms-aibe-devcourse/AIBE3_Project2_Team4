@@ -22,7 +22,8 @@ public record ServiceDTO(
         String freelancerName,
         CategoryType category,
         TagType[] tags,
-        String content
+        String content,
+        String createdAt
 ) {
     public ServiceDTO(ProjectService service, List<TagService> tagServices, Category category) {
         this(
@@ -37,7 +38,8 @@ public record ServiceDTO(
                 tagServices.stream()
                         .map(tagService -> tagService.getTag().getName())
                         .toArray(TagType[]::new),
-                service.getContent()
+                service.getContent(),
+                service.getCreatedAt().toString()
         );
     }
     public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category) {
