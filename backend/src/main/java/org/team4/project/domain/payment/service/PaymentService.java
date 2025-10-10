@@ -51,6 +51,7 @@ public class PaymentService {
         PaymentConfirmDTO paymentConfirmDTO = paymentConfirmRequestDTO.convert();
         JsonNode response = paymentClient.confirmPayment(paymentConfirmDTO);
 
+        //TODO : 서비스 ID 전달받아 Payment 엔티티에 서비스 저장
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다. email : " + email));
         paymentRepository.save(convertToEntity(response, member, memo));
         redisRepository.deleteValue(generateKey(orderId));
