@@ -1,5 +1,6 @@
 package org.team4.project.global.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -46,6 +47,14 @@ public class GlobalExceptionHandler {
                 request.getMethod(), request.getRequestURI(), e.getMessage(), e);
 
         return new ResponseEntity<>(ErrorResponse.of(request, e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityNotFoundException .class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException e, HttpServletRequest request) {
+        log.warn("Resource not found error at [{} {}]: {}",
+                request.getMethod(), request.getRequestURI(), e.getMessage());
+
+        return new ResponseEntity<>(ErrorResponse.of(request, e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ServiceException.class)
