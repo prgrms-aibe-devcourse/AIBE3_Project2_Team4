@@ -22,8 +22,12 @@ export default function SelectRolePage() {
     setError("");
 
     try {
-      const res = await authorizedFetch(`${baseUrl}/api/v1/auth/role?role=${role}`, {
+      const res = await authorizedFetch(`${baseUrl}/api/v1/auth/role`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role }),
       });
 
       if (!res.ok) throw new Error("역할 선택 실패");

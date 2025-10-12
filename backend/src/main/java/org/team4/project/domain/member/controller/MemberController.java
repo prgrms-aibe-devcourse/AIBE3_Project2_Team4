@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
+import org.team4.project.domain.member.dto.MemberRoleRequestDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.service.AuthService;
 import org.team4.project.domain.member.service.MemberService;
@@ -50,8 +51,8 @@ public class MemberController {
 
     @PostMapping("/role")
     public ResponseEntity<MemberProfileResponseDTO> setRole(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                            @RequestParam("role") String role) {
-        MemberProfileResponseDTO profile = memberService.setRole(customUserDetails.getEmail(), role);
+                                                            @RequestBody MemberRoleRequestDTO memberRoleRequestDTO) {
+        MemberProfileResponseDTO profile = memberService.setRole(customUserDetails.getEmail(), memberRoleRequestDTO.getRole());
         return ResponseEntity.ok(profile);
     }
 }
