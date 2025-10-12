@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
 import Logo from "@/components/logo";
 import { validateEmail, validatePassword } from "@/lib/validation/auth";
-import { setAccessToken, authorizedFetch } from "@/lib/api";
+import { setAccessToken, authorizedFetch, refreshAccessToken } from "@/lib/api";
 import { useLoginStore } from "@/store/useLoginStore";
 
 export default function LoginPage() {
@@ -89,6 +89,10 @@ export default function LoginPage() {
     }
   };
 
+  const handleKakaoLogin = () => {
+    window.location.href = `${baseUrl}/oauth2/authorization/kakao`;
+  };
+
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-4">
       <Logo />
@@ -162,6 +166,14 @@ export default function LoginPage() {
                 {isLoading ? "로그인 중..." : "로그인"}
               </Button>
             </form>
+
+            <Button
+              type="button"
+              className="mt-2 w-full bg-yellow-400 hover:bg-yellow-500"
+              onClick={handleKakaoLogin}
+            >
+              카카오로 로그인하기
+            </Button>
 
             <div className="mt-6 space-y-4 text-center text-sm">
               <div className="flex justify-between">

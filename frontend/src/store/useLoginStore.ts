@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface Member {
   email: string;
   nickname: string;
-  role: "freelancer" | "client" | "admin";
+  role: "freelancer" | "client" | "admin" | "unassigned";
 }
 
 interface LoginState {

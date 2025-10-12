@@ -9,8 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.entity.MemberRole;
+import org.team4.project.domain.member.entity.Provider;
 import org.team4.project.domain.member.exception.RegisterException;
 import org.team4.project.domain.member.repository.MemberRepository;
+
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +45,48 @@ public class MemberService {
 
     public MemberProfileResponseDTO getProfile(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
-        return MemberProfileResponseDTO.of(member);
+        return MemberProfileResponseDTO.from(member);
+    }
+
+    @Transactional
+    public Member oauthRegister(String email, String registrationId) {
+        Member member;
+        if(memberRepository.existsByEmail(email)) {
+            member = memberRepository.findByEmail(email).get();
+            member.setProvider(registrationId);
+        } else {
+            member = Member.builder()
+                    .email(email)
+                    .password(null)
+                    .memberRole(MemberRole.UNASSIGNED)
+                    .nickname(generateRandomNickname(registrationId))
+                    .provider(Provider.valueOf(registrationId))
+                    .build();
+
+            memberRepository.save(member);
+        }
+        return member;
+    }
+
+    @Transactional
+    public MemberProfileResponseDTO setRole(String email, String role) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
+        member.setMemberRole(role);
+        return MemberProfileResponseDTO.from(member);
+    }
+
+    private String generateRandomNickname(String registrationId) {
+        Random random = new Random();
+        String nickname;
+
+        do {
+            StringBuilder sb = new StringBuilder(registrationId);
+            for (int i = 0; i < 10; i++) {
+                sb.append(random.nextInt(10));
+            }
+            nickname = sb.toString();
+        } while (memberRepository.existsByNickname(nickname));
+
+        return nickname;
     }
 }

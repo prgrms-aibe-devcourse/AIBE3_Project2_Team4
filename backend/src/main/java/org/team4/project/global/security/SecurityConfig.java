@@ -1,6 +1,7 @@
 package org.team4.project.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +50,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthenticationFilter customAuthenticationFilter, JwtFilter jwtFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomAuthenticationFilter customAuthenticationFilter,
+                                                   JwtFilter jwtFilter,
+                                                   CustomOAuth2UserService customOAuth2UserService,
+                                                   CustomAuthenticationHandlers handlers) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -63,14 +68,25 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                //TODO : OAuth 설정 필요
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                        .successHandler(handlers.oauthSuccessHandler()))
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_RESOURCES).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .anyRequest().permitAll() //TODO : 구현에 따라 권한 처리 추가 필요
+                        .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
+                        .anyRequest().authenticated()
                 )
+
         ;
 
         return http.build();

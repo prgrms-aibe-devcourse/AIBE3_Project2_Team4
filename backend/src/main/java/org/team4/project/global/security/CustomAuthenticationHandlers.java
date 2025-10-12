@@ -36,6 +36,20 @@ public class CustomAuthenticationHandlers {
         };
     }
 
+    public AuthenticationSuccessHandler oauthSuccessHandler() {
+        return (request, response, authentication) -> {
+            CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
+            String email = user.getEmail();
+            String role = user.getRole();
+
+            String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role, REFRESH_TOKEN_EXPIRE_MILLIS);
+            redisRepository.setValue(refreshToken, "value", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
+
+            response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_COOKIE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));
+            response.sendRedirect("http://localhost:3000/auth/oauth/success");
+        };
+    }
+
     public AuthenticationFailureHandler failureHandler() {
         return (request, response, exception) -> {
             response.setStatus(401);

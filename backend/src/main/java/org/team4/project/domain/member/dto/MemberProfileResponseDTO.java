@@ -11,7 +11,7 @@ public class MemberProfileResponseDTO {
     private String nickname;
     private String role;
 
-    public static MemberProfileResponseDTO of(Member member) {
+    public static MemberProfileResponseDTO from(Member member) {
         String role = member.getMemberRole().name().toLowerCase();
         return new MemberProfileResponseDTO(member.getEmail(), member.getNickname(), role);
     }

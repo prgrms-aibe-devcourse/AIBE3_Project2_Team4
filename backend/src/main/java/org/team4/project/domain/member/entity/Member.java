@@ -28,4 +28,15 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    public void setProvider(String provider) {
+        this.provider = Provider.valueOf(provider);
+    }
+
+    public void setMemberRole(String role) {
+        this.memberRole = MemberRole.valueOf(role.toUpperCase());
+    }
 }

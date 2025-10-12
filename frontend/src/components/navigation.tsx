@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { MessageCircle, Bookmark, LogOut, User, Trophy } from "lucide-react";
 import useLogin from "@/hooks/use-Login";
 import Logo from "@/components/logo";
+import { useRouter } from "next/navigation";
 
 interface NavigationProps {
   newMessageCount?: number;
@@ -19,6 +20,8 @@ export function Navigation({ newMessageCount = 0 }: NavigationProps) {
   const userType = member ? member.role : null;
 
   const [isOpen, setIsOpen] = useState(false);
+
+  const router = useRouter();
 
   return (
     <nav className="bg-background border-border fixed top-0 right-0 left-0 z-50 border-b">
@@ -114,7 +117,14 @@ export function Navigation({ newMessageCount = 0 }: NavigationProps) {
                 </Button>
 
                 {/* 로그아웃 버튼 */}
-                <Button variant="ghost" size="icon" onClick={() => logout()}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={async () => {
+                    await logout(); // 토큰 정리 + 서버 로그아웃
+                    router.replace("/auth/login"); // 로그인 페이지로 이동
+                  }}
+                >
                   <LogOut className="h-5 w-5" />
                 </Button>
               </>
