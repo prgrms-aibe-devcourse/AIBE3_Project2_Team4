@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.dto.ServiceDetailDTO;
 import org.team4.project.domain.service.entity.category.Category;
 import org.team4.project.domain.service.entity.category.Tag;
 import org.team4.project.domain.service.entity.category.TagService;
@@ -56,11 +57,11 @@ public class ServiceService {
     }
 
     //서비스 단건 조회 DTO
-    public ServiceDTO fromFindById(Long id) {
+    public ServiceDetailDTO fromFindById(Long id) {
         ProjectService service = findById(id);
         List<TagService> tagServices = findByService(service);
         Category category = tagServices.getFirst().getTag().getCategory();
-        return new ServiceDTO(service, tagServices, category);
+        return new ServiceDetailDTO(service, tagServices, category);
     }
 
     //서비스 다건 조회

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.dto.ServiceDetailDTO;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
@@ -30,7 +31,7 @@ public class ServiceController {
 
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
-    public ServiceDTO getItem(@PathVariable Long id) {
+    public ServiceDetailDTO getItem(@PathVariable Long id) {
         return serviceService.fromFindById(id);
     }
 

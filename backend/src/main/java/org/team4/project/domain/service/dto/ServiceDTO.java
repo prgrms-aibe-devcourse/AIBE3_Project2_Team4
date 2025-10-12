@@ -1,16 +1,12 @@
 package org.team4.project.domain.service.dto;
 
-import lombok.Getter;
-import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.entity.category.Category;
-import org.team4.project.domain.service.entity.category.Tag;
 import org.team4.project.domain.service.entity.category.TagService;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record ServiceDTO(
         Long id,
