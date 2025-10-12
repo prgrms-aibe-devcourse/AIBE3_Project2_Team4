@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Configuration;
 
 import static io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP;
@@ -26,5 +27,20 @@ public class SpringDocConfig {
                                 .bearerFormat("JWT")
                         )
                 );
+    }
+    @Bean
+    public GroupedOpenApi groupApiV1() {
+        return GroupedOpenApi.builder()
+                .group("apiV1")
+                .pathsToMatch("/api/v1/**")
+                .build();
+    }
+
+    @Bean GroupedOpenApi GroupNone() {
+        return GroupedOpenApi.builder()
+                .group("none-group")
+                .pathsToExclude("/api/**")
+                .pathsToMatch("/**")
+                .build();
     }
 }
