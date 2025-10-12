@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { CreditCard, Shield, Lock, AlertCircle } from "lucide-react";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import { v4 as uuidv4 } from "uuid";
+import { useLoginStore } from "@/store/useLoginStore";
 
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 const customerKey = uuidv4();
@@ -19,6 +20,7 @@ export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [payment, setPayment] = useState(null as any);
   const [error, setError] = useState<string>("");
+  const { member } = useLoginStore();
 
   // Get payment details from URL params
   const amount = searchParams.get("amount") || "500000";
@@ -85,11 +87,8 @@ export default function PaymentPage() {
         orderName: serviceName,
         successUrl: `${window.location.origin}/payment/success?chatId=${chatId}&memo=${encodeURIComponent(memo)}`,
         failUrl: `${window.location.origin}/payment/fail`,
-        // TODO: 실제 사용자 정보로 변경
-        customerEmail: "customer@example.com",
-        customerName: "고객명",
-        customerMobilePhone: "01012345678",
-        // 카드 결제에 필요한 정보
+        customerEmail: member?.email,
+        customerName: member?.nickname,
         card: {
           useEscrow: false,
           flowMode: "DEFAULT", // 통합결제창 여는 옵션
