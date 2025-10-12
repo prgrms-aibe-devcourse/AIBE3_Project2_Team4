@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
 import Logo from "@/components/logo";
 import { validateEmail, validatePassword } from "@/lib/validation/auth";
-import { setAccessToken, authorizedFetch, refreshAccessToken } from "@/lib/api";
+import { setAccessToken, authorizedFetch } from "@/lib/api";
 import { useLoginStore } from "@/store/useLoginStore";
 
 export default function LoginPage() {
