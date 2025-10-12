@@ -28,6 +28,13 @@ export default function PaymentPage() {
   const serviceName = searchParams.get("service") || "웹사이트 디자인 및 개발";
   const chatId = searchParams.get("chatId") || "";
 
+  // Check authentication
+  useEffect(() => {
+    if (!member) {
+      setError("결제를 진행하려면 로그인이 필요합니다.");
+    }
+  }, [member]);
+
   // 토스페이먼츠 위젯 초기화
   useEffect(() => {
     async function fetchPaymentWidgets() {
@@ -245,7 +252,7 @@ export default function PaymentPage() {
 
                     <Button
                       onClick={handlePayment}
-                      disabled={isProcessing}
+                      disabled={isProcessing || !member}
                       className="from-primary hover:from-primary/90 h-14 w-full bg-gradient-to-r to-purple-600 text-lg font-semibold shadow-lg transition-all duration-300 hover:scale-[1.02] hover:to-purple-600/90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isProcessing ? (
@@ -256,7 +263,7 @@ export default function PaymentPage() {
                       ) : (
                         <>
                           <Lock className="mr-2 h-5 w-5" />
-                          결제하기
+                          {!member ? "로그인 필요" : "결제하기"}
                         </>
                       )}
                     </Button>
