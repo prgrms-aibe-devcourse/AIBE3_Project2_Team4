@@ -3,7 +3,6 @@ package org.team4.project.domain.member.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +50,7 @@ public class MemberController {
 
     @PostMapping("/role")
     public ResponseEntity<MemberProfileResponseDTO> setRole(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                            @RequestBody MemberRoleRequestDTO memberRoleRequestDTO) {
+                                                            @Valid @RequestBody MemberRoleRequestDTO memberRoleRequestDTO) {
         MemberProfileResponseDTO profile = memberService.setRole(customUserDetails.getEmail(), memberRoleRequestDTO.getRole());
         return ResponseEntity.ok(profile);
     }
