@@ -37,7 +37,30 @@ import {
 } from "lucide-react";
 import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
+import { authorizedFetch } from "@/lib/api";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+
+interface PaymentHistory {
+  freelancerId: number;
+  serviceId: number;
+  serviceTitle: string;
+  price: number;
+  memo?: string;
+  approvedAt: string;
+  paymentStatus:
+    | "READY"
+    | "IN_PROGRESS"
+    | "WAITING_FOR_DEPOSIT"
+    | "DONE"
+    | "CANCELED"
+    | "PARTIAL_CANCELED"
+    | "ABORTED"
+    | "EXPIRED";
+}
+
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function MyPage() {
   const router = useRouter();
@@ -62,6 +85,10 @@ export default function MyPage() {
   const [experienceCompany, setExperienceCompany] = useState("");
   const [experiencePeriod, setExperiencePeriod] = useState("");
   const [experienceDescription, setExperienceDescription] = useState("");
+
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const [userProfile, setUserProfile] = useState({
     nickname: "김개발자",
@@ -208,44 +235,132 @@ export default function MyPage() {
     },
   ];
 
-  const paymentHistory = [
-    {
-      id: "1",
-      image: "/ecommerce-website-homepage.png",
-      amount: 2000000,
-      memo: "이커머스 웹사이트 구축 프로젝트 최종 결제",
-      date: "2024.03.15",
-      status: "completed",
-    },
-    {
-      id: "2",
-      image: "/data-visualization-dashboard.png",
-      amount: 1200000,
-      memo: "데이터 시각화 대시보드 개발 1차 결제",
-      date: "2024.03.10",
-      status: "completed",
-    },
-    {
-      id: "3",
-      image: "/project-management-dashboard.png",
-      amount: 800000,
-      memo: "API 서버 구축 및 배포",
-      date: "2024.03.05",
-      status: "completed",
-    },
-    {
-      id: "4",
-      image: "/responsive-design.png",
-      amount: 500000,
-      memo: "반응형 웹사이트 리뉴얼",
-      date: "2024.02.28",
-      status: "completed",
-    },
-  ];
+  // const paymentHistory = [
+  //   {
+  //     id: "1",
+  //     image: "/ecommerce-website-homepage.png",
+  //     amount: 2000000,
+  //     memo: "이커머스 웹사이트 구축 프로젝트 최종 결제",
+  //     date: "2024.03.15",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "2",
+  //     image: "/data-visualization-dashboard.png",
+  //     amount: 1200000,
+  //     memo: "데이터 시각화 대시보드 개발 1차 결제",
+  //     date: "2024.03.10",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "3",
+  //     image: "/project-management-dashboard.png",
+  //     amount: 800000,
+  //     memo: "API 서버 구축 및 배포",
+  //     date: "2024.03.05",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "4",
+  //     image: "/responsive-design.png",
+  //     amount: 500000,
+  //     memo: "반응형 웹사이트 리뉴얼",
+  //     date: "2024.02.28",
+  //     status: "completed",
+  //   },
+  // ];
+
+  const fetchPaymentHistory = async () => {
+    if (!isLoggedIn || !member) return;
+
+    setIsPaymentLoading(true);
+    setPaymentError(null);
+
+    try {
+      const response = await authorizedFetch(`${baseUrl}/api/v1/auth/me/payments`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("결제 내역을 불러오는데 실패했습니다.");
+      }
+
+      const data: PaymentHistory[] = await response.json();
+      setPaymentHistory(data);
+    } catch (error) {
+      console.error("결제 내역 조회 오류:", error);
+      setPaymentError(error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.");
+    } finally {
+      setIsPaymentLoading(false);
+    }
+  };
 
   useEffect(() => {
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchPaymentHistory();
+    }
+  }, [isLoggedIn]);
+
+  const getPaymentStatusText = (status: string) => {
+    switch (status) {
+      case "READY":
+        return "결제 준비";
+      case "IN_PROGRESS":
+        return "결제 진행중";
+      case "WAITING_FOR_DEPOSIT":
+        return "입금 대기";
+      case "DONE":
+        return "결제 완료";
+      case "CANCELED":
+        return "결제 취소";
+      case "PARTIAL_CANCELED":
+        return "부분 취소";
+      case "ABORTED":
+        return "결제 중단";
+      case "EXPIRED":
+        return "결제 만료";
+      default:
+        return status;
+    }
+  };
+
+  // 결제 상태 뱃지 색상
+  const getPaymentStatusVariant = (status: string) => {
+    switch (status) {
+      case "DONE":
+        return "bg-green-500 hover:bg-green-600";
+      case "CANCELED":
+      case "PARTIAL_CANCELED":
+      case "ABORTED":
+        return "bg-red-500 hover:bg-red-600";
+      case "READY":
+      case "IN_PROGRESS":
+      case "WAITING_FOR_DEPOSIT":
+        return "bg-yellow-500 hover:bg-yellow-600";
+      case "EXPIRED":
+        return "bg-gray-500 hover:bg-gray-600";
+      default:
+        return "bg-gray-500 hover:bg-gray-600";
+    }
+  };
+
+  // 날짜 포맷 함수
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, "yyyy.MM.dd", { locale: ko });
+    } catch (error) {
+      console.error("날짜 포맷 오류:", error);
+      return dateString;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -904,7 +1019,7 @@ export default function MyPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>내가 등록한 서비스</CardTitle>
-                  <Button onClick={()=> router.push("/services/register")}>
+                  <Button onClick={() => router.push("/services/register")}>
                     <Plus className="mr-2 h-4 w-4" />새 서비스 등록
                   </Button>
                 </CardHeader>
@@ -928,51 +1043,95 @@ export default function MyPage() {
           <TabsContent value="payments">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="h-5 w-5" />
-                  <span>결제 내역</span>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5" />
+                    <span>결제 내역</span>
+                  </div>
+                  <Button
+                    onClick={fetchPaymentHistory}
+                    variant="outline"
+                    size="sm"
+                    disabled={isPaymentLoading}
+                  >
+                    {isPaymentLoading ? "로딩 중..." : "새로고침"}
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {paymentHistory.map((payment) => (
-                    <Card
-                      key={payment.id}
-                      className="overflow-hidden transition-shadow hover:shadow-lg"
-                    >
-                      <div className="bg-muted relative h-48">
-                        <img
-                          src={payment.image || "/placeholder.svg"}
-                          alt="결제 항목"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <CardContent className="space-y-3 p-4">
-                        <div className="flex items-baseline justify-between">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-primary text-2xl font-bold">
-                              {payment.amount.toLocaleString()}
-                            </span>
-                            <span className="text-muted-foreground text-sm">원</span>
-                          </div>
-                          <Badge variant="secondary" className="gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {payment.date}
-                          </Badge>
+                {isPaymentLoading ? (
+                  <div className="flex h-64 items-center justify-center">
+                    <div className="text-center">
+                      <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
+                      <p className="text-muted-foreground">결제 내역을 불러오는 중...</p>
+                    </div>
+                  </div>
+                ) : paymentError ? (
+                  <div className="flex h-64 items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-destructive mb-4">{paymentError}</p>
+                      <Button onClick={fetchPaymentHistory} variant="outline">
+                        다시 시도
+                      </Button>
+                    </div>
+                  </div>
+                ) : paymentHistory.length === 0 ? (
+                  <div className="flex h-64 items-center justify-center">
+                    <div className="text-center">
+                      <CreditCard className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                      <p className="text-muted-foreground">결제 내역이 없습니다.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {paymentHistory.map((payment, index) => (
+                      <Card
+                        key={`${payment.serviceId}-${index}`}
+                        className="overflow-hidden transition-shadow hover:shadow-lg"
+                      >
+                        <div className="bg-muted relative flex h-48 items-center justify-center">
+                          <FileText className="text-muted-foreground h-16 w-16" />
                         </div>
-                        {payment.memo && (
-                          <div className="bg-muted/50 rounded-lg border p-3">
-                            <p className="text-muted-foreground mb-1 text-sm">메모</p>
-                            <p className="text-sm leading-relaxed">{payment.memo}</p>
+                        <CardContent className="space-y-3 p-4">
+                          <h3 className="line-clamp-2 text-lg font-bold">{payment.serviceTitle}</h3>
+
+                          <div className="flex items-baseline justify-between">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-primary text-2xl font-bold">
+                                {payment.price.toLocaleString()}
+                              </span>
+                              <span className="text-muted-foreground text-sm">원</span>
+                            </div>
+                            <Badge variant="secondary" className="gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(payment.approvedAt)}
+                            </Badge>
                           </div>
-                        )}
-                        <Badge className="w-full justify-center bg-green-500 hover:bg-green-600">
-                          결제 완료
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+
+                          <div className="bg-muted/50 rounded-lg border p-3">
+                            <div className="mb-1 flex items-center gap-2">
+                              <FileText className="text-primary h-3 w-3" />
+                              <p className="text-muted-foreground text-xs font-semibold">메모</p>
+                            </div>
+                            {payment.memo ? (
+                              <p className="text-sm leading-relaxed">{payment.memo}</p>
+                            ) : (
+                              <p className="text-muted-foreground/60 text-xs italic">
+                                메모한 내용이 없습니다
+                              </p>
+                            )}
+                          </div>
+
+                          <Badge
+                            className={`w-full justify-center ${getPaymentStatusVariant(payment.paymentStatus)}`}
+                          >
+                            {getPaymentStatusText(payment.paymentStatus)}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
