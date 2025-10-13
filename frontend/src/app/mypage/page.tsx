@@ -235,41 +235,6 @@ export default function MyPage() {
     },
   ];
 
-  // const paymentHistory = [
-  //   {
-  //     id: "1",
-  //     image: "/ecommerce-website-homepage.png",
-  //     amount: 2000000,
-  //     memo: "이커머스 웹사이트 구축 프로젝트 최종 결제",
-  //     date: "2024.03.15",
-  //     status: "completed",
-  //   },
-  //   {
-  //     id: "2",
-  //     image: "/data-visualization-dashboard.png",
-  //     amount: 1200000,
-  //     memo: "데이터 시각화 대시보드 개발 1차 결제",
-  //     date: "2024.03.10",
-  //     status: "completed",
-  //   },
-  //   {
-  //     id: "3",
-  //     image: "/project-management-dashboard.png",
-  //     amount: 800000,
-  //     memo: "API 서버 구축 및 배포",
-  //     date: "2024.03.05",
-  //     status: "completed",
-  //   },
-  //   {
-  //     id: "4",
-  //     image: "/responsive-design.png",
-  //     amount: 500000,
-  //     memo: "반응형 웹사이트 리뉴얼",
-  //     date: "2024.02.28",
-  //     status: "completed",
-  //   },
-  // ];
-
   const fetchPaymentHistory = async () => {
     if (!isLoggedIn || !member) return;
 
