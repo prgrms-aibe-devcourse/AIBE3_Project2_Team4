@@ -57,6 +57,7 @@ public class MemberController {
                                                             @Valid @RequestBody MemberRoleRequestDTO memberRoleRequestDTO) {
         MemberProfileResponseDTO profile = memberService.setRole(customUserDetails.getEmail(), memberRoleRequestDTO.getRole());
         return ResponseEntity.ok(profile);
+    }
       
     @GetMapping("/me/payments")
     @SecurityRequirement(name = "bearerAuth")
