@@ -4,12 +4,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.global.jpa.entity.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -23,6 +28,14 @@ public class Payment extends BaseEntity {
 
     @Id
     private String paymentKey;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_service_id")
+    private ProjectService projectService;
 
     @Column(nullable = false)
     private String orderId;
@@ -41,6 +54,5 @@ public class Payment extends BaseEntity {
     private PaymentMethod paymentMethod;
 
     private LocalDateTime approvedAt;
-
-    //TODO : 사용자, 서비스 외래키 연결
+    private String memo;
 }
