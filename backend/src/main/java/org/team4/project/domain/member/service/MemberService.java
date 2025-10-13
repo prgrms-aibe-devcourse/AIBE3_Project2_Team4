@@ -16,8 +16,8 @@ import org.team4.project.domain.member.exception.RegisterException;
 import org.team4.project.domain.member.repository.MemberQueryRepository;
 import org.team4.project.domain.member.repository.MemberRepository;
 
-import java.util.Random;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -80,15 +80,15 @@ public class MemberService {
     }
 
     private String generateRandomNickname(String registrationId) {
-        Random random = new Random();
         String nickname;
 
         do {
-            StringBuilder sb = new StringBuilder(registrationId);
-            for (int i = 0; i < 10; i++) {
-                sb.append(random.nextInt(10));
-            }
-            nickname = sb.toString();
+            String uuidPart = UUID.randomUUID()
+                    .toString()
+                    .replace("-", "")
+                    .substring(0, 10);
+
+            nickname = registrationId + uuidPart;
         } while (memberRepository.existsByNickname(nickname));
 
         return nickname;
