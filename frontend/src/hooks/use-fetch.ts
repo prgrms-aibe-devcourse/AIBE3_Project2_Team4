@@ -1,6 +1,8 @@
 import { authorizedFetch } from "@/lib/api";
 import { useEffect, useState } from "react";
 
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function useAuthFetchV1<DTO, OUT>(
   url: string,
   errMsg: string,
@@ -10,7 +12,7 @@ export default function useAuthFetchV1<DTO, OUT>(
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    authorizedFetch("http://localhost:8080/api/v1" + url)
+    authorizedFetch(`${baseUrl}${url}`)
       .then((res) => {
         if (res.ok) return res.json() as DTO;
         else throw new Error(errMsg);

@@ -1,18 +1,15 @@
 export interface ServiceCardDto {
-  id: number;
-  freelancer: {
-    id: number;
-    nickname: string;
-    thumbnail: string;
-    email: string;
-  };
+  id: string;
+  thumbnail: string;
   title: string;
-  content: string;
   price: number;
+  rating: number;
+  reviewCount: number;
+  freelancerName: string;
 }
 
 export interface ServiceCardType {
-  id: number;
+  id: string;
   thumbnail: string;
   title: string;
   price: number;

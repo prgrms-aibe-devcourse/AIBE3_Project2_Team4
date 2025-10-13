@@ -11,12 +11,12 @@ const convert = (dto: Page<ServiceCardDto>) => ({
   ...dto,
   content: dto.content.map((content) => ({
     id: content.id,
-    thumbnail: "",
+    thumbnail: content.thumbnail,
     title: content.title,
     price: content.price,
-    rating: 2,
-    reviewCount: 3,
-    freelancerName: content.freelancer.nickname,
+    rating: content.rating,
+    reviewCount: content.reviewCount,
+    freelancerName: content.freelancerName,
   })),
 });
 
@@ -24,7 +24,7 @@ export default function MyServiceTab() {
   const { data: myServices, isLoading } = useAuthFetchV1<
     Page<ServiceCardDto>,
     Page<ServiceCardType>
-  >("/services/me", "내 서비스 불러오기에서 오류 발생", convert);
+  >("/api/v1/service/me", "내 서비스 불러오기에서 오류 발생", convert);
 
   const router = useRouter();
 
