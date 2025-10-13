@@ -1,11 +1,15 @@
 package org.team4.project.domain.payment.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.repository.MemberRepository;
+import org.team4.project.domain.payment.dto.PaymentConfirmDTO;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
@@ -33,18 +37,23 @@ public class PaymentService {
 
     private final PaymentClient paymentClient;
     private final RedisRepository redisRepository;
+    private final MemberRepository memberRepository;
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+    public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO, String email) {
         String orderId = paymentConfirmRequestDTO.orderId();
         Integer amount = paymentConfirmRequestDTO.amount();
+        String memo = paymentConfirmRequestDTO.memo();
 
         verifyTempPayment(orderId, amount);
 
-        JsonNode response = paymentClient.confirmPayment(paymentConfirmRequestDTO);
+        PaymentConfirmDTO paymentConfirmDTO = paymentConfirmRequestDTO.convert();
+        JsonNode response = paymentClient.confirmPayment(paymentConfirmDTO);
 
-        paymentRepository.save(convertToEntity(response));
+        //TODO : 서비스 ID 전달받아 Payment 엔티티에 서비스 저장
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다. email : " + email));
+        paymentRepository.save(convertToEntity(response, member, memo));
         redisRepository.deleteValue(generateKey(orderId));
 
         String receiptUrl = response.get("receipt").get("url").asText(null);
@@ -70,7 +79,7 @@ public class PaymentService {
         }
     }
 
-    private Payment convertToEntity(JsonNode response) {
+    private Payment convertToEntity(JsonNode response, Member member, String memo) {
         String orderId = response.get("orderId").asText();
         String paymentKey = response.get("paymentKey").asText();
 
@@ -84,12 +93,14 @@ public class PaymentService {
 
         return Payment.builder()
                       .paymentKey(paymentKey)
+                      .member(member)
                       .orderId(orderId)
                       .paymentMethod(paymentMethod)
                       .paymentStatus(paymentStatus)
                       .requestedAt(requestedAt)
                       .approvedAt(approvedAt)
                       .totalAmount(totalAmount)
+                      .memo(memo)
                       .build();
     }
 

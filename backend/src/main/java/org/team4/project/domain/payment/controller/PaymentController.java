@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,16 +19,18 @@ import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
 import org.team4.project.domain.payment.service.PaymentService;
 import org.team4.project.global.exception.ErrorResponse;
+import org.team4.project.global.security.CustomUserDetails;
 
-@Tag(name = "Payment API", description = "결제 기능 관련 API")
 @RestController
-@RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/payments")
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Payment API", description = "결제 기능 관련 API")
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    //TODO : 사용자 ID와 서비스 ID를 전달받아 결제 완료 후 DB 저장
+    //TODO : 서비스 ID 전달받아 결제 완료 후 DB 저장
     @Operation(
             summary = "결제 승인 요청 API",
             description = "실제 토스 결제 승인 API를 요청합니다.",
@@ -36,8 +40,9 @@ public class PaymentController {
             }
     )
     @PostMapping("/confirm")
-    public ResponseEntity<PaymentResponseDTO> confirmPayment(@Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
-        PaymentResponseDTO response = paymentService.confirmPayment(paymentConfirmRequestDTO);
+    public ResponseEntity<PaymentResponseDTO> confirmPayment(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                             @Valid @RequestBody PaymentConfirmRequestDTO paymentConfirmRequestDTO) {
+        PaymentResponseDTO response = paymentService.confirmPayment(paymentConfirmRequestDTO, customUserDetails.getEmail());
         return ResponseEntity.ok(response);
     }
 
