@@ -39,7 +39,7 @@ public class ProfileService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 회원의 프로필을 찾을 수 없습니다. id: " + id));
 
         if (!(profile instanceof FreelancerProfile)) {
-            throw new EntityNotFoundException("해당 프로필은 클라이언트 프로필이 아닙니다. id: " + id);
+            throw new EntityNotFoundException("해당 프로필은 프리랜서 프로필이 아닙니다. id: " + id);
         }
         return FreelancerProfileResponse.from((FreelancerProfile) profile);
     }
