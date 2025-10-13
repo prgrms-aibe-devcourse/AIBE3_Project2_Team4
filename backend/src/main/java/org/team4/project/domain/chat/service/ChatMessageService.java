@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.team4.project.domain.chat.entity.ChatMessage;
 import org.team4.project.domain.chat.entity.ChatRoom;
 import org.team4.project.domain.chat.repository.ChatMessageRepository;
+import org.team4.project.domain.member.entity.Member;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,10 +15,10 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
 
-    public ChatMessage saveMessage(ChatRoom room, String sender, String content) {
+    public ChatMessage saveMessage(ChatRoom room, Member member, String content) {
         ChatMessage message = new ChatMessage();
         message.setRoom(room);
-        message.setSender(sender);
+        message.setMember(member);
         message.setContent(content);
         return chatMessageRepository.save(message);
     }

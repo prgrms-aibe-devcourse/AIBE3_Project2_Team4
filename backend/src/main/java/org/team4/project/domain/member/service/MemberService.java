@@ -8,13 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.entity.MemberRole;
 import org.team4.project.domain.member.entity.Provider;
 import org.team4.project.domain.member.exception.RegisterException;
+import org.team4.project.domain.member.repository.MemberQueryRepository;
 import org.team4.project.domain.member.repository.MemberRepository;
 
 import java.util.Random;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberQueryRepository memberQueryRepository;
 
     @Transactional
     public void signUp(MemberSignUpRequestDTO memberSignUpRequestDTO) {
@@ -88,5 +92,9 @@ public class MemberService {
         } while (memberRepository.existsByNickname(nickname));
 
         return nickname;
+    }
+
+    public List<PaymentHistoryResponseDTO> getPaymentHistories(String email) {
+        return memberQueryRepository.getPaymentHistories(email);
     }
 }
