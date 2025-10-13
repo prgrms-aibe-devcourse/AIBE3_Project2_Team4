@@ -32,8 +32,8 @@ public class S3UploadService {
         }
 
         String originalFileName = multipartFile.getOriginalFilename();
-        String fileExtension = getFileExtension(originalFileName);
-        String s3FileName = directoryPath + UUID.randomUUID() + "_" + originalFileName; // S3에 저장될 파일명 (폴더 경로 + UUID_원본파일명)
+        String fileExtension = StringUtils.getFilenameExtension(originalFileName);
+        String s3FileName = directoryPath + UUID.randomUUID() + "." + fileExtension; // S3에 저장될 파일명 (폴더 경로 + UUID + .확장자)
 
         validateFile(fileExtension, multipartFile.getSize());
 
@@ -57,19 +57,14 @@ public class S3UploadService {
         s3Template.deleteObject(bucket, s3FileName);
     }
 
-    // 확장자 추출
-    public String getFileExtension(String fileName) {
-        try {
-            return fileName.substring(fileName.lastIndexOf("."));
-        } catch (StringIndexOutOfBoundsException e) {
-            throw new FileUploadException("파일 확장자가 올바르지 않습니다.");
-        }
-    }
-
     // 파일 유효성 검사
     private void validateFile(String fileExtension, long fileSize) {
+        if (!StringUtils.hasText(fileExtension)) {
+            throw new FileUploadException("파일 확장자가 없는 파일은 업로드할 수 없습니다.");
+        }
+
         // 허용된 확장자 목록 (임시)
-        List<String> allowedExtensions = List.of(".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx");
+        List<String> allowedExtensions = List.of("jpg", "jpeg", "png", "gif", "pdf", "doc", "docx");
         if (!allowedExtensions.contains(fileExtension.toLowerCase())) {
             throw new FileUploadException("허용되지 않는 파일 확장자입니다: " + fileExtension);
         }

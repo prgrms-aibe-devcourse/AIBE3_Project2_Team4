@@ -3,6 +3,7 @@ package org.team4.project.domain.file.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
+import org.team4.project.global.jpa.entity.BaseEntity;
 
 @Entity
 @Getter
@@ -11,13 +12,13 @@ import org.hibernate.annotations.DynamicUpdate;
 @Builder
 @DynamicUpdate // 변경된 필드만 업데이트 쿼리에 포함
 @Table(name = "uploaded_file")
-public class File {
+public class File extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String originalFileName; // 원본 파일명
-    private String s3FileName;       // S3 파일명 (폴더 경로 + UUID_원본파일명)
+    private String s3FileName;       // S3 파일명 (폴더 경로 + UUID + .확장자)
     private String s3Url;            // S3 파일의 URL
     private String fileExtension;    // 파일 확장자
     private Long fileSize;           // 파일 크기 (bytes)

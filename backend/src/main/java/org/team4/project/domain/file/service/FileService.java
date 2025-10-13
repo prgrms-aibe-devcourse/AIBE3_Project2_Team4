@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.team4.project.domain.file.dto.FileResponse;
 import org.team4.project.domain.file.entity.File;
@@ -46,7 +47,7 @@ public class FileService {
                 .originalFileName(multipartFile.getOriginalFilename())
                 .s3FileName(s3FileName)
                 .s3Url(s3Url)
-                .fileExtension(s3UploadService.getFileExtension(multipartFile.getOriginalFilename()))
+                .fileExtension(StringUtils.getFilenameExtension(multipartFile.getOriginalFilename()))
                 .fileSize(multipartFile.getSize())
                 .fileCategory(fileCategory)
                 .referenceId(referenceId)
