@@ -42,6 +42,8 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [nicknameChecked, setNicknameChecked] = useState(false);
+  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const validateAll = (state: typeof formData): FieldErrors => ({
@@ -73,6 +75,12 @@ export default function SignupPage() {
     setFieldErrors(latestErrors);
     const latestValid = Object.values(latestErrors).every((v) => !v);
     if (!latestValid) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (!nicknameChecked || nicknameAvailable === false) {
+      setError("닉네임 중복 확인이 필요합니다.");
       setIsLoading(false);
       return;
     }
@@ -129,6 +137,27 @@ export default function SignupPage() {
     });
   };
 
+  const checkNickname = async () => {
+    if (!formData.nickname.trim()) return;
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/api/v1/auth/check-nickname?nickname=${formData.nickname.trim()}`,
+      );
+      const available = await response.json(); // true / false 반환
+      setNicknameAvailable(available);
+      setNicknameChecked(true);
+
+      if (available) {
+        setError("");
+      }
+    } catch (err) {
+      console.error(err);
+      setNicknameAvailable(false);
+      setNicknameChecked(true);
+    }
+  };
+
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-6 p-4">
       <Logo />
@@ -182,16 +211,35 @@ export default function SignupPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="nickname">닉네임</Label>
-                <Input
-                  id="nickname"
-                  type="text"
-                  placeholder="닉네임을 입력하세요"
-                  value={formData.nickname}
-                  onChange={(e) => handleInputChange("nickname", e.target.value)}
-                  className="bg-input border-border"
-                />
+                <div className="flex">
+                  <Input
+                    id="nickname"
+                    type="text"
+                    placeholder="닉네임을 입력하세요"
+                    value={formData.nickname}
+                    onChange={(e) => {
+                      handleInputChange("nickname", e.target.value);
+                      // 입력이 바뀌면 중복 확인 초기화
+                      setNicknameChecked(false);
+                      setNicknameAvailable(null);
+                    }}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button type="button" onClick={checkNickname} className="ml-2">
+                    중복 확인
+                  </Button>
+                </div>
                 {fieldErrors.nickname && (
                   <p className="text-destructive mt-1 text-sm">{fieldErrors.nickname}</p>
+                )}
+                {nicknameChecked && nicknameAvailable !== null && (
+                  <p
+                    className={`mt-1 text-sm ${nicknameAvailable ? "text-green-500" : "text-red-500"}`}
+                  >
+                    {nicknameAvailable
+                      ? "사용 가능한 닉네임입니다."
+                      : "이미 사용중인 닉네임입니다."}
+                  </p>
                 )}
               </div>
 

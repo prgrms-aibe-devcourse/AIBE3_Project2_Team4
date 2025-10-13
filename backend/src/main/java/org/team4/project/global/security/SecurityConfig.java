@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_RESOURCES).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
+                        .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register", "api/v1/auth/check-nickname").permitAll()
                         .anyRequest().authenticated()
                 )
 

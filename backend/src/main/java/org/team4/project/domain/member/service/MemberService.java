@@ -97,4 +97,8 @@ public class MemberService {
     public List<PaymentHistoryResponseDTO> getPaymentHistories(String email) {
         return memberQueryRepository.getPaymentHistories(email);
     }
+
+    public Boolean checkNickname(String nickname) {
+        return !memberRepository.existsByNickname(nickname);
+    }
 }

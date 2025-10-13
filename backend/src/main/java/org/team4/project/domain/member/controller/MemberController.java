@@ -65,4 +65,9 @@ public class MemberController {
         List<PaymentHistoryResponseDTO> paymentHistories = memberService.getPaymentHistories(customUserDetails.getEmail());
         return ResponseEntity.ok(paymentHistories);
     }
+
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
+        return ResponseEntity.ok(memberService.checkNickname(nickname));
+    }
 }
