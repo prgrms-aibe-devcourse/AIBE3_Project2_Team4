@@ -10,11 +10,14 @@ import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
 import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.entity.MemberRole;
+import org.team4.project.domain.member.entity.Provider;
 import org.team4.project.domain.member.exception.RegisterException;
 import org.team4.project.domain.member.repository.MemberQueryRepository;
 import org.team4.project.domain.member.repository.MemberRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +49,49 @@ public class MemberService {
 
     public MemberProfileResponseDTO getProfile(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
-        return MemberProfileResponseDTO.of(member);
+        return MemberProfileResponseDTO.from(member);
+    }
+
+    @Transactional
+    public Member oauthRegister(String email, String registrationId) {
+        Member member;
+        if(memberRepository.existsByEmail(email)) {
+            member = memberRepository.findByEmail(email).get();
+            member.setProvider(registrationId);
+        } else {
+            member = Member.builder()
+                    .email(email)
+                    .password(null)
+                    .memberRole(MemberRole.UNASSIGNED)
+                    .nickname(generateRandomNickname(registrationId))
+                    .provider(Provider.valueOf(registrationId))
+                    .build();
+
+            memberRepository.save(member);
+        }
+        return member;
+    }
+
+    @Transactional
+    public MemberProfileResponseDTO setRole(String email, String role) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
+        member.setMemberRole(role);
+        return MemberProfileResponseDTO.from(member);
+    }
+
+    private String generateRandomNickname(String registrationId) {
+        String nickname;
+
+        do {
+            String uuidPart = UUID.randomUUID()
+                    .toString()
+                    .replace("-", "")
+                    .substring(0, 10);
+
+            nickname = registrationId + uuidPart;
+        } while (memberRepository.existsByNickname(nickname));
+
+        return nickname;
     }
 
     public List<PaymentHistoryResponseDTO> getPaymentHistories(String email) {

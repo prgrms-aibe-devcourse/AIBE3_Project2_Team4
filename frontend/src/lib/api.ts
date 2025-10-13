@@ -21,8 +21,9 @@ function extractBearerFromAuthHeader(value: string | null): string | null {
 }
 
 export async function refreshAccessToken(): Promise<boolean> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   try {
-    const resp = await fetch("http://localhost:8080/api/v1/auth/token/refresh", {
+    const resp = await fetch(`${baseUrl}/api/v1/auth/token/refresh`, {
       method: "POST",
       credentials: "include",
     });
@@ -70,8 +71,9 @@ export async function authorizedFetch(input: RequestInfo | URL, init: RequestIni
 }
 
 export async function backendLogout(): Promise<void> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   try {
-    await fetch("http://localhost:8080/api/v1/auth/token/logout", {
+    await fetch(`${baseUrl}/api/v1/auth/token/logout`, {
       method: "POST",
       credentials: "include",
     });

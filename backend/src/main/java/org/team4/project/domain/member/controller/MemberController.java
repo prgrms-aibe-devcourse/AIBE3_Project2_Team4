@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
+import org.team4.project.domain.member.dto.MemberRoleRequestDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
 import org.team4.project.domain.member.service.AuthService;
@@ -51,6 +52,13 @@ public class MemberController {
         return ResponseEntity.ok(profile);
     }
 
+    @PostMapping("/role")
+    public ResponseEntity<MemberProfileResponseDTO> setRole(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                            @Valid @RequestBody MemberRoleRequestDTO memberRoleRequestDTO) {
+        MemberProfileResponseDTO profile = memberService.setRole(customUserDetails.getEmail(), memberRoleRequestDTO.getRole());
+        return ResponseEntity.ok(profile);
+    }
+      
     @GetMapping("/me/payments")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<PaymentHistoryResponseDTO>> getPaymentHistories(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
