@@ -80,7 +80,12 @@ export default function LoginPage() {
       const meResp = await authorizedFetch(`${baseUrl}/api/v1/auth/me`);
       if (!meResp.ok) throw new Error("프로필 조회 중 오류가 발생했습니다.");
       const me = await meResp.json();
-      setMember({ email: me.email, nickname: me.nickname, role: me.role });
+      setMember({
+        email: me.email,
+        nickname: me.nickname,
+        profileImageUrl: me.profileImageUrl,
+        role: me.role,
+      });
       router.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인 중 오류가 발생했습니다.");

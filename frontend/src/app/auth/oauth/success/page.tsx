@@ -19,7 +19,12 @@ export default function OAuthSuccessPage() {
         if (!res.ok) throw new Error("프로필 조회 실패");
         const me = await res.json();
 
-        setMember({ email: me.email, nickname: me.nickname, role: me.role });
+        setMember({
+          email: me.email,
+          nickname: me.nickname,
+          profileImageUrl: me.profileImageUrl,
+          role: me.role,
+        });
 
         if (me.role === "unassigned") {
           router.replace("/auth/select-role");

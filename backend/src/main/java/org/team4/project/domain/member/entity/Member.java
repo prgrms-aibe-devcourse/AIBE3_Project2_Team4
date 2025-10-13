@@ -26,6 +26,8 @@ public class Member extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String nickname;
 
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
 
