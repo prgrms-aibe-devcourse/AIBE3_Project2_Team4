@@ -25,6 +25,7 @@ public class MemberQueryRepository {
                                    projectService.id,
                                    projectService.title,
                                    payment.totalAmount,
+                                   payment.memo,
                                    payment.approvedAt,
                                    payment.paymentStatus
                            ))

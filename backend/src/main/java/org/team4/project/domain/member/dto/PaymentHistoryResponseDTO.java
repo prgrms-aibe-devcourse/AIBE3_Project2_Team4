@@ -9,6 +9,7 @@ public record PaymentHistoryResponseDTO(
         Long serviceId,
         String serviceTitle,
         Integer price,
+        String memo,
         LocalDateTime approvedAt,
         PaymentStatus paymentStatus) {
 }
