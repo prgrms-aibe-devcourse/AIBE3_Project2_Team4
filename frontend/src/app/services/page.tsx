@@ -32,41 +32,47 @@ function ServicesPageContent() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   type ServiceDTO = components["schemas"]["ServiceDTO"];
   const [allServices, setAllServices] = useState<ServiceDTO[]>([]);
   const [filteredServices, setFilteredServices] = useState<ServiceDTO[]>([]);
 
   const itemsPerPage = 9;
 
+  const fetchServices = async () => {
+    let url = `${API_BASE_URL}/api/v1/service?page=${currentPage - 1}&size=${itemsPerPage}`;
+
+    // 카테고리만 선택
+    if (selectedCategory && selectedTags.length === 0) {
+      url = `${API_BASE_URL}/api/v1/service/category?page=${currentPage - 1}&size=${itemsPerPage}&category=${selectedCategory}`;
+    }
+
+    // 태그 선택
+    if (selectedTags.length > 0) {
+      const tagQuery = selectedTags.map((tag) => `&tags=${encodeURIComponent(tag)}`).join("");
+      url = `${API_BASE_URL}/api/v1/service/tags?page=${currentPage - 1}&size=${itemsPerPage}${tagQuery}`;
+    }
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("서비스 목록 불러오기 실패");
+      const data = await res.json();
+      setAllServices(data.content);
+      setFilteredServices(data.content);
+      setTotalElements(data.totalElements);
+      setTotalPages(data.totalPages);
+
+      console.log(data.content);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // 서비스 목록 가져오기
   useEffect(() => {
-    const fetchServices = async () => {
-      let url = `${API_BASE_URL}/api/v1/service?page=0&size=10`;
-
-      // 카테고리만 선택
-      if (selectedCategory && selectedTags.length === 0) {
-        url = `${API_BASE_URL}/api/v1/service/category?page=0&size=10&category=${selectedCategory}`;
-      }
-
-      // 태그 선택
-      if (selectedTags.length > 0) {
-        const tagQuery = selectedTags.map((tag) => `&tags=${encodeURIComponent(tag)}`).join("");
-        url = `${API_BASE_URL}/api/v1/service/tags?page=0&size=10${tagQuery}`;
-      }
-
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("서비스 목록 불러오기 실패");
-        const data = await res.json();
-        setAllServices(data);
-        setFilteredServices(data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     fetchServices();
-  }, [selectedCategory, selectedTags]);
+  }, [currentPage, selectedCategory, selectedTags]);
 
   // 필터링 및 정렬 로직
   useEffect(() => {
@@ -105,7 +111,6 @@ function ServicesPageContent() {
     }
 
     setFilteredServices(filtered);
-    setCurrentPage(1); // 필터 변경 시 첫 페이지로 이동
   }, [searchQuery, selectedCategory, selectedTags, sortBy, allServices]);
 
   const handleCategorySelect = (categoryId: string | null) => {
@@ -150,9 +155,8 @@ function ServicesPageContent() {
     : [];
 
   // 페이지네이션
-  const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentServices = filteredServices.slice(startIndex, startIndex + itemsPerPage);
+  const currentServices = filteredServices;
 
   return (
     <div className="bg-background min-h-screen">
@@ -236,8 +240,8 @@ function ServicesPageContent() {
               <div className="flex items-center gap-2">
                 <Filter className="text-muted-foreground h-5 w-5" />
                 <span className="text-lg font-medium">
-                  총 <span className="text-primary font-bold">{filteredServices.length}</span>개의
-                  서비스
+                  총 <span className="text-primary font-bold">{totalElements}</span>
+                  개의 서비스
                 </span>
               </div>
 

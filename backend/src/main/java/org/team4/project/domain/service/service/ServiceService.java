@@ -1,9 +1,8 @@
 package org.team4.project.domain.service.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
@@ -28,12 +27,14 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final TagServiceRepository tagServiceRepository;
     private final TagRepository tagRepository;
+    private final ServiceReviewRepository serviceReviewRepository;
 
     //서비스 개수 조회
     public Integer count() {
         return (int) serviceRepository.count();
     }
 
+    //CREATE------------------------------------------------------------------
     // 서비스 생성
     public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
         ProjectService service =  serviceRepository.save(
@@ -49,6 +50,7 @@ public class ServiceService {
         });
     }
 
+    //READ------------------------------------------------------------------
     //서비스 단건 조회 엔티티
     public ProjectService findById(Long id) {
         return serviceRepository
@@ -65,44 +67,36 @@ public class ServiceService {
     }
 
     //서비스 다건 조회
-    public List<ServiceDTO> getServices(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        return serviceRepository.findAllWithFreelancer(pageable).stream()
+    public Page<ServiceDTO> getServices(Pageable pageable) {
+        return serviceRepository.findAll(pageable)
                 .map(service -> {
                     List<TagService> tagServices = findByService(service);
                     Category category = tagServices.getFirst().getTag().getCategory();
                     return new ServiceDTO(service, tagServices, category);
-                })
-                .toList();
+                });
     }
 
     //서비스 다건 조회 (카테고리)
-    public List<ServiceDTO> getServicesByCategory(int page, int size, CategoryType category) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        return tagServiceRepository.findByCategory(category, pageable).stream()
+    public Page<ServiceDTO> getServicesByCategory(Pageable pageable, CategoryType category) {
+        return tagServiceRepository.findByCategory(category,pageable)
                 .map(e -> {
                     List<TagService> tagServices = findByService(e.getService());
                     Category c = tagServices.getFirst().getTag().getCategory();
                     return new ServiceDTO(e.getService(), tagServices, c);
-                })
-                .toList();
+                });
     }
 
     //서비스 다건 조회 (태그)
-    public List<ServiceDTO> getServicesByTags(int page, int size, List<TagType> tags) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        return tagServiceRepository.findByTags(tags, pageable).stream()
+    public Page<ServiceDTO> getServicesByTags(Pageable pageable, List<TagType> tags) {
+        return tagServiceRepository.findByTags(tags, pageable)
                 .map(e -> {
                     List<TagService> tagServices = findByService(e.getService());
                     Category category = tagServices.getFirst().getTag().getCategory();
                     return new ServiceDTO(e.getService(), tagServices, category);
-                })
-                .toList();
+                });
     }
 
+    //UPDATE------------------------------------------------------------------
     //서비스 수정
     public void updateService(Long id, ServiceCreateRqBody serviceCreateRqBody) {
         ProjectService existingService = serviceRepository.findById(id)
@@ -117,6 +111,7 @@ public class ServiceService {
         serviceRepository.save(existingService);
     }
 
+    //DELETE------------------------------------------------------------------
     //서비스 삭제
     public void deleteService(Long id) {
         if (!serviceRepository.existsById(id)) {
