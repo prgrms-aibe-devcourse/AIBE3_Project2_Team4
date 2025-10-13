@@ -13,7 +13,7 @@ public record ServiceDTO(
         String thumbnail,
         String title,
         Integer price,
-        Integer rating,
+        Float rating,
         Integer reviewCount,
         String freelancerName,
         CategoryType category,
@@ -21,14 +21,14 @@ public record ServiceDTO(
         String content,
         String createdAt
 ) {
-    public ServiceDTO(ProjectService service, List<TagService> tagServices, Category category) {
+    public ServiceDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
         this(
                 service.getId(),
                 "/-------.jpg",
                 service.getTitle(),
                 service.getPrice(),
-                1, // rating
-                1, // reviewCount
+                rating, // rating
+                reviewCount, // reviewCount
                 service.getFreelancer().getNickname(),
                 category.getName(),
                 tagServices.stream()
@@ -38,7 +38,7 @@ public record ServiceDTO(
                 service.getCreatedAt().toString()
         );
     }
-    public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category) {
-        return new ServiceDTO(service, tagServices, category);
+    public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
+        return new ServiceDTO(service, tagServices, category, reviewCount, rating);
     }
 }
