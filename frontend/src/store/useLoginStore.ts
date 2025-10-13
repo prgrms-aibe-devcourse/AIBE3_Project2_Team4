@@ -4,7 +4,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
 interface Member {
   email: string;
   nickname: string;
-  role: "freelancer" | "client" | "admin";
+  profileImageUrl: string | null;
+  role: "freelancer" | "client" | "admin" | "unassigned";
 }
 
 interface LoginState {
