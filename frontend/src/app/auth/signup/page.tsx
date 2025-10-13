@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff, User, Building } from "lucide-react";
 import Logo from "@/components/logo";
-import EmailVerification from "@/components/email-verification";
+import EmailVerification from "./EmailVerification";
 import {
   Dialog,
   DialogContent,
