@@ -36,7 +36,7 @@ spring:
       client:
         registration:
           kakao:
-            client-id: 54dc11f82cfb28f2d94c17979d55bbd1
+            client-id: ${KAKAO__CLIENT_ID}
             redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
             scope:
               - account_email
