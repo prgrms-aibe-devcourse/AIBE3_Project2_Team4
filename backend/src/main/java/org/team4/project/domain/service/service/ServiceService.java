@@ -2,10 +2,7 @@ package org.team4.project.domain.service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
@@ -30,7 +27,7 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final TagServiceRepository tagServiceRepository;
     private final TagRepository tagRepository;
-    private final ServiceReviewRepository serviceReviewRepository;
+    // private final ServiceReviewRepository serviceReviewRepository; // 누락 상태인 것 같아서 잠시 주석
 
     //서비스 개수 조회
     public Integer count() {
@@ -134,6 +131,7 @@ public class ServiceService {
 
     // email 기반으로 서비스 목록 찾기
     public Page<ServiceDTO> getServicesByEmail(String username, Pageable pageable) {
-        return serviceRepository.findAllByFreelancer_Email(username, pageable).map(ServiceDTO::from);
+
+        return serviceRepository.findAllByFreelancer_Email(username, pageable).map(ServiceDTO::fromCardOnly);
     }
 }

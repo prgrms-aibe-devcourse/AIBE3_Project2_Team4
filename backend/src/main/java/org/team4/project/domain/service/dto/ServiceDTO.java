@@ -38,7 +38,28 @@ public record ServiceDTO(
                 service.getCreatedAt().toString()
         );
     }
+
+    public ServiceDTO(ProjectService service) {
+        this(
+                service.getId(),
+                "/-------.jpg",
+                service.getTitle(),
+                service.getPrice(),
+                1, // rating
+                1, // reviewCount
+                service.getFreelancer().getNickname(),
+                null,
+                null,
+                service.getContent(),
+                service.getCreatedAt().toString()
+        );
+    }
+
     public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category) {
         return new ServiceDTO(service, tagServices, category);
+    }
+
+    public static ServiceDTO fromCardOnly(ProjectService service) {
+        return new ServiceDTO(service);
     }
 }
