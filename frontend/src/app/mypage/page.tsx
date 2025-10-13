@@ -43,6 +43,7 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
 interface PaymentHistory {
+  paymentKey: string;
   freelancerId: number;
   serviceId: number;
   serviceTitle: string;
@@ -89,6 +90,10 @@ export default function MyPage() {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  const [isEditingMemo, setIsEditingMemo] = useState<number | null>(null);
+  const [editMemoText, setEditMemoText] = useState("");
+  const MEMO_MAX_LENGTH = 200;
 
   const [userProfile, setUserProfile] = useState({
     nickname: "김개발자",
@@ -522,6 +527,42 @@ export default function MyPage() {
         completed: [...freelancerServices.completed, { ...service, status: "completed" }],
       });
     }
+  };
+
+  // 메모 저장 함수
+  const handleSaveMemo = async (paymentKey: string) => {
+    try {
+      await authorizedFetch(`${baseUrl}/api/v1/payments/${paymentKey}/memo`, {
+        method: "PATCH",
+        body: JSON.stringify({ memo: editMemoText }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // 로컬 상태 업데이트
+      setPaymentHistory((prev) =>
+        prev.map((payment) =>
+          payment.paymentKey === paymentKey ? { ...payment, memo: editMemoText } : payment,
+        ),
+      );
+
+      setIsEditingMemo(null);
+      setEditMemoText("");
+    } catch (error) {
+      console.error("메모 저장 오류:", error);
+      alert("메모 저장에 실패했습니다.");
+    }
+  };
+
+  // 메모 편집 시작
+  const handleStartEditMemo = (index: number, currentMemo?: string) => {
+    setIsEditingMemo(index);
+    setEditMemoText(currentMemo || "");
+  };
+
+  // 메모 편집 취소
+  const handleCancelEditMemo = () => {
+    setIsEditingMemo(null);
+    setEditMemoText("");
   };
 
   return (
@@ -1051,7 +1092,7 @@ export default function MyPage() {
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {paymentHistory.map((payment, index) => (
                       <Card
-                        key={`${payment.serviceId}-${index}`}
+                        key={`${payment.paymentKey}`}
                         className="overflow-hidden transition-shadow hover:shadow-lg"
                       >
                         <div className="bg-muted relative flex h-48 items-center justify-center">
@@ -1074,11 +1115,71 @@ export default function MyPage() {
                           </div>
 
                           <div className="bg-muted/50 rounded-lg border p-3">
-                            <div className="mb-1 flex items-center gap-2">
-                              <FileText className="text-primary h-3 w-3" />
-                              <p className="text-muted-foreground text-xs font-semibold">메모</p>
+                            <div className="mb-2 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-primary h-3 w-3" />
+                                <p className="text-muted-foreground text-xs font-semibold">메모</p>
+                              </div>
+                              {isEditingMemo === index ? (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={() => handleSaveMemo(payment.paymentKey)}
+                                  >
+                                    <Save className="mr-1 h-3 w-3" />
+                                    저장
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={handleCancelEditMemo}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={() => handleStartEditMemo(index, payment.memo)}
+                                >
+                                  <Edit className="mr-1 h-3 w-3" />
+                                  수정
+                                </Button>
+                              )}
                             </div>
-                            {payment.memo ? (
+                            {isEditingMemo === index ? (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={editMemoText}
+                                  onChange={(e) => setEditMemoText(e.target.value)}
+                                  placeholder="메모를 입력하세요..."
+                                  className="min-h-[60px] text-sm"
+                                  maxLength={MEMO_MAX_LENGTH}
+                                  autoFocus
+                                />
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`text-xs ${
+                                      editMemoText.length >= MEMO_MAX_LENGTH
+                                        ? "text-destructive font-semibold"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  >
+                                    {editMemoText.length} / {MEMO_MAX_LENGTH}자
+                                  </span>
+                                  {editMemoText.length >= MEMO_MAX_LENGTH && (
+                                    <span className="text-destructive text-xs">
+                                      최대 글자 수에 도달했습니다
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ) : payment.memo ? (
                               <p className="text-sm leading-relaxed">{payment.memo}</p>
                             ) : (
                               <p className="text-muted-foreground/60 text-xs italic">

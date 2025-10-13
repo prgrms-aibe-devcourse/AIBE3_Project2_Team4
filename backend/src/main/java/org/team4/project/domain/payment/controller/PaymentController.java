@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
+import org.team4.project.domain.payment.dto.UpdatePaymentMemoRequestDTO;
 import org.team4.project.domain.payment.service.PaymentService;
 import org.team4.project.global.exception.ErrorResponse;
 import org.team4.project.global.security.CustomUserDetails;
@@ -51,6 +54,14 @@ public class PaymentController {
     @PostMapping("/save")
     public ResponseEntity<?> savePayment(@Valid @RequestBody SavePaymentRequestDTO savePaymentRequestDTO) {
         paymentService.savePayment(savePaymentRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{paymentKey}/memo")
+    public ResponseEntity<?> updatePaymentMemo(@PathVariable("paymentKey") String paymentKey,
+                                               @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                               @Valid @RequestBody UpdatePaymentMemoRequestDTO updatePaymentMemoRequestDTO) {
+        paymentService.updatePaymentMemo(paymentKey, updatePaymentMemoRequestDTO, customUserDetails.getEmail());
         return ResponseEntity.ok().build();
     }
 }

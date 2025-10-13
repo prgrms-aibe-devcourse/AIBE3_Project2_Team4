@@ -5,6 +5,7 @@ import org.team4.project.domain.payment.entity.PaymentStatus;
 import java.time.LocalDateTime;
 
 public record PaymentHistoryResponseDTO(
+        String paymentKey,
         Long freelancerId,
         Long serviceId,
         String serviceTitle,

@@ -13,6 +13,7 @@ import org.team4.project.domain.payment.dto.PaymentConfirmDTO;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
+import org.team4.project.domain.payment.dto.UpdatePaymentMemoRequestDTO;
 import org.team4.project.domain.payment.entity.Payment;
 import org.team4.project.domain.payment.entity.PaymentMethod;
 import org.team4.project.domain.payment.entity.PaymentStatus;
@@ -67,6 +68,13 @@ public class PaymentService {
         String key = generateKey(orderId);
         String value = amount.toString();
         redisRepository.setValue(key, value, Duration.ofMinutes(10));
+    }
+
+    @Transactional
+    public void updatePaymentMemo(String paymentKey, UpdatePaymentMemoRequestDTO updatePaymentMemoRequestDTO, String email) {
+        Payment payment = paymentRepository.findByPaymentKeyAndMemberEmail(paymentKey, email)
+                                           .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결제 정보입니다. paymentKey : " + paymentKey + ", email : " + email));
+        payment.updateMemo(updatePaymentMemoRequestDTO.memo());
     }
 
     private void verifyTempPayment(String orderId, Integer amount) {
