@@ -26,8 +26,6 @@ import {
   Star,
   Bookmark,
   Plus,
-  CreditCard,
-  Calendar,
   ExternalLink,
   Briefcase,
   Trash2,
@@ -38,30 +36,7 @@ import {
 import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
 import { useRouter } from "next/navigation";
-import { authorizedFetch } from "@/lib/api";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
-
-interface PaymentHistory {
-  paymentKey: string;
-  freelancerId: number;
-  serviceId: number;
-  serviceTitle: string;
-  price: number;
-  memo?: string;
-  approvedAt: string;
-  paymentStatus:
-    | "READY"
-    | "IN_PROGRESS"
-    | "WAITING_FOR_DEPOSIT"
-    | "DONE"
-    | "CANCELED"
-    | "PARTIAL_CANCELED"
-    | "ABORTED"
-    | "EXPIRED";
-}
-
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+import PaymentTab from "./PaymentTab";
 
 export default function MyPage() {
   const router = useRouter();
@@ -86,14 +61,6 @@ export default function MyPage() {
   const [experienceCompany, setExperienceCompany] = useState("");
   const [experiencePeriod, setExperiencePeriod] = useState("");
   const [experienceDescription, setExperienceDescription] = useState("");
-
-  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
-  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-
-  const [isEditingMemo, setIsEditingMemo] = useState<number | null>(null);
-  const [editMemoText, setEditMemoText] = useState("");
-  const MEMO_MAX_LENGTH = 200;
 
   const [userProfile, setUserProfile] = useState({
     nickname: "김개발자",
@@ -240,97 +207,9 @@ export default function MyPage() {
     },
   ];
 
-  const fetchPaymentHistory = async () => {
-    if (!isLoggedIn || !member) return;
-
-    setIsPaymentLoading(true);
-    setPaymentError(null);
-
-    try {
-      const response = await authorizedFetch(`${baseUrl}/api/v1/auth/me/payments`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("결제 내역을 불러오는데 실패했습니다.");
-      }
-
-      const data: PaymentHistory[] = await response.json();
-      setPaymentHistory(data);
-    } catch (error) {
-      console.error("결제 내역 조회 오류:", error);
-      setPaymentError(error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.");
-    } finally {
-      setIsPaymentLoading(false);
-    }
-  };
-
   useEffect(() => {
     setIsLoading(false);
   }, []);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchPaymentHistory();
-    }
-  }, [isLoggedIn]);
-
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case "READY":
-        return "결제 준비";
-      case "IN_PROGRESS":
-        return "결제 진행중";
-      case "WAITING_FOR_DEPOSIT":
-        return "입금 대기";
-      case "DONE":
-        return "결제 완료";
-      case "CANCELED":
-        return "결제 취소";
-      case "PARTIAL_CANCELED":
-        return "부분 취소";
-      case "ABORTED":
-        return "결제 중단";
-      case "EXPIRED":
-        return "결제 만료";
-      default:
-        return status;
-    }
-  };
-
-  // 결제 상태 뱃지 색상
-  const getPaymentStatusVariant = (status: string) => {
-    switch (status) {
-      case "DONE":
-        return "bg-green-500 hover:bg-green-600";
-      case "CANCELED":
-      case "PARTIAL_CANCELED":
-      case "ABORTED":
-        return "bg-red-500 hover:bg-red-600";
-      case "READY":
-      case "IN_PROGRESS":
-      case "WAITING_FOR_DEPOSIT":
-        return "bg-yellow-500 hover:bg-yellow-600";
-      case "EXPIRED":
-        return "bg-gray-500 hover:bg-gray-600";
-      default:
-        return "bg-gray-500 hover:bg-gray-600";
-    }
-  };
-
-  // 날짜 포맷 함수
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, "yyyy.MM.dd", { locale: ko });
-    } catch (error) {
-      console.error("날짜 포맷 오류:", error);
-      return dateString;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -527,42 +406,6 @@ export default function MyPage() {
         completed: [...freelancerServices.completed, { ...service, status: "completed" }],
       });
     }
-  };
-
-  // 메모 저장 함수
-  const handleSaveMemo = async (paymentKey: string) => {
-    try {
-      await authorizedFetch(`${baseUrl}/api/v1/payments/${paymentKey}/memo`, {
-        method: "PATCH",
-        body: JSON.stringify({ memo: editMemoText }),
-        headers: { "Content-Type": "application/json" },
-      });
-
-      // 로컬 상태 업데이트
-      setPaymentHistory((prev) =>
-        prev.map((payment) =>
-          payment.paymentKey === paymentKey ? { ...payment, memo: editMemoText } : payment,
-        ),
-      );
-
-      setIsEditingMemo(null);
-      setEditMemoText("");
-    } catch (error) {
-      console.error("메모 저장 오류:", error);
-      alert("메모 저장에 실패했습니다.");
-    }
-  };
-
-  // 메모 편집 시작
-  const handleStartEditMemo = (index: number, currentMemo?: string) => {
-    setIsEditingMemo(index);
-    setEditMemoText(currentMemo || "");
-  };
-
-  // 메모 편집 취소
-  const handleCancelEditMemo = () => {
-    setIsEditingMemo(null);
-    setEditMemoText("");
   };
 
   return (
@@ -1047,159 +890,7 @@ export default function MyPage() {
 
           {/* 결제 내역 탭 */}
           <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <CreditCard className="h-5 w-5" />
-                    <span>결제 내역</span>
-                  </div>
-                  <Button
-                    onClick={fetchPaymentHistory}
-                    variant="outline"
-                    size="sm"
-                    disabled={isPaymentLoading}
-                  >
-                    {isPaymentLoading ? "로딩 중..." : "새로고침"}
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isPaymentLoading ? (
-                  <div className="flex h-64 items-center justify-center">
-                    <div className="text-center">
-                      <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
-                      <p className="text-muted-foreground">결제 내역을 불러오는 중...</p>
-                    </div>
-                  </div>
-                ) : paymentError ? (
-                  <div className="flex h-64 items-center justify-center">
-                    <div className="text-center">
-                      <p className="text-destructive mb-4">{paymentError}</p>
-                      <Button onClick={fetchPaymentHistory} variant="outline">
-                        다시 시도
-                      </Button>
-                    </div>
-                  </div>
-                ) : paymentHistory.length === 0 ? (
-                  <div className="flex h-64 items-center justify-center">
-                    <div className="text-center">
-                      <CreditCard className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-                      <p className="text-muted-foreground">결제 내역이 없습니다.</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {paymentHistory.map((payment, index) => (
-                      <Card
-                        key={`${payment.paymentKey}`}
-                        className="overflow-hidden transition-shadow hover:shadow-lg"
-                      >
-                        <div className="bg-muted relative flex h-48 items-center justify-center">
-                          <FileText className="text-muted-foreground h-16 w-16" />
-                        </div>
-                        <CardContent className="space-y-3 p-4">
-                          <h3 className="line-clamp-2 text-lg font-bold">{payment.serviceTitle}</h3>
-
-                          <div className="flex items-baseline justify-between">
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-primary text-2xl font-bold">
-                                {payment.price.toLocaleString()}
-                              </span>
-                              <span className="text-muted-foreground text-sm">원</span>
-                            </div>
-                            <Badge variant="secondary" className="gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(payment.approvedAt)}
-                            </Badge>
-                          </div>
-
-                          <div className="bg-muted/50 rounded-lg border p-3">
-                            <div className="mb-2 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <FileText className="text-primary h-3 w-3" />
-                                <p className="text-muted-foreground text-xs font-semibold">메모</p>
-                              </div>
-                              {isEditingMemo === index ? (
-                                <div className="flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() => handleSaveMemo(payment.paymentKey)}
-                                  >
-                                    <Save className="mr-1 h-3 w-3" />
-                                    저장
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={handleCancelEditMemo}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={() => handleStartEditMemo(index, payment.memo)}
-                                >
-                                  <Edit className="mr-1 h-3 w-3" />
-                                  수정
-                                </Button>
-                              )}
-                            </div>
-                            {isEditingMemo === index ? (
-                              <div className="space-y-2">
-                                <Textarea
-                                  value={editMemoText}
-                                  onChange={(e) => setEditMemoText(e.target.value)}
-                                  placeholder="메모를 입력하세요..."
-                                  className="min-h-[60px] text-sm"
-                                  maxLength={MEMO_MAX_LENGTH}
-                                  autoFocus
-                                />
-                                <div className="flex items-center justify-between">
-                                  <span
-                                    className={`text-xs ${
-                                      editMemoText.length >= MEMO_MAX_LENGTH
-                                        ? "text-destructive font-semibold"
-                                        : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    {editMemoText.length} / {MEMO_MAX_LENGTH}자
-                                  </span>
-                                  {editMemoText.length >= MEMO_MAX_LENGTH && (
-                                    <span className="text-destructive text-xs">
-                                      최대 글자 수에 도달했습니다
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ) : payment.memo ? (
-                              <p className="text-sm leading-relaxed">{payment.memo}</p>
-                            ) : (
-                              <p className="text-muted-foreground/60 text-xs italic">
-                                메모한 내용이 없습니다
-                              </p>
-                            )}
-                          </div>
-
-                          <Badge
-                            className={`w-full justify-center ${getPaymentStatusVariant(payment.paymentStatus)}`}
-                          >
-                            {getPaymentStatusText(payment.paymentStatus)}
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <PaymentTab />
           </TabsContent>
 
           {/* 북마크 탭 (클라이언트 전용) */}
