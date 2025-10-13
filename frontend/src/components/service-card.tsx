@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface ServiceCardProps {
-  id: string;
+  id: number;
   thumbnail: string;
   title: string;
   price: number;

@@ -3,27 +3,67 @@ import { useEffect, useState } from "react";
 import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart } from "lucide-react";
 
 const categories_mock = [
-  { id: "development", name: "개발·프로그래밍", icon: Code, color: "bg-blue-100 text-blue-700" },
-  { id: "design", name: "디자인", icon: Palette, color: "bg-purple-100 text-purple-700" },
-  { id: "video", name: "영상·사진·음향", icon: Camera, color: "bg-green-100 text-green-700" },
+  { id: "WEB_DEVELOPMENT", name: "웹 개발", icon: Code, color: "bg-blue-100 text-blue-700" },
   {
-    id: "writing",
-    name: "번역·통역·글쓰기",
+    id: "MOBILE_DEVELOPMENT",
+    name: "앱 개발",
+    icon: Palette,
+    color: "bg-purple-100 text-purple-700",
+  },
+  { id: "DATA_SCIENCE", name: "데이터", icon: Camera, color: "bg-green-100 text-green-700" },
+  {
+    id: "INFRA_SECURITY",
+    name: "인프라 보안",
     icon: PenTool,
     color: "bg-orange-100 text-orange-700",
   },
-  { id: "marketing", name: "마케팅", icon: Megaphone, color: "bg-red-100 text-red-700" },
-  { id: "business", name: "비즈니스", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
+  { id: "UIUX_DESIGN", name: "디자인", icon: Megaphone, color: "bg-red-100 text-red-700" },
+  { id: "ETC", name: "기타", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
 ];
 
 // 태그 데이터 (카테고리별)
 const tagsByCategory_mock = {
-  development: ["웹개발", "앱개발", "AI/ML", "데이터분석", "게임개발"],
-  design: ["로고디자인", "UI/UX", "브랜딩", "일러스트", "패키지디자인"],
-  video: ["영상편집", "모션그래픽", "사진촬영", "음향편집", "애니메이션"],
-  writing: ["번역", "콘텐츠작성", "카피라이팅", "교정·교열", "네이밍"],
-  marketing: ["SNS마케팅", "SEO", "광고운영", "브랜드마케팅", "이벤트기획"],
-  business: ["사업계획서", "재무관리", "법무자문", "HR컨설팅", "창업컨설팅"],
+  // WEB_DEVELOPMENT 웹 개발
+  WEB_DEVELOPMENT: [
+    { id: "FRONTEND", name: "프론트엔드" },
+    { id: "BACKEND", name: "백엔드" },
+    { id: "FULLSTACK", name: "풀스택" },
+  ],
+
+  // MOBILE_DEVELOPMENT 앱 개발
+  MOBILE_DEVELOPMENT: [
+    { id: "IOS", name: "iOS" },
+    { id: "ANDROID", name: "안드로이드" },
+    { id: "CROSS_PLATFORM", name: "크로스플랫폼" },
+  ],
+
+  // DATA_SCIENCE 데이터
+  DATA_SCIENCE: [
+    { id: "DATABASE", name: "데이터베이스" },
+    { id: "DATA_ANALYSIS", name: "데이터 분석" },
+    { id: "AI_MACHINE_LEARNING", name: "머신러닝 / AI" },
+  ],
+
+  // INFRA_SECURITY 인프라 보안
+  INFRA_SECURITY: [
+    { id: "CLOUD_SERVER", name: "클라우드 / 서버" },
+    { id: "DEVOPS", name: "DevOps" },
+    { id: "SECURITY", name: "보안" },
+  ],
+
+  // UIUX_DESIGN 디자인
+  UIUX_DESIGN: [
+    { id: "UI_DESIGN", name: "UI 디자인" },
+    { id: "UX_DESIGN", name: "UX 디자인" },
+    { id: "PROTOTYPING", name: "프로토타이핑" },
+  ],
+
+  // ETC 기타
+  ETC: [
+    { id: "PROJECT_MANAGEMENT", name: "프로젝트 관리" },
+    { id: "QA_TESTING", name: "QA / 테스트" },
+    { id: "TECHNICAL_WRITING", name: "문서화" },
+  ],
 };
 
 export default function useCategory() {
