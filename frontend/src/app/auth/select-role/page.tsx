@@ -16,7 +16,7 @@ export default function SelectRolePage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const selectRole = async (role: "freelancer" | "client") => {
+  const selectRole = async (role: "FREELANCER" | "CLIENT") => {
     if (!member) return;
     setLoading(true);
     setError("");
@@ -54,14 +54,14 @@ export default function SelectRolePage() {
 
       <div className="mt-4 flex gap-4">
         <Button
-          onClick={() => selectRole("freelancer")}
+          onClick={() => selectRole("FREELANCER")}
           disabled={loading}
           className="bg-blue-600 text-white hover:bg-blue-700"
         >
           프리랜서
         </Button>
         <Button
-          onClick={() => selectRole("client")}
+          onClick={() => selectRole("CLIENT")}
           disabled={loading}
           className="bg-green-600 text-white hover:bg-green-700"
         >
