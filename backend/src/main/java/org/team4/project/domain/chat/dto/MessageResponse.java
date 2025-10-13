@@ -10,14 +10,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MessageResponse {
     private Long id;
-    private String sender;
+    private String sender; //수정필요
     private String content;
     private LocalDateTime createdAt;
 
     public static MessageResponse from(ChatMessage entity) {
         return new MessageResponse(
                 entity.getId(),
-                entity.getSender(),
+                entity.getMember().getNickname(), //수정필요
                 entity.getContent(),
                 entity.getCreatedAt()
         );

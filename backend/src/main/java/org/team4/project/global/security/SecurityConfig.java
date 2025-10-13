@@ -1,7 +1,7 @@
 package org.team4.project.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.team4.project.global.redis.RedisRepository;
 import org.team4.project.global.security.jwt.JwtFilter;
 import org.team4.project.global.security.jwt.JwtUtil;
 
@@ -27,13 +26,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private static final String[] SWAGGER_RESOURCES = {"/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**"};
-    private final ObjectMapper objectMapper;
-    private final JwtUtil jwtUtil;
-    private final RedisRepository redisRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -41,12 +36,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
-        CustomAuthenticationFilter customFilter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
-        customFilter.setAuthenticationManager(authenticationManager);
-        customFilter.setAuthenticationSuccessHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).successHandler());
-        customFilter.setAuthenticationFailureHandler(new CustomAuthenticationHandlers(jwtUtil, redisRepository).failureHandler());
+    public JwtFilter jwtFilter(JwtUtil jwtUtil) {
+        return new JwtFilter(jwtUtil);
+    }
 
+    @Bean
+    public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager, CustomAuthenticationHandlers handlers, ObjectMapper objectMapper) {
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
+        filter.setAuthenticationManager(authenticationManager);
+        filter.setAuthenticationSuccessHandler(handlers.successHandler());
+        filter.setAuthenticationFailureHandler(handlers.failureHandler());
+        return filter;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomAuthenticationFilter customAuthenticationFilter,
+                                                   JwtFilter jwtFilter,
+                                                   CustomOAuth2UserService customOAuth2UserService,
+                                                   CustomAuthenticationHandlers handlers) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -58,16 +66,27 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(customFilter, UsernamePasswordAuthenticationFilter.class)
-                //TODO : OAuth 설정 필요
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService))
+                        .successHandler(handlers.oauthSuccessHandler()))
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                )
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_RESOURCES).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .anyRequest().permitAll() //TODO : 구현에 따라 권한 처리 추가 필요
+                        .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
+                        .anyRequest().authenticated()
                 )
+
         ;
 
         return http.build();

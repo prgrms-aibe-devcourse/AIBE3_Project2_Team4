@@ -26,6 +26,19 @@ public class Member extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String nickname;
 
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    public void setProvider(String provider) {
+        this.provider = Provider.valueOf(provider);
+    }
+
+    public void setMemberRole(String role) {
+        this.memberRole = MemberRole.valueOf(role.toUpperCase());
+    }
 }
