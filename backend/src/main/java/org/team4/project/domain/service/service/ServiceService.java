@@ -1,6 +1,7 @@
 package org.team4.project.domain.service.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,6 +14,7 @@ import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.domain.service.repository.ServiceRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,4 +78,8 @@ public class ServiceService {
         serviceRepository.deleteById(id);
     }
 
+    // email 기반으로 서비스 목록 찾기
+    public Page<ServiceDTO> getServicesByEmail(String username, Pageable pageable) {
+        return serviceRepository.findAllByFreelancer_Email(username, pageable).map(ServiceDTO::from);
+    }
 }
