@@ -118,6 +118,8 @@ public class MemberService {
 
         Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
         member.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        redisRepository.deleteValue(RedisKeys.passwordResetToken(request.getEmail()));
     }
 
     private boolean isSignupVerified(String email) {
