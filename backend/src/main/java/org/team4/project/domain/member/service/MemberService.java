@@ -22,6 +22,7 @@ import org.team4.project.global.redis.RedisRepository;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -61,6 +62,17 @@ public class MemberService {
     }
 
     public int generateEmailVerificationCode(String email) {
+        Optional<Member> optMember = memberRepository.findByEmail(email);
+
+        if (optMember.isPresent()) {
+            Member member = optMember.get();
+            if (member.getProvider().equals(Provider.KAKAO)) {
+                throw new RegisterException("카카오 소셜 로그인으로 가입한 이메일 입니다");
+            } else {
+                throw new RegisterException("이미 사용중인 이메일 입니다.");
+            }
+        }
+
         // 6자리 난수 (100000 ~ 999999)
         int code = new Random().nextInt(900000) + 100000;
 
@@ -93,8 +105,10 @@ public class MemberService {
     }
 
     public String generatePasswordResetToken(String email) {
-        if (!memberRepository.existsByEmail(email)) {
-            throw new EntityNotFoundException("해당 이메일로 가입한 회원이 없습니다.");
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("해당 이메일로 가입한 회원이 없습니다."));
+
+        if (member.getProvider().equals(Provider.KAKAO) && member.getPassword() == null) {
+            throw new PasswordResetException("해당 이메일은 카카오 소셜 로그인으로 가입한 이메일입니다.");
         }
 
         String token = UUID.randomUUID().toString();

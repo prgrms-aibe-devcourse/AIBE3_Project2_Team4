@@ -36,7 +36,9 @@ export default function EmailVerification({
       });
 
       if (!response.ok) {
-        throw new Error("인증 코드 전송 실패");
+        const errorData = await response.json();
+        const errorMessage = errorData.message || "인증 코드 전송 실패";
+        throw new Error(errorMessage);
       }
 
       setIsSent(true);
