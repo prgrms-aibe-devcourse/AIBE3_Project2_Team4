@@ -107,7 +107,7 @@ public class MemberService {
     public String generatePasswordResetToken(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("해당 이메일로 가입한 회원이 없습니다."));
 
-        if (member.getProvider().equals(Provider.KAKAO) && member.getPassword() == null) {
+        if (Provider.KAKAO.equals(member.getProvider()) && member.getPassword() == null) {
             throw new PasswordResetException("해당 이메일은 카카오 소셜 로그인으로 가입한 이메일입니다.");
         }
 
