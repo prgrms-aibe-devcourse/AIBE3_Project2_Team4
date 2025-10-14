@@ -181,10 +181,7 @@ export default function LoginPage() {
             </Button>
 
             <div className="mt-6 space-y-4 text-center text-sm">
-              <div className="flex justify-between">
-                <Link href="/auth/find-id" className="text-primary hover:text-primary/80">
-                  아이디 찾기
-                </Link>
+              <div>
                 <Link href="/auth/find-password" className="text-primary hover:text-primary/80">
                   비밀번호 찾기
                 </Link>

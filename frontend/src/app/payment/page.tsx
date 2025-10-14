@@ -10,6 +10,7 @@ import { CreditCard, Shield, Lock, AlertCircle } from "lucide-react";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { useLoginStore } from "@/store/useLoginStore";
+import { authorizedFetch } from "@/lib/api";
 
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 const customerKey = uuidv4();
@@ -27,13 +28,6 @@ export default function PaymentPage() {
   const memo = searchParams.get("memo") || "웹사이트 디자인 및 개발 프로젝트 1차 결제입니다.";
   const serviceName = searchParams.get("service") || "웹사이트 디자인 및 개발";
   const chatId = searchParams.get("chatId") || "";
-
-  // Check authentication
-  useEffect(() => {
-    if (!member) {
-      setError("결제를 진행하려면 로그인이 필요합니다.");
-    }
-  }, [member]);
 
   // 토스페이먼츠 위젯 초기화
   useEffect(() => {
@@ -59,6 +53,11 @@ export default function PaymentPage() {
   }, [clientKey, customerKey]);
 
   const handlePayment = async () => {
+    if (!member) {
+      setError("결제를 진행하려면 로그인이 필요합니다.");
+      return;
+    }
+
     setIsProcessing(true);
     setError("");
     try {
@@ -67,7 +66,7 @@ export default function PaymentPage() {
 
       // 1단계: 결제를 요청하기 전에 orderId, amount를 서버에 저장
       // 결제 과정에서 악의적으로 결제 금액이 바뀌는 것을 확인하는 용도
-      const saveResponse = await fetch(`${baseUrl}/api/v1/payments/save`, {
+      const saveResponse = await authorizedFetch(`${baseUrl}/api/v1/payments/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

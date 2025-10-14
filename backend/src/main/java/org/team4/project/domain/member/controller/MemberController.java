@@ -7,12 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
-import org.team4.project.domain.member.dto.MemberRoleRequestDTO;
-import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
-import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
+import org.team4.project.domain.member.dto.*;
 import org.team4.project.domain.member.service.AuthService;
 import org.team4.project.domain.member.service.MemberService;
+import org.team4.project.global.mail.MailService;
 import org.team4.project.global.security.CustomUserDetails;
 import org.team4.project.global.util.CookieUtil;
 
@@ -27,10 +25,42 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthService authService;
+    private final MailService mailService;
 
     @PostMapping("/register")
-    public void singUp(@Valid @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
+    public void signUp(@Valid @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
         memberService.signUp(memberSignUpRequestDTO);
+    }
+
+    @PostMapping("/email/verify/request")
+    public ResponseEntity<String> requestEmailVerification(@Valid @RequestBody EmailVerificationRequestDTO request) {
+        int code = memberService.generateEmailVerificationCode(request.getEmail());
+
+        mailService.sendVerificationCode(request.getEmail(), code);
+
+        return ResponseEntity.ok("인증 코드가 이메일로 전송되었습니다.");
+    }
+
+    @PostMapping("/email/verify/confirm")
+    public ResponseEntity<String> confirmEmailVerification(@Valid @RequestBody EmailVerificationConfirmRequestDTO request) {
+        memberService.verifyEmailCode(request.getEmail(), Integer.parseInt(request.getCode()));
+        return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+    }
+
+    @PostMapping("/reset-password/request")
+    public ResponseEntity<String> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO request) {
+        String token = memberService.generatePasswordResetToken(request.getEmail());
+
+        mailService.sendPasswordResetLink(request.getEmail(), token);
+
+        return ResponseEntity.ok("비밀번호 재설정 링크가 메일로 전송되었습니다.");
+    }
+
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmRequestDTO request) {
+        memberService.resetPassword(request);
+
+        return ResponseEntity.ok("비밀번호 재설정이 완료되었습니다");
     }
 
     @PostMapping("/token/refresh")
@@ -64,5 +94,10 @@ public class MemberController {
     public ResponseEntity<List<PaymentHistoryResponseDTO>> getPaymentHistories(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         List<PaymentHistoryResponseDTO> paymentHistories = memberService.getPaymentHistories(customUserDetails.getEmail());
         return ResponseEntity.ok(paymentHistories);
+    }
+
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam("nickname") String nickname) {
+        return ResponseEntity.ok(memberService.checkNickname(nickname));
     }
 }

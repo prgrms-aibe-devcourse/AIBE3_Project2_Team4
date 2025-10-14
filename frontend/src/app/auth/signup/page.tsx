@@ -14,6 +14,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff, User, Building } from "lucide-react";
 import Logo from "@/components/logo";
+import EmailVerification from "./EmailVerification";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   validateEmail,
   validatePassword,
@@ -42,6 +50,15 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [nicknameChecked, setNicknameChecked] = useState(false);
+  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
+  const [touched, setTouched] = useState({
+    nickname: false,
+    password: false,
+    confirmPassword: false,
+  });
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailForVerification, setEmailForVerification] = useState("");
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const validateAll = (state: typeof formData): FieldErrors => ({
@@ -61,7 +78,11 @@ export default function SignupPage() {
     }),
   );
 
-  const isValid = Object.values(fieldErrors).every((v) => !v);
+  // 회원가입 버튼 활성화는 닉네임 유효성 검사를 제외하고 판단
+  const { nickname: _nicknameErrorIgnored, ...others } = validateAll(formData);
+  const isValid = Object.values(others).every((v) => !v);
+  const isNicknameVerified = nicknameChecked && nicknameAvailable === true;
+  const emailValidationError = validateEmail(emailForVerification);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +94,12 @@ export default function SignupPage() {
     setFieldErrors(latestErrors);
     const latestValid = Object.values(latestErrors).every((v) => !v);
     if (!latestValid) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (!nicknameChecked || nicknameAvailable === false) {
+      setError("닉네임 중복 확인이 필요합니다.");
       setIsLoading(false);
       return;
     }
@@ -127,6 +154,28 @@ export default function SignupPage() {
       setFieldErrors(nextErrors);
       return next;
     });
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const checkNickname = async () => {
+    if (!formData.nickname.trim()) return;
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/api/v1/auth/check-nickname?nickname=${formData.nickname.trim()}`,
+      );
+      const available = await response.json(); // true / false 반환
+      setNicknameAvailable(available);
+      setNicknameChecked(true);
+
+      if (available) {
+        setError("");
+      }
+    } catch (err) {
+      console.error(err);
+      setNicknameAvailable(false);
+      setNicknameChecked(true);
+    }
   };
 
   return (
@@ -182,33 +231,97 @@ export default function SignupPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="nickname">닉네임</Label>
-                <Input
-                  id="nickname"
-                  type="text"
-                  placeholder="닉네임을 입력하세요"
-                  value={formData.nickname}
-                  onChange={(e) => handleInputChange("nickname", e.target.value)}
-                  className="bg-input border-border"
-                />
-                {fieldErrors.nickname && (
+                <div className="flex">
+                  <Input
+                    id="nickname"
+                    type="text"
+                    placeholder="닉네임을 입력하세요"
+                    value={formData.nickname}
+                    onChange={(e) => {
+                      handleInputChange("nickname", e.target.value);
+                      // 입력이 바뀌면 중복 확인 초기화
+                      setNicknameChecked(false);
+                      setNicknameAvailable(null);
+                    }}
+                    className="bg-input border-border flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={checkNickname}
+                    className="ml-2"
+                    disabled={Boolean(validateNickname(formData.nickname))}
+                  >
+                    중복 확인
+                  </Button>
+                </div>
+                {touched.nickname && fieldErrors.nickname && (
                   <p className="text-destructive mt-1 text-sm">{fieldErrors.nickname}</p>
+                )}
+                {nicknameChecked && nicknameAvailable !== null && (
+                  <p
+                    className={`mt-1 text-sm ${nicknameAvailable ? "text-green-500" : "text-red-500"}`}
+                  >
+                    {nicknameAvailable
+                      ? "사용 가능한 닉네임입니다."
+                      : "이미 사용중인 닉네임입니다."}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">이메일</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="example@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="bg-input border-border"
-                  autoComplete="email"
-                />
-                {fieldErrors.email && (
-                  <p className="text-destructive mt-1 text-sm">{fieldErrors.email}</p>
-                )}
+                <div className="flex space-x-2">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="이메일 인증을 진행하세요"
+                    value={formData.email}
+                    readOnly
+                    className="bg-input border-border flex-1"
+                    autoComplete="email"
+                  />
+                  <Dialog open={isEmailModalOpen} onOpenChange={setIsEmailModalOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button">이메일 인증</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>이메일 인증</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="verifyEmailInput">이메일 입력</Label>
+                          <Input
+                            id="verifyEmailInput"
+                            type="email"
+                            placeholder="example@email.com"
+                            value={emailForVerification}
+                            onChange={(e) => {
+                              setEmailForVerification(e.target.value);
+                            }}
+                            className="bg-input border-border"
+                          />
+                          {emailForVerification && emailValidationError && (
+                            <p className="text-destructive mt-1 text-sm">{emailValidationError}</p>
+                          )}
+                        </div>
+                        {!emailValidationError && emailForVerification && (
+                          <EmailVerification
+                            email={emailForVerification}
+                            setVerified={(v) => {
+                              if (v) {
+                                // 이메일 인증 성공 시 폼에 반영하고 모달 닫기
+                                setFormData((prev) => ({ ...prev, email: emailForVerification }));
+                                setIsEmailModalOpen(false);
+                              }
+                            }}
+                          />
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                {/* 이메일은 모달 인증으로만 설정되므로 개별 에러 메시지 표시를 제거 */}
               </div>
 
               <div className="space-y-2">
@@ -236,7 +349,7 @@ export default function SignupPage() {
                     )}
                   </Button>
                 </div>
-                {fieldErrors.password && (
+                {touched.password && fieldErrors.password && (
                   <p className="text-destructive mt-1 text-sm">{fieldErrors.password}</p>
                 )}
               </div>
@@ -266,7 +379,7 @@ export default function SignupPage() {
                     )}
                   </Button>
                 </div>
-                {fieldErrors.confirmPassword && (
+                {touched.confirmPassword && fieldErrors.confirmPassword && (
                   <p className="text-destructive mt-1 text-sm">{fieldErrors.confirmPassword}</p>
                 )}
               </div>
@@ -274,7 +387,7 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 className="bg-primary hover:bg-primary/90 w-full"
-                disabled={!isValid || isLoading}
+                disabled={!isValid || isLoading || !isNicknameVerified}
               >
                 {isLoading ? "가입 중..." : "회원가입"}
               </Button>
