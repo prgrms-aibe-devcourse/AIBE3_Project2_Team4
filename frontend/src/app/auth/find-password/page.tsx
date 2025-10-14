@@ -16,6 +16,7 @@ export default function FindPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +24,25 @@ export default function FindPasswordPage() {
     setError("");
 
     try {
-      // 실제 비밀번호 재설정 로직 구현
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 임시 딜레이
-      setIsSuccess(true);
+      const response = await fetch(`${baseUrl}/api/v1/auth/reset-password/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      if (response.ok) {
+        const message = await response.text();
+        setError(message);
+        setIsSuccess(true);
+      } else {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || "비밀번호 재설정 요청 중 오류가 발생했습니다.";
+        setError(errorMessage);
+      }
     } catch (err) {
-      setError("등록된 이메일을 찾을 수 없습니다.");
+      setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setIsLoading(false);
     }
@@ -117,16 +132,6 @@ export default function FindPasswordPage() {
                 {isLoading ? "전송 중..." : "비밀번호 재설정"}
               </Button>
             </form>
-
-            <div className="text-muted-foreground mt-6 text-center text-sm">
-              아이디를 잊으셨나요?{" "}
-              <Link
-                href="/auth/find-id"
-                className="text-primary hover:text-primary/80 font-medium transition-colors"
-              >
-                아이디 찾기
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>
