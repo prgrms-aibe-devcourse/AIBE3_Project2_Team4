@@ -12,7 +12,7 @@ public record ServiceDetailDTO(
         Long id,
         String title,
         Integer price,
-        Integer rating,
+        Float rating,
         Integer reviewCount,
         String[] images,
         String description,
@@ -20,13 +20,13 @@ public record ServiceDetailDTO(
         CategoryType category,
         TagType[] tags
 ) {
-    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category) {
+    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
         this(
                 service.getId(),
                 service.getTitle(),
                 service.getPrice(),
-                1, // TODO: 실제 rating 계산 필요
-                1, // TODO: 실제 reviewCount 계산 필요
+                rating,
+                reviewCount,
                 new String[]{"", "", ""}, // TODO: 실제 이미지 경로 배열로 대체
                 service.getContent(),
                 new FreelancerDTO(service.getFreelancer()),
@@ -37,7 +37,7 @@ public record ServiceDetailDTO(
         );
     }
 
-    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category) {
-        return new ServiceDetailDTO(service, tagServices, category);
+    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
+        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating);
     }
 }

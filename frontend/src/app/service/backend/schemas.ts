@@ -17,9 +17,21 @@ export interface ServiceDTO {
   tags: string[];
 }
 
+export interface ServiceReviewDTO {
+  id: number;
+  rating: number;
+  content: string;
+  images: string[];
+  freelancerName: string;
+  freelancerEmail: string;
+  freelancerProfileImage: string;
+  createdAt: string;
+}
+
 export interface components {
   schemas: {
     ServiceDTO: ServiceDTO;
     FreelancerDTO: FreelancerDTO;
+    ServiceReviewDTO: ServiceReviewDTO;
   };
 }
