@@ -41,4 +41,8 @@ public record ServiceDTO(
     public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
         return new ServiceDTO(service, tagServices, category, reviewCount, rating);
     }
+
+    public static ServiceDTO fromCardOnly(ProjectService service, Integer reviewCount, Float rating) {
+        return new ServiceDTO(service, reviewCount, rating);
+    }
 }

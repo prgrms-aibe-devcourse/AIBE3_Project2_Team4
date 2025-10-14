@@ -3,15 +3,9 @@ import Link from "next/link";
 import { Star, Edit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ServiceCardType } from "@/app/type/service";
 
-interface ServiceCardProps {
-  id: number;
-  thumbnail: string;
-  title: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  freelancerName: string;
+interface ServiceCardProps extends ServiceCardType {
   variant?: "list" | "mypage";
 }
 
