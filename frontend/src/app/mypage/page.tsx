@@ -26,8 +26,6 @@ import {
   Star,
   Bookmark,
   Plus,
-  CreditCard,
-  Calendar,
   ExternalLink,
   Briefcase,
   Trash2,
@@ -153,6 +151,8 @@ export default function MyPage() {
       },
     ],
   });
+
+
 
   const [clientServices, setClientServices] = useState({
     ongoing: [
