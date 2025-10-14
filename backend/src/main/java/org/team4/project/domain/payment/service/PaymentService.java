@@ -132,4 +132,10 @@ public class PaymentService {
     private String generateKey(String orderId) {
         return "payment:" + orderId;
     }
+
+    @Transactional(readOnly = true)
+    public Payment findPaymentById(String paymentKey) {
+        return paymentRepository.findById(paymentKey)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결제 정보입니다. paymentKey : " + paymentKey));
+    }
 }
