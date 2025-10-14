@@ -14,19 +14,21 @@ public record ServiceDetailDTO(
         Integer price,
         Float rating,
         Integer reviewCount,
+        Boolean isBookmarked,
         String[] images,
         String description,
         FreelancerDTO freelancer,
         CategoryType category,
         TagType[] tags
 ) {
-    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
+    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, Boolean isBookmarked) {
         this(
                 service.getId(),
                 service.getTitle(),
                 service.getPrice(),
                 rating,
                 reviewCount,
+                isBookmarked,
                 new String[]{"", "", ""}, // TODO: 실제 이미지 경로 배열로 대체
                 service.getContent(),
                 new FreelancerDTO(service.getFreelancer()),
@@ -37,7 +39,7 @@ public record ServiceDetailDTO(
         );
     }
 
-    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
-        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating);
+    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, Boolean isBookmarked) {
+        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating, isBookmarked);
     }
 }

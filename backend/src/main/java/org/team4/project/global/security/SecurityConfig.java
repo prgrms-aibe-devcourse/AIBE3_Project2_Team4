@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -84,6 +85,12 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/service/category",
+                                "/api/v1/service/{id:\\d++}",
+                                "/api/v1/service/tags",
+                                "/api/v1/service",
+                                "/api/v1/review/{id:\\d++}").permitAll()
                         .anyRequest().authenticated()
                 )
 

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
@@ -15,22 +16,25 @@ import org.team4.project.domain.service.dto.ServiceDetailDTO;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
+import org.team4.project.domain.service.service.BookMarkService;
 import org.team4.project.domain.service.service.ServiceService;
+import org.team4.project.global.security.CustomUserDetails;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/service")
+@RequestMapping("/api/v1/services")
 public class ServiceController {
     private final ServiceService serviceService;
+    private final BookMarkService bookMarkService;
 
     @PostMapping
     @Transactional
     public void createItem(
-            @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
-        Member freeLancer = new Member(); // = 인증된 사용자 정보로 대체 필요
-        serviceService.createService(serviceCreateRqBody, freeLancer);
+            @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        serviceService.createService(serviceCreateRqBody, customUserDetails);
     }
 
     @GetMapping("/{id}")
@@ -67,8 +71,9 @@ public class ServiceController {
     @Transactional
     public void updateItem(
             @PathVariable Long id,
-            @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody) {
-        Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
+            @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String actor = customUserDetails.getEmail();
 
         ProjectService service = serviceService.findById(id);
 
@@ -79,8 +84,9 @@ public class ServiceController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void deleteItem(@PathVariable Long id) {
-        Member actor = new Member(); // = 인증된 사용자 정보로 대체 필요
+    public void deleteItem(@PathVariable Long id,
+                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String actor = customUserDetails.getEmail();
 
         ProjectService service = serviceService.findById(id);
 
