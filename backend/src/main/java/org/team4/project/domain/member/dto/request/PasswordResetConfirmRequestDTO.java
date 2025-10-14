@@ -1,4 +1,4 @@
-package org.team4.project.domain.member.dto;
+package org.team4.project.domain.member.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

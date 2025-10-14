@@ -1,4 +1,4 @@
-package org.team4.project.domain.member.dto;
+package org.team4.project.domain.member.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
-import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.member.service.MemberService;
