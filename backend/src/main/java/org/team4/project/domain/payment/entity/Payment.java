@@ -55,4 +55,8 @@ public class Payment extends BaseEntity {
 
     private LocalDateTime approvedAt;
     private String memo;
+
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
 }

@@ -21,10 +21,12 @@ public class MemberQueryRepository {
     public List<PaymentHistoryResponseDTO> getPaymentHistories(String email) {
         return queryFactory.select(Projections.constructor(
                                    PaymentHistoryResponseDTO.class,
+                                   payment.paymentKey,
                                    projectService.freelancer.id,
                                    projectService.id,
                                    projectService.title,
                                    payment.totalAmount,
+                                   payment.memo,
                                    payment.approvedAt,
                                    payment.paymentStatus
                            ))
