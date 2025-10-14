@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.team4.project.domain.member.dto.AuthTokensDTO;
 import org.team4.project.domain.member.dto.request.*;
 import org.team4.project.domain.member.dto.response.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.response.PaymentHistoryResponseDTO;
@@ -14,6 +15,7 @@ import org.team4.project.domain.member.service.AuthService;
 import org.team4.project.domain.member.service.MemberService;
 import org.team4.project.global.mail.MailService;
 import org.team4.project.global.security.CustomUserDetails;
+import org.team4.project.global.security.jwt.JwtContents;
 import org.team4.project.global.util.CookieUtil;
 
 import java.util.List;
@@ -32,6 +34,23 @@ public class MemberController {
     @PostMapping("/register")
     public void signUp(@Valid @RequestBody MemberSignUpRequestDTO memberSignUpRequestDTO) {
         memberService.signUp(memberSignUpRequestDTO);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequestDTO loginRequest,
+                                      HttpServletResponse response) {
+        AuthTokensDTO tokens = authService.login(loginRequest);
+
+        response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokens.getAccessToken());
+
+        response.addCookie(CookieUtil.createCookie(
+                JwtContents.TOKEN_TYPE_REFRESH,
+                tokens.getRefreshToken(),
+                JwtContents.REFRESH_COOKIE_PATH,
+                JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS
+        ));
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/email/verify/request")
