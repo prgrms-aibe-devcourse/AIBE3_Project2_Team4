@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
@@ -16,6 +17,7 @@ import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.domain.service.repository.ServiceRepository;
+import org.team4.project.domain.service.repository.ServiceReviewRepository;
 import org.team4.project.domain.service.repository.TagRepository;
 import org.team4.project.domain.service.repository.TagServiceRepository;
 
@@ -36,15 +38,14 @@ public class ServiceService {
 
     //CREATE------------------------------------------------------------------
     // 서비스 생성
+    @Transactional
     public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
         ProjectService service =  serviceRepository.save(
             ProjectService.addService(serviceCreateRqBody, freeLancer)
         );
         serviceCreateRqBody.tagNames().forEach(e -> {
-            Tag tag = tagRepository.findByName(e);
-            if (tag == null) {
-                throw new ServiceException("해당 태그가 존재하지 않습니다.");
-            }
+            Tag tag = tagRepository.findByName(e).orElseThrow(
+                    () -> new ServiceException("해당 태그가 존재하지 않습니다."));
             TagService tagService = new TagService(tag, service);
             tagServiceRepository.save(tagService);
         });
@@ -63,7 +64,10 @@ public class ServiceService {
         ProjectService service = findById(id);
         List<TagService> tagServices = findByService(service);
         Category category = tagServices.getFirst().getTag().getCategory();
-        return new ServiceDetailDTO(service, tagServices, category);
+        Integer reviewCount = serviceReviewRepository.countByServiceId(id);
+        Float rating = serviceReviewRepository.findAvgRatingByService(id);
+
+        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating);
     }
 
     //서비스 다건 조회
@@ -72,27 +76,33 @@ public class ServiceService {
                 .map(service -> {
                     List<TagService> tagServices = findByService(service);
                     Category category = tagServices.getFirst().getTag().getCategory();
-                    return new ServiceDTO(service, tagServices, category);
+                    Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
+                    Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
+                    return new ServiceDTO(service, tagServices, category, reviewCount, rating);
                 });
     }
 
     //서비스 다건 조회 (카테고리)
     public Page<ServiceDTO> getServicesByCategory(Pageable pageable, CategoryType category) {
         return tagServiceRepository.findByCategory(category,pageable)
-                .map(e -> {
-                    List<TagService> tagServices = findByService(e.getService());
+                .map(service -> {
+                    List<TagService> tagServices = findByService(service.getService());
                     Category c = tagServices.getFirst().getTag().getCategory();
-                    return new ServiceDTO(e.getService(), tagServices, c);
+                    Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
+                    Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
+                    return new ServiceDTO(service.getService(), tagServices, c, reviewCount, rating);
                 });
     }
 
     //서비스 다건 조회 (태그)
     public Page<ServiceDTO> getServicesByTags(Pageable pageable, List<TagType> tags) {
         return tagServiceRepository.findByTags(tags, pageable)
-                .map(e -> {
-                    List<TagService> tagServices = findByService(e.getService());
+                .map(service -> {
+                    List<TagService> tagServices = findByService(service.getService());
                     Category category = tagServices.getFirst().getTag().getCategory();
-                    return new ServiceDTO(e.getService(), tagServices, category);
+                    Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
+                    Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
+                    return new ServiceDTO(service.getService(), tagServices, category, reviewCount, rating);
                 });
     }
 

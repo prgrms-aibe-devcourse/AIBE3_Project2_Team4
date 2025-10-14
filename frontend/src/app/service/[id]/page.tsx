@@ -45,57 +45,25 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 //   category: "웹개발",
 // };
 
-const mockReviews = [
-  {
-    id: "1",
-    rating: 5,
-    content:
-      "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
-    images: ["/review-image-1.jpg", "/review-image-2.jpg"],
-    authorName: "이클라이언트",
-    authorId: "client-1",
-    authorProfileImage: "/client-profile-1.jpg",
-    createdAt: "2024.01.15",
-  },
-  {
-    id: "2",
-    rating: 5,
-    content:
-      "소통이 원활하고 작업 속도도 빨라서 좋았습니다. 중간중간 진행상황도 공유해주시고, 수정 요청에도 빠르게 대응해주셨어요. 추천합니다!",
-    images: ["/review-image-3.jpg"],
-    authorName: "박사장",
-    authorId: "client-2",
-    authorProfileImage: "/client-profile-2.jpg",
-    createdAt: "2024.01.10",
-  },
-  {
-    id: "3",
-    rating: 4,
-    content:
-      "전반적으로 만족하지만 초기 소통에서 약간의 아쉬움이 있었습니다. 하지만 결과물은 기대 이상이었고, 애프터서비스도 좋았습니다.",
-    images: [],
-    authorName: "최대표",
-    authorId: "client-3",
-    authorProfileImage: "/client-profile-3.jpg",
-    createdAt: "2024.01.05",
-  },
-  {
-    id: "4",
-    rating: 5,
-    content:
-      "프로젝트 완성도가 정말 높습니다. 세심한 부분까지 신경써주시고, 코드 품질도 우수해요. 유지보수도 편리하게 해주셨습니다.",
-    images: ["/review-image-4.jpg", "/review-image-5.jpg", "/review-image-6.jpg"],
-    authorName: "김기획",
-    authorId: "client-4",
-    authorProfileImage: "/client-profile-4.jpg",
-    createdAt: "2023.12.28",
-  },
-];
+// const mockReviews = [
+//   {
+//     id: "1",
+//     rating: 5,
+//     content:
+//       "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
+//     images: ["/review-image-1.jpg", "/review-image-2.jpg"],
+//     authorName: "이클라이언트",
+//     authorId: "client-1",
+//     authorProfileImage: "/client-profile-1.jpg",
+//     createdAt: "2024.01.15",
+//   }
+// ];
 
 export default function ServiceDetailPage() {
   const params = useParams();
   const serviceId = params?.id;
 
+  type ServiceReviewDTO = components["schemas"]["ServiceReviewDTO"];
   type ServiceDTO = components["schemas"]["ServiceDTO"];
   const [service, setService] = useState<ServiceDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,7 +72,9 @@ export default function ServiceDetailPage() {
   const [reviewSort, setReviewSort] = useState("latest");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 실제로는 auth context에서 가져올 값
+  const [reviews, setReviews] = useState<ServiceReviewDTO[]>([]);
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
+  const [totalReviewPage, setTotalReviewPage] = useState(1);
 
   useEffect(() => {
     const fetchServiceDetail = async () => {
@@ -130,6 +100,33 @@ export default function ServiceDetailPage() {
 
     fetchServiceDetail();
   }, [serviceId]);
+
+  const reviewSize = 5;
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/review/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+
+        if (!res.ok) throw new Error(`서비스 정보를 불러오지 못했습니다. (${res.status})`);
+
+        const data = await res.json();
+        setReviews(data.content);
+        setTotalReviewPage(data.totalPages);
+      } catch (err: any) {
+        console.error("서비스 상세 조회 실패:", err);
+        setError(err.message);
+      }
+    };
+
+    fetchReviews();
+  }, [currentReviewPage]);
 
   const nextImage = () => {
     if (!service || !service.images?.length) return;
@@ -335,15 +332,15 @@ export default function ServiceDetailPage() {
           </div>
 
           <div className="grid gap-4">
-            {mockReviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard
                 key={review.id}
                 rating={review.rating}
                 content={review.content}
                 images={review.images}
-                authorName={review.authorName}
-                authorId={review.authorId}
-                authorProfileImage={review.authorProfileImage}
+                authorName={review.freelancerName}
+                authorId={review.freelancerEmail}
+                authorProfileImage={review.freelancerProfileImage}
                 createdAt={review.createdAt}
               />
             ))}
@@ -351,7 +348,7 @@ export default function ServiceDetailPage() {
 
           <Pagination
             currentPage={currentReviewPage}
-            totalPages={5}
+            totalPages={totalReviewPage}
             onPageChange={setCurrentReviewPage}
           />
         </div>
