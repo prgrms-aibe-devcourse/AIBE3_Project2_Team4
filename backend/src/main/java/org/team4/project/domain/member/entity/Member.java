@@ -41,4 +41,8 @@ public class Member extends BaseEntity {
     public void setMemberRole(String role) {
         this.memberRole = MemberRole.valueOf(role.toUpperCase());
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

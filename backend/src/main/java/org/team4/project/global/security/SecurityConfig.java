@@ -83,7 +83,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_RESOURCES).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers(PathRequest.toH2Console()).permitAll()                        
                         .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/services/category",
@@ -91,6 +91,12 @@ public class SecurityConfig {
                                 "/api/v1/services/tags",
                                 "/api/v1/services",
                                 "/api/v1/reviews/{id:\\d++}").permitAll()
+                        .requestMatchers("/api/v1/auth/register",
+                                "/api/v1/auth/email/verify/**",
+                                "/api/v1/auth/reset-password/**",
+                                "/api/v1/auth/token/refresh",
+                                "/api/v1/auth/token/logout",
+                                "/api/v1/auth/check-nickname").permitAll()
                         .anyRequest().authenticated()
                 )
 
