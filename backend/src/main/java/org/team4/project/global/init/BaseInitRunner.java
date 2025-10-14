@@ -11,9 +11,6 @@ import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.member.service.MemberService;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
-import org.team4.project.domain.service.entity.category.Category;
-import org.team4.project.domain.service.entity.category.Tag;
-import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.repository.TagRepository;
 import org.team4.project.domain.service.service.ServiceService;
@@ -50,8 +47,7 @@ public class BaseInitRunner {
     @Transactional
     public void work1() {
         if (memberRepository.findByEmail("qweqweqwe@gmail.com").isPresent()) return ;
-        Tag tag = tagRepository.findByName(TagType.BACKEND);
-        if (tag == null) return;
+        if (tagRepository.findByName(TagType.BACKEND).isEmpty()) return;
 
         MemberSignUpRequestDTO memberSignUpRequestDTO = new MemberSignUpRequestDTO();
         memberSignUpRequestDTO.setEmail("qweqweqwe@gmail.com");

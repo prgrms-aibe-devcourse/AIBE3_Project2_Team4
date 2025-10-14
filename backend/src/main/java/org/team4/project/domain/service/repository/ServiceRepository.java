@@ -16,6 +16,6 @@ public interface ServiceRepository extends JpaRepository<ProjectService, Long> {
     @Query("select s from ProjectService s join fetch s.freelancer")
     List<ProjectService> findAllWithFreelancer(Pageable pageable);
 
-    @EntityGraph(attributePaths = "freelancer")
+    @EntityGraph(attributePaths = {"freelancer", "reviews"})
     Page<ProjectService> findAllByFreelancer_Email(String email, Pageable pageable);
 }
