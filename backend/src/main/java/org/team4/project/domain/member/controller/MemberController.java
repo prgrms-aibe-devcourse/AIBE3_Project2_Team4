@@ -33,7 +33,7 @@ public class MemberController {
     }
 
     @PostMapping("/email/verify/request")
-    public ResponseEntity<String> requestEmailVerification(@RequestBody EmailVerificationRequestDTO request) {
+    public ResponseEntity<String> requestEmailVerification(@Valid @RequestBody EmailVerificationRequestDTO request) {
         int code = memberService.generateEmailVerificationCode(request.getEmail());
 
         mailService.sendVerificationCode(request.getEmail(), code);
@@ -42,8 +42,8 @@ public class MemberController {
     }
 
     @PostMapping("/email/verify/confirm")
-    public ResponseEntity<String> confirmEmailVerification(@RequestBody EmailVerificationConfirmRequestDTO request) {
-        memberService.verifyEmailCode(request.getEmail(), request.getCode());
+    public ResponseEntity<String> confirmEmailVerification(@Valid @RequestBody EmailVerificationConfirmRequestDTO request) {
+        memberService.verifyEmailCode(request.getEmail(), Integer.parseInt(request.getCode()));
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
     }
 
