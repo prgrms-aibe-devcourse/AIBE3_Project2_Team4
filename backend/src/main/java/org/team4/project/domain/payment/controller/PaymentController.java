@@ -33,7 +33,6 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    //TODO : 서비스 ID 전달받아 결제 완료 후 DB 저장
     @Operation(
             summary = "결제 승인 요청 API",
             description = "실제 토스 결제 승인 API를 요청합니다.",
@@ -57,6 +56,8 @@ public class PaymentController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "결제 내역 메모 수정 API")
+    @ApiResponse(responseCode = "200", description = "메모 수정 성공")
     @PatchMapping("/{paymentKey}/memo")
     public ResponseEntity<?> updatePaymentMemo(@PathVariable("paymentKey") String paymentKey,
                                                @AuthenticationPrincipal CustomUserDetails customUserDetails,
