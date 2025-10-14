@@ -42,6 +42,22 @@ public record ServiceDTO(
         return new ServiceDTO(service, tagServices, category, reviewCount, rating);
     }
 
+    public ServiceDTO(ProjectService service, Integer reviewCount, Float rating) {
+        this(
+                service.getId(),
+                "/-------.jpg",
+                service.getTitle(),
+                service.getPrice(),
+                rating, // rating
+                reviewCount, // reviewCount
+                service.getFreelancer().getNickname(),
+                null,
+                null,
+                service.getContent(),
+                service.getCreatedAt().toString()
+        );
+    }
+
     public static ServiceDTO fromCardOnly(ProjectService service, Integer reviewCount, Float rating) {
         return new ServiceDTO(service, reviewCount, rating);
     }

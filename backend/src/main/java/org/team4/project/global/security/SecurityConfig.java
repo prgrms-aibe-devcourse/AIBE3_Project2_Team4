@@ -86,11 +86,11 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .requestMatchers("api/v1/auth/token/refresh", "api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/api/v1/service/category",
-                                "/api/v1/service/{id:\\d++}",
-                                "/api/v1/service/tags",
-                                "/api/v1/service",
-                                "/api/v1/review/{id:\\d++}").permitAll()
+                                "/api/v1/services/category",
+                                "/api/v1/services/{id:\\d++}",
+                                "/api/v1/services/tags",
+                                "/api/v1/services",
+                                "/api/v1/reviews/{id:\\d++}").permitAll()
                         .anyRequest().authenticated()
                 )
 

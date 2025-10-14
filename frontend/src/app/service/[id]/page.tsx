@@ -81,7 +81,7 @@ export default function ServiceDetailPage() {
       if (!serviceId) return;
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/v1/service/${serviceId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/v1/services/${serviceId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -101,13 +101,35 @@ export default function ServiceDetailPage() {
     fetchServiceDetail();
   }, [serviceId]);
 
+  useEffect(() => {
+    const fetchBookmark = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) throw new Error(`서비스 정보를 불러오지 못했습니다. (${res.status})`);
+
+        const data = await res.json();
+        setIsBookmarked(data);
+      } catch (err: any) {
+        console.error("서비스 상세 조회 실패:", err);
+        setError(err.message);
+      } finally {
+      }
+    };
+
+    fetchBookmark();
+  }, [serviceId]);
+
   const reviewSize = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/review/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
+          `${API_BASE_URL}/api/v1/reviews/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
