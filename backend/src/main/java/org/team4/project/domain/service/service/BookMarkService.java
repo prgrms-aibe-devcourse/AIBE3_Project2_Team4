@@ -63,6 +63,7 @@ public class BookMarkService {
                 });
     }
 
+    @Transactional
     public void deleteBookmark(String memberEmail, Long serviceId) {
         Member member = memberRepository.findByEmail(memberEmail).orElseThrow(
                 () -> new ServiceException("멤버가 존재하지 않습니다.")
