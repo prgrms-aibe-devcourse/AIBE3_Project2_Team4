@@ -72,7 +72,7 @@ public class ServiceService {
         Integer reviewCount = serviceReviewRepository.countByServiceId(id);
         Float rating = serviceReviewRepository.findAvgRatingByService(id);
 
-        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating, false);
+        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating);
     }
 
     //서비스 다건 조회
