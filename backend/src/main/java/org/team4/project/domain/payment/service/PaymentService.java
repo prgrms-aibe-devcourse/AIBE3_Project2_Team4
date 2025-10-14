@@ -13,12 +13,15 @@ import org.team4.project.domain.payment.dto.PaymentConfirmDTO;
 import org.team4.project.domain.payment.dto.PaymentConfirmRequestDTO;
 import org.team4.project.domain.payment.dto.PaymentResponseDTO;
 import org.team4.project.domain.payment.dto.SavePaymentRequestDTO;
+import org.team4.project.domain.payment.dto.UpdatePaymentMemoRequestDTO;
 import org.team4.project.domain.payment.entity.Payment;
 import org.team4.project.domain.payment.entity.PaymentMethod;
 import org.team4.project.domain.payment.entity.PaymentStatus;
 import org.team4.project.domain.payment.exception.PaymentException;
 import org.team4.project.domain.payment.infra.PaymentClient;
 import org.team4.project.domain.payment.repository.PaymentRepository;
+import org.team4.project.domain.service.entity.service.ProjectService;
+import org.team4.project.domain.service.repository.ServiceRepository;
 import org.team4.project.global.redis.RedisRepository;
 
 import java.time.Duration;
@@ -36,24 +39,30 @@ public class PaymentService {
     private static final ZoneId ZONE_ASIA_SEOUL = ZoneId.of("Asia/Seoul");
 
     private final PaymentClient paymentClient;
+
     private final RedisRepository redisRepository;
     private final MemberRepository memberRepository;
     private final PaymentRepository paymentRepository;
+    private final ServiceRepository serviceRepository;
 
     @Transactional
     public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO, String email) {
         String orderId = paymentConfirmRequestDTO.orderId();
         Integer amount = paymentConfirmRequestDTO.amount();
         String memo = paymentConfirmRequestDTO.memo();
+        Long serviceId = paymentConfirmRequestDTO.serviceId();
 
         verifyTempPayment(orderId, amount);
 
         PaymentConfirmDTO paymentConfirmDTO = paymentConfirmRequestDTO.convert();
         JsonNode response = paymentClient.confirmPayment(paymentConfirmDTO);
 
-        //TODO : 서비스 ID 전달받아 Payment 엔티티에 서비스 저장
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다. email : " + email));
-        paymentRepository.save(convertToEntity(response, member, memo));
+        Member member = memberRepository.findByEmail(email)
+                                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다. email : " + email));
+        ProjectService projectService = serviceRepository.findById(serviceId)
+                                                         .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 서비스입니다. serviceId : " + serviceId));
+
+        paymentRepository.save(convertToEntity(response, member, projectService, memo));
         redisRepository.deleteValue(generateKey(orderId));
 
         String receiptUrl = response.get("receipt").get("url").asText(null);
@@ -69,6 +78,13 @@ public class PaymentService {
         redisRepository.setValue(key, value, Duration.ofMinutes(10));
     }
 
+    @Transactional
+    public void updatePaymentMemo(String paymentKey, UpdatePaymentMemoRequestDTO updatePaymentMemoRequestDTO, String email) {
+        Payment payment = paymentRepository.findByPaymentKeyAndMemberEmail(paymentKey, email)
+                                           .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 결제 정보입니다. paymentKey : " + paymentKey + ", email : " + email));
+        payment.updateMemo(updatePaymentMemoRequestDTO.memo());
+    }
+
     private void verifyTempPayment(String orderId, Integer amount) {
         String key = generateKey(orderId);
         String storedValue = redisRepository.getValue(key);
@@ -79,7 +95,7 @@ public class PaymentService {
         }
     }
 
-    private Payment convertToEntity(JsonNode response, Member member, String memo) {
+    private Payment convertToEntity(JsonNode response, Member member, ProjectService projectService, String memo) {
         String orderId = response.get("orderId").asText();
         String paymentKey = response.get("paymentKey").asText();
 
@@ -94,6 +110,7 @@ public class PaymentService {
         return Payment.builder()
                       .paymentKey(paymentKey)
                       .member(member)
+                      .projectService(projectService)
                       .orderId(orderId)
                       .paymentMethod(paymentMethod)
                       .paymentStatus(paymentStatus)
