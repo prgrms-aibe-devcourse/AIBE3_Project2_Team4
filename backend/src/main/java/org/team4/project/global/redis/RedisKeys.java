@@ -7,4 +7,8 @@ public class RedisKeys {
     public static String signupVerified(String email) {
         return "signup:verified:" + email;
     }
+
+    public static String passwordResetToken(String email) {
+        return "password:reset:token:" + email;
+    }
 }

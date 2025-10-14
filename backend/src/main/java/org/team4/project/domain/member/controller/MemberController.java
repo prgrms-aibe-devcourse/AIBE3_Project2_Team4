@@ -47,6 +47,22 @@ public class MemberController {
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
     }
 
+    @PostMapping("/reset-password/request")
+    public ResponseEntity<String> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDTO request) {
+        String token = memberService.generatePasswordResetToken(request.getEmail());
+
+        mailService.sendPasswordResetLink(request.getEmail(), token);
+
+        return ResponseEntity.ok("비밀번호 재설정 링크가 메일로 전송되었습니다.");
+    }
+
+    @PostMapping("/reset-password/confirm")
+    public ResponseEntity<String> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmRequestDTO request) {
+        memberService.resetPassword(request);
+
+        return ResponseEntity.ok("비밀번호 재설정이 완료되었습니다");
+    }
+
     @PostMapping("/token/refresh")
     public void reissueToken(@CookieValue(name = TOKEN_TYPE_REFRESH, required = false) String refreshToken, HttpServletResponse response) {
         String newAccessToken = authService.reissueAccessToken(refreshToken);

@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.PasswordResetConfirmRequestDTO;
 import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.entity.MemberRole;
 import org.team4.project.domain.member.entity.Provider;
+import org.team4.project.domain.member.exception.PasswordResetException;
 import org.team4.project.domain.member.exception.RegisterException;
 import org.team4.project.domain.member.repository.MemberQueryRepository;
 import org.team4.project.domain.member.repository.MemberRepository;
@@ -88,6 +90,34 @@ public class MemberService {
                 "true",
                 Duration.ofMinutes(10)
         );
+    }
+
+    public String generatePasswordResetToken(String email) {
+        if (!memberRepository.existsByEmail(email)) {
+            throw new EntityNotFoundException("해당 이메일로 가입한 회원이 없습니다.");
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        redisRepository.setValue(
+                RedisKeys.passwordResetToken(email),
+                token,
+                Duration.ofMinutes(5)
+        );
+
+        return token;
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetConfirmRequestDTO request) {
+        String token = redisRepository.getValue(RedisKeys.passwordResetToken(request.getEmail()));
+
+        if (!request.getToken().equals(token)) {
+            throw new PasswordResetException("비밀번호 재설정 링크가 유효하지 않거나 만료되었습니다. 다시 요청해주세요.");
+        }
+
+        Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
+        member.setPassword(passwordEncoder.encode(request.getPassword()));
     }
 
     private boolean isSignupVerified(String email) {
