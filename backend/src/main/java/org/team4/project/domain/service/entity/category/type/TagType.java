@@ -1,0 +1,16 @@
+package org.team4.project.domain.service.entity.category.type;
+
+public enum TagType {
+    //WEB_DEVELOPMENT 웹 개발
+    FRONTEND, BACKEND, FULLSTACK,
+    //MOBILE_DEVELOPMENT 앱 개발
+    IOS, ANDROID, CROSS_PLATFORM,
+    //DATA_SCIENCE 데이터
+    DATABASE, DATA_ANALYSIS, AI_MACHINE_LEARNING,
+    //INFRA_SECURITY 인프라 보안
+    CLOUD_SERVER, DEVOPS, SECURITY,
+    //UIUX_DESIGN 디자인
+    UI_DESIGN, UX_DESIGN, PROTOTYPING,
+    //ETC 기타
+    PROJECT_MANAGEMENT, QA_TESTING, TECHNICAL_WRITING
+}

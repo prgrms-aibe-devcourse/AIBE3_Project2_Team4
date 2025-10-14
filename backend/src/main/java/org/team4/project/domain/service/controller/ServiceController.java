@@ -2,11 +2,18 @@ package org.team4.project.domain.service.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
+import org.team4.project.domain.service.dto.ServiceDetailDTO;
+import org.team4.project.domain.service.entity.category.type.CategoryType;
+import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.service.ServiceService;
 
@@ -14,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/services")
+@RequestMapping("/api/v1/service")
 public class ServiceController {
     private final ServiceService serviceService;
 
@@ -28,17 +35,33 @@ public class ServiceController {
 
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
-    public ServiceDTO getItem(@PathVariable Long id) {
+    public ServiceDetailDTO getItem(@PathVariable Long id) {
         return serviceService.fromFindById(id);
     }
 
     @GetMapping
     @Transactional(readOnly = true)
-    public List<ServiceDTO> getServices(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return serviceService.getServices(page, size);
+    public Page<ServiceDTO> getServices(
+        @PageableDefault(page = 0, size = 10, sort="id", direction = Sort.Direction.DESC)Pageable pageable) {
+        return serviceService.getServices(pageable);
     }
+
+    @GetMapping("/category")
+    @Transactional(readOnly = true)
+    public Page<ServiceDTO> getServicesByCategory(
+            @PageableDefault(page = 0, size = 10, sort="id", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam CategoryType category) {
+        return serviceService.getServicesByCategory(pageable, category);
+    }
+
+    @GetMapping("/tags")
+    @Transactional(readOnly = true)
+    public Page<ServiceDTO> getServicesByTags(
+            @PageableDefault(page = 0, size = 10, sort="id", direction = Sort.Direction.DESC)Pageable pageable,
+            @RequestParam List<TagType> tags) {
+        return serviceService.getServicesByTags(pageable, tags);
+    }
+
 
     @PutMapping("/{id}")
     @Transactional

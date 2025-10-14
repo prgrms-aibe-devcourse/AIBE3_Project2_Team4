@@ -26,8 +26,6 @@ import {
   Star,
   Bookmark,
   Plus,
-  CreditCard,
-  Calendar,
   ExternalLink,
   Briefcase,
   Trash2,
@@ -37,7 +35,8 @@ import {
 } from "lucide-react";
 import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
+import PaymentTab from "./PaymentTab";
 
 export default function MyPage() {
   const router = useRouter();
@@ -205,41 +204,6 @@ export default function MyPage() {
       rating: 4.9,
       reviewCount: 34,
       freelancerName: "김디자이너",
-    },
-  ];
-
-  const paymentHistory = [
-    {
-      id: "1",
-      image: "/ecommerce-website-homepage.png",
-      amount: 2000000,
-      memo: "이커머스 웹사이트 구축 프로젝트 최종 결제",
-      date: "2024.03.15",
-      status: "completed",
-    },
-    {
-      id: "2",
-      image: "/data-visualization-dashboard.png",
-      amount: 1200000,
-      memo: "데이터 시각화 대시보드 개발 1차 결제",
-      date: "2024.03.10",
-      status: "completed",
-    },
-    {
-      id: "3",
-      image: "/project-management-dashboard.png",
-      amount: 800000,
-      memo: "API 서버 구축 및 배포",
-      date: "2024.03.05",
-      status: "completed",
-    },
-    {
-      id: "4",
-      image: "/responsive-design.png",
-      amount: 500000,
-      memo: "반응형 웹사이트 리뉴얼",
-      date: "2024.02.28",
-      status: "completed",
     },
   ];
 
@@ -904,7 +868,7 @@ export default function MyPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>내가 등록한 서비스</CardTitle>
-                  <Button onClick={()=> router.push("/services/register")}>
+                  <Button onClick={() => router.push("/services/register")}>
                     <Plus className="mr-2 h-4 w-4" />새 서비스 등록
                   </Button>
                 </CardHeader>
@@ -926,55 +890,7 @@ export default function MyPage() {
 
           {/* 결제 내역 탭 */}
           <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="h-5 w-5" />
-                  <span>결제 내역</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {paymentHistory.map((payment) => (
-                    <Card
-                      key={payment.id}
-                      className="overflow-hidden transition-shadow hover:shadow-lg"
-                    >
-                      <div className="bg-muted relative h-48">
-                        <img
-                          src={payment.image || "/placeholder.svg"}
-                          alt="결제 항목"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <CardContent className="space-y-3 p-4">
-                        <div className="flex items-baseline justify-between">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-primary text-2xl font-bold">
-                              {payment.amount.toLocaleString()}
-                            </span>
-                            <span className="text-muted-foreground text-sm">원</span>
-                          </div>
-                          <Badge variant="secondary" className="gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {payment.date}
-                          </Badge>
-                        </div>
-                        {payment.memo && (
-                          <div className="bg-muted/50 rounded-lg border p-3">
-                            <p className="text-muted-foreground mb-1 text-sm">메모</p>
-                            <p className="text-sm leading-relaxed">{payment.memo}</p>
-                          </div>
-                        )}
-                        <Badge className="w-full justify-center bg-green-500 hover:bg-green-600">
-                          결제 완료
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <PaymentTab />
           </TabsContent>
 
           {/* 북마크 탭 (클라이언트 전용) */}

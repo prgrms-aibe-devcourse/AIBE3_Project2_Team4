@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -18,116 +18,124 @@ import {
 } from "@/components/ui/select";
 import { ReviewCard } from "@/components/review-card";
 import { Pagination } from "@/components/pagination";
+import { components } from "@/app/service/backend/schemas";
 
-// Mock data - 실제로는 API에서 가져올 데이터
-const mockService = {
-  id: "1",
-  title: "프리미엄 웹사이트 디자인 및 개발",
-  price: 500000,
-  rating: 4.8,
-  reviewCount: 127,
-  images: [
-    "/website-design-portfolio-1.jpg",
-    "/website-design-portfolio-2.jpg",
-    "/website-design-portfolio-3.jpg",
-    "/website-design-portfolio-4.jpg",
-  ],
-  description: `안녕하세요! 5년 경력의 풀스택 개발자입니다.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-✅ 제공 서비스
-• 반응형 웹사이트 디자인
-• 프론트엔드 개발 (React, Next.js)
-• 백엔드 개발 (Node.js, Python)
-• 데이터베이스 설계 및 구축
-• SEO 최적화
+// const mockService = {
+//   id: "1",
+//   title: "프리미엄 웹사이트 디자인 및 개발",
+//   price: 500000,
+//   rating: 4.8,
+//   reviewCount: 127,
+//   images: [
+//     "/website-design-portfolio-1.jpg",
+//     "/website-design-portfolio-2.jpg",
+//     "/website-design-portfolio-3.jpg",
+//     "/website-design-portfolio-4.jpg",
+//   ],
+//   description: `안녕하세`,
+//   freelancer: {
+//     id: "freelancer-1",
+//     name: "김개발",
+//     avatar: "/developer-profile.png",
+//     rating: 4.9,
+//   },
+//   tags: ["웹개발", "React", "Next.js", "디자인"],
+//   category: "웹개발",
+// };
 
-✅ 작업 프로세스
-1. 요구사항 분석 및 기획
-2. 디자인 시안 제작
-3. 개발 및 테스트
-4. 배포 및 유지보수
-
-✅ 포함 사항
-• 무제한 수정
-• 1개월 무료 유지보수
-• 소스코드 제공
-• 배포 지원
-
-궁금한 점이 있으시면 언제든 채팅으로 문의해주세요!`,
-  freelancer: {
-    id: "freelancer-1",
-    name: "김개발",
-    avatar: "/developer-profile.png",
-    rating: 4.9,
-    completedProjects: 89,
-  },
-  tags: ["웹개발", "React", "Next.js", "디자인"],
-  category: "웹개발",
-};
-
-const mockReviews = [
-  {
-    id: "1",
-    rating: 5,
-    content:
-      "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
-    images: ["/review-image-1.jpg", "/review-image-2.jpg"],
-    authorName: "이클라이언트",
-    authorId: "client-1",
-    authorProfileImage: "/client-profile-1.jpg",
-    createdAt: "2024.01.15",
-  },
-  {
-    id: "2",
-    rating: 5,
-    content:
-      "소통이 원활하고 작업 속도도 빨라서 좋았습니다. 중간중간 진행상황도 공유해주시고, 수정 요청에도 빠르게 대응해주셨어요. 추천합니다!",
-    images: ["/review-image-3.jpg"],
-    authorName: "박사장",
-    authorId: "client-2",
-    authorProfileImage: "/client-profile-2.jpg",
-    createdAt: "2024.01.10",
-  },
-  {
-    id: "3",
-    rating: 4,
-    content:
-      "전반적으로 만족하지만 초기 소통에서 약간의 아쉬움이 있었습니다. 하지만 결과물은 기대 이상이었고, 애프터서비스도 좋았습니다.",
-    images: [],
-    authorName: "최대표",
-    authorId: "client-3",
-    authorProfileImage: "/client-profile-3.jpg",
-    createdAt: "2024.01.05",
-  },
-  {
-    id: "4",
-    rating: 5,
-    content:
-      "프로젝트 완성도가 정말 높습니다. 세심한 부분까지 신경써주시고, 코드 품질도 우수해요. 유지보수도 편리하게 해주셨습니다.",
-    images: ["/review-image-4.jpg", "/review-image-5.jpg", "/review-image-6.jpg"],
-    authorName: "김기획",
-    authorId: "client-4",
-    authorProfileImage: "/client-profile-4.jpg",
-    createdAt: "2023.12.28",
-  },
-];
+// const mockReviews = [
+//   {
+//     id: "1",
+//     rating: 5,
+//     content:
+//       "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
+//     images: ["/review-image-1.jpg", "/review-image-2.jpg"],
+//     authorName: "이클라이언트",
+//     authorId: "client-1",
+//     authorProfileImage: "/client-profile-1.jpg",
+//     createdAt: "2024.01.15",
+//   }
+// ];
 
 export default function ServiceDetailPage() {
   const params = useParams();
+  const serviceId = params?.id;
+
+  type ServiceReviewDTO = components["schemas"]["ServiceReviewDTO"];
+  type ServiceDTO = components["schemas"]["ServiceDTO"];
+  const [service, setService] = useState<ServiceDTO | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reviewSort, setReviewSort] = useState("latest");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 실제로는 auth context에서 가져올 값
+  const [reviews, setReviews] = useState<ServiceReviewDTO[]>([]);
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
+  const [totalReviewPage, setTotalReviewPage] = useState(1);
+
+  useEffect(() => {
+    const fetchServiceDetail = async () => {
+      if (!serviceId) return;
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE_URL}/api/v1/service/${serviceId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) throw new Error(`서비스 정보를 불러오지 못했습니다. (${res.status})`);
+
+        const data: ServiceDTO = await res.json();
+        setService(data);
+      } catch (err: any) {
+        console.error("서비스 상세 조회 실패:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceDetail();
+  }, [serviceId]);
+
+  const reviewSize = 5;
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/v1/review/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+
+        if (!res.ok) throw new Error(`서비스 정보를 불러오지 못했습니다. (${res.status})`);
+
+        const data = await res.json();
+        setReviews(data.content);
+        setTotalReviewPage(data.totalPages);
+      } catch (err: any) {
+        console.error("서비스 상세 조회 실패:", err);
+        setError(err.message);
+      }
+    };
+
+    fetchReviews();
+  }, [currentReviewPage]);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % mockService.images.length);
+    if (!service || !service.images?.length) return;
+    setCurrentImageIndex((prev) => (prev + 1) % service.images.length);
   };
 
   const prevImage = () => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + mockService.images.length) % mockService.images.length,
-    );
+    if (!service || !service.images?.length) return;
+    setCurrentImageIndex((prev) => (prev - 1 + service.images.length) % service.images.length);
   };
 
   const handleChatClick = () => {
@@ -135,7 +143,6 @@ export default function ServiceDetailPage() {
       alert("로그인이 필요한 서비스입니다.");
       return;
     }
-    // 채팅 생성 로직
     console.log("채팅 시작");
   };
 
@@ -144,7 +151,7 @@ export default function ServiceDetailPage() {
       alert("로그인이 필요한 서비스입니다.");
       return;
     }
-    setIsBookmarked(!isBookmarked);
+    setIsBookmarked((prev) => !prev);
   };
 
   const handleShareClick = async () => {
@@ -156,6 +163,11 @@ export default function ServiceDetailPage() {
     }
   };
 
+  // --- 렌더링 가드 ---
+  if (loading) return <div className="p-10 text-center">로딩 중...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
+  if (!service) return <div className="p-10 text-center">서비스를 찾을 수 없습니다.</div>;
+
   return (
     <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-6xl px-4 py-8">
@@ -165,12 +177,12 @@ export default function ServiceDetailPage() {
           <div className="space-y-4">
             <div className="relative aspect-video overflow-hidden rounded-lg">
               <Image
-                src={mockService.images[currentImageIndex] || "/placeholder.svg"}
-                alt={`${mockService.title} - 이미지 ${currentImageIndex + 1}`}
+                src={service.images[currentImageIndex] || "/placeholder.svg"}
+                alt={`${service.title} - 이미지 ${currentImageIndex + 1}`}
                 fill
                 className="object-cover"
               />
-              {mockService.images.length > 1 && (
+              {service.images.length > 1 && (
                 <>
                   <Button
                     variant="ghost"
@@ -193,9 +205,9 @@ export default function ServiceDetailPage() {
             </div>
 
             {/* 썸네일 이미지들 */}
-            {mockService.images.length > 1 && (
+            {service.images.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto">
-                {mockService.images.map((image, index) => (
+                {service.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
@@ -220,23 +232,23 @@ export default function ServiceDetailPage() {
           <div className="space-y-6">
             <div>
               <div className="mb-2 flex items-center space-x-2">
-                <Badge variant="secondary">{mockService.category}</Badge>
-                {mockService.tags.map((tag) => (
+                <Badge variant="secondary">{service.category}</Badge>
+                {service.tags.map((tag) => (
                   <Badge key={tag} variant="outline">
                     {tag}
                   </Badge>
                 ))}
               </div>
-              <h1 className="mb-4 text-2xl font-bold">{mockService.title}</h1>
+              <h1 className="mb-4 text-2xl font-bold">{service.title}</h1>
               <div className="mb-4 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{mockService.rating}</span>
-                  <span className="text-muted-foreground">({mockService.reviewCount}개 리뷰)</span>
+                  <span className="font-medium">{service.rating}</span>
+                  <span className="text-muted-foreground">({service.reviewCount}개 리뷰)</span>
                 </div>
               </div>
               <div className="text-primary mb-6 text-3xl font-bold">
-                {mockService.price.toLocaleString()}원
+                {service.price.toLocaleString()}원
               </div>
             </div>
 
@@ -244,24 +256,25 @@ export default function ServiceDetailPage() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
-                  <Link href={`/freelancer/${mockService.freelancer.id}`}>
+                  <Link href={`/freelancer/${service.freelancer.id}`}>
                     <Avatar className="hover:ring-primary h-12 w-12 cursor-pointer hover:ring-2">
-                      <AvatarImage src={mockService.freelancer.avatar || "/placeholder.svg"} />
-                      <AvatarFallback>{mockService.freelancer.name[0]}</AvatarFallback>
+                      {/* <AvatarImage src={service.freelancer.avatar || "/placeholder.svg"} /> */}
+                      <AvatarImage src={"/placeholder.svg"} />
+                      <AvatarFallback>{service.freelancer.nickname}</AvatarFallback>
                     </Avatar>
                   </Link>
                   <div className="flex-1">
-                    <Link href={`/freelancer/${mockService.freelancer.id}`}>
+                    <Link href={`/freelancer/${service.freelancer.id}`}>
                       <h3 className="hover:text-primary cursor-pointer font-medium">
-                        {mockService.freelancer.name}
+                        {service.freelancer.nickname}
                       </h3>
                     </Link>
                     <div className="text-muted-foreground flex items-center space-x-4 text-sm">
                       <div className="flex items-center space-x-1">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{mockService.freelancer.rating}</span>
+                        {/* <span>{service.freelancer.rating}</span> */}
+                        <span>4.9</span>
                       </div>
-                      <span>완료 프로젝트 {mockService.freelancer.completedProjects}개</span>
                     </div>
                   </div>
                 </div>
@@ -289,7 +302,7 @@ export default function ServiceDetailPage() {
           <CardContent className="p-6">
             <h2 className="mb-4 text-xl font-bold">서비스 상세 설명</h2>
             <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
-              {mockService.description}
+              {service.description}
             </div>
           </CardContent>
         </Card>
@@ -302,9 +315,9 @@ export default function ServiceDetailPage() {
               <div className="mt-2 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-medium">{mockService.rating}</span>
+                  <span className="text-lg font-medium">{service.rating}</span>
                 </div>
-                <span className="text-muted-foreground">총 {mockService.reviewCount}개 리뷰</span>
+                <span className="text-muted-foreground">총 {service.reviewCount}개 리뷰</span>
               </div>
             </div>
             <Select value={reviewSort} onValueChange={setReviewSort}>
@@ -319,15 +332,15 @@ export default function ServiceDetailPage() {
           </div>
 
           <div className="grid gap-4">
-            {mockReviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard
                 key={review.id}
                 rating={review.rating}
                 content={review.content}
                 images={review.images}
-                authorName={review.authorName}
-                authorId={review.authorId}
-                authorProfileImage={review.authorProfileImage}
+                authorName={review.freelancerName}
+                authorId={review.freelancerEmail}
+                authorProfileImage={review.freelancerProfileImage}
                 createdAt={review.createdAt}
               />
             ))}
@@ -335,7 +348,7 @@ export default function ServiceDetailPage() {
 
           <Pagination
             currentPage={currentReviewPage}
-            totalPages={5}
+            totalPages={totalReviewPage}
             onPageChange={setCurrentReviewPage}
           />
         </div>

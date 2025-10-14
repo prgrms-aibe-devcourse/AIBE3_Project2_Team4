@@ -20,7 +20,7 @@ public record PaymentConfirmRequestDTO(
         @NotNull @PositiveOrZero @Schema(description = "결제할 금액", requiredMode = REQUIRED)
         Integer amount,
 
-        String memo) {
+        String memo, Long serviceId) {
 
     public PaymentConfirmDTO convert() {
         return new PaymentConfirmDTO(this.paymentKey, this.orderId, this.amount);
