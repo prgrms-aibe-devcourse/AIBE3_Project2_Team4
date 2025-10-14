@@ -35,11 +35,10 @@ import {
 } from "lucide-react";
 import ChatTab from "./ChatTab";
 import useLogin from "@/hooks/use-Login";
-import { useRouter } from "next/navigation";
 import PaymentTab from "./PaymentTab";
+import MyServiceTab from "@/app/mypage/MyServiceTab";
 
 export default function MyPage() {
-  const router = useRouter();
   const { isLoggedIn, member } = useLogin();
   const userType = member ? member.role : null;
 
@@ -61,6 +60,18 @@ export default function MyPage() {
   const [experienceCompany, setExperienceCompany] = useState("");
   const [experiencePeriod, setExperiencePeriod] = useState("");
   const [experienceDescription, setExperienceDescription] = useState("");
+
+  const bookmarkedServices = [
+    {
+      id: "5",
+      thumbnail: "/project-management-dashboard.png",
+      title: "모바일 앱 UI/UX 디자인",
+      price: 600000,
+      rating: 4.9,
+      reviewCount: 34,
+      freelancerName: "김디자이너",
+    },
+  ];
 
   const [userProfile, setUserProfile] = useState({
     nickname: "김개발자",
@@ -109,29 +120,6 @@ export default function MyPage() {
     teamName: "개발팀",
   });
 
-  const myServices = [
-    {
-      id: "1",
-      thumbnail: "/ecommerce-website-homepage.png",
-      title: "React 웹사이트 개발해드립니다",
-      price: 500000,
-      rating: 4.9,
-      reviewCount: 23,
-      freelancerName: "김개발자",
-      status: "active",
-    },
-    {
-      id: "2",
-      thumbnail: "/project-management-dashboard.png",
-      title: "Node.js API 서버 구축",
-      price: 800000,
-      rating: 4.7,
-      reviewCount: 15,
-      freelancerName: "김개발자",
-      status: "active",
-    },
-  ];
-
   // Updated service data structure to include memo field and chatId
   const [freelancerServices, setFreelancerServices] = useState({
     ongoing: [
@@ -164,6 +152,8 @@ export default function MyPage() {
     ],
   });
 
+
+
   const [clientServices, setClientServices] = useState({
     ongoing: [
       {
@@ -194,18 +184,6 @@ export default function MyPage() {
       },
     ],
   });
-
-  const bookmarkedServices = [
-    {
-      id: "5",
-      thumbnail: "/project-management-dashboard.png",
-      title: "모바일 앱 UI/UX 디자인",
-      price: 600000,
-      rating: 4.9,
-      reviewCount: 34,
-      freelancerName: "김디자이너",
-    },
-  ];
 
   useEffect(() => {
     setIsLoading(false);
@@ -865,21 +843,7 @@ export default function MyPage() {
           {/* 내 서비스 탭 (프리랜서 전용) */}
           {userType === "freelancer" && (
             <TabsContent value="my-services">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>내가 등록한 서비스</CardTitle>
-                  <Button onClick={() => router.push("/services/register")}>
-                    <Plus className="mr-2 h-4 w-4" />새 서비스 등록
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {myServices.map((service) => (
-                      <ServiceCard key={service.id} {...service} variant="mypage" />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <MyServiceTab />
             </TabsContent>
           )}
 

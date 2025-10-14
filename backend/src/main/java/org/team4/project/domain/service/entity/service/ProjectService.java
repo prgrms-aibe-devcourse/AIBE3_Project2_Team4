@@ -7,8 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
+import org.team4.project.domain.service.entity.reviews.ServiceReview;
 import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.global.jpa.entity.BaseEntity;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,6 +30,9 @@ public class ProjectService extends BaseEntity {
     private String title;
     private String content;
     private Integer price;
+
+    @OneToMany(mappedBy = "service", orphanRemoval = true, cascade = CascadeType.REMOVE)
+    private List<ServiceReview> reviews;
 
     public static ProjectService addService(ServiceCreateRqBody serviceCreateRqBody, Member freelancer) {
         return ProjectService.builder()

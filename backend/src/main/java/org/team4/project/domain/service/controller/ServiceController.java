@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.member.entity.Member;
@@ -16,6 +18,7 @@ import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.domain.service.service.ServiceService;
+import org.team4.project.global.security.CustomUserDetails;
 
 import java.util.List;
 
@@ -89,4 +92,16 @@ public class ServiceController {
         serviceService.deleteService(id);
     }
 
+    @GetMapping("/me")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<ServiceDTO>> getMyServices(
+            @PageableDefault(page=0, size=10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        Page<ServiceDTO> response = serviceService.getServicesByEmail(currentUser.getUsername(), pageable);
+        return ResponseEntity
+                .ok()
+                .body(response);
+    }
 }
