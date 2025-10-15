@@ -41,17 +41,17 @@ function ServicesPageContent() {
   const itemsPerPage = 9;
 
   const fetchServices = async () => {
-    let url = `${API_BASE_URL}/api/v1/service?page=${currentPage - 1}&size=${itemsPerPage}`;
+    let url = `${API_BASE_URL}/api/v1/services?page=${currentPage - 1}&size=${itemsPerPage}`;
 
     // 카테고리만 선택
     if (selectedCategory && selectedTags.length === 0) {
-      url = `${API_BASE_URL}/api/v1/service/category?page=${currentPage - 1}&size=${itemsPerPage}&category=${selectedCategory}`;
+      url = `${API_BASE_URL}/api/v1/services/category?page=${currentPage - 1}&size=${itemsPerPage}&category=${selectedCategory}`;
     }
 
     // 태그 선택
     if (selectedTags.length > 0) {
       const tagQuery = selectedTags.map((tag) => `&tags=${encodeURIComponent(tag)}`).join("");
-      url = `${API_BASE_URL}/api/v1/service/tags?page=${currentPage - 1}&size=${itemsPerPage}${tagQuery}`;
+      url = `${API_BASE_URL}/api/v1/services/tags?page=${currentPage - 1}&size=${itemsPerPage}${tagQuery}`;
     }
 
     try {
@@ -263,7 +263,7 @@ function ServicesPageContent() {
                   {currentServices.map((service) => (
                     <ServiceCard
                       key={service.id}
-                      id={service.id}
+                      id={service.id.toString()}
                       thumbnail={service.thumbnail}
                       title={service.title}
                       price={service.price}

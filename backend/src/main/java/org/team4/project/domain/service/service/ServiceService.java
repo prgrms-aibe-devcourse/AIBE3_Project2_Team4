@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.service.dto.ServiceCreateRqBody;
 import org.team4.project.domain.service.dto.ServiceDTO;
 import org.team4.project.domain.service.dto.ServiceDetailDTO;
@@ -21,6 +22,7 @@ import org.team4.project.domain.service.repository.ServiceRepository;
 import org.team4.project.domain.service.repository.ServiceReviewRepository;
 import org.team4.project.domain.service.repository.TagRepository;
 import org.team4.project.domain.service.repository.TagServiceRepository;
+import org.team4.project.global.security.CustomUserDetails;
 
 import java.util.List;
 
@@ -30,7 +32,8 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final TagServiceRepository tagServiceRepository;
     private final TagRepository tagRepository;
-    private final ServiceReviewRepository serviceReviewRepository; // 누락 상태인 것 같아서 잠시 주석
+    private final ServiceReviewRepository serviceReviewRepository;
+    private final MemberRepository memberRepository;
 
     //서비스 개수 조회
     public Integer count() {
@@ -40,7 +43,9 @@ public class ServiceService {
     //CREATE------------------------------------------------------------------
     // 서비스 생성
     @Transactional
-    public void createService(ServiceCreateRqBody serviceCreateRqBody, Member freeLancer) {
+    public void createService(ServiceCreateRqBody serviceCreateRqBody, CustomUserDetails memberDetails) {
+        Member freeLancer = memberRepository.findByEmail(memberDetails.getEmail())
+                .orElseThrow(() -> new ServiceException("해당 사용자가 존재하지 않습니다."));
         ProjectService service =  serviceRepository.save(
             ProjectService.addService(serviceCreateRqBody, freeLancer)
         );

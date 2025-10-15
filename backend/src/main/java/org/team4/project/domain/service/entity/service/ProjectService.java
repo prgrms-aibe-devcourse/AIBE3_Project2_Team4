@@ -49,14 +49,14 @@ public class ProjectService extends BaseEntity {
         this.price = newPrice;
     }
 
-    public void checkActorCanModify(Member actor) {
-        if (!actor.getId().equals(freelancer.getId())) {
+    public void checkActorCanModify(String actor) {
+        if (!actor.equals(freelancer.getEmail())) {
             throw new ServiceException("%d번 글 수정 권한이 없습니다.".formatted(getId()));
         }
     }
 
-    public void checkActorCanDelete(Member actor) {
-        if (!actor.getId().equals(freelancer.getId())) {
+    public void checkActorCanDelete(String actor) {
+        if (!actor.equals(freelancer.getEmail())) {
             throw new ServiceException("%d번 글을 삭제할 권한이 없습니다.".formatted(getId()));
         }
     }
