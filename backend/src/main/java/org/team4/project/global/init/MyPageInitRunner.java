@@ -28,9 +28,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 @Configuration
 public class MyPageInitRunner {
-
+/*
     @Autowired
     ServiceService serviceService;
     @Autowired
@@ -187,4 +189,7 @@ public class MyPageInitRunner {
         chatRoomService.findOrCreateRoom(client5, 1L);
         chatRoomService.findOrCreateRoom(client2, 252L);
     }
+    */
 }
+
+
