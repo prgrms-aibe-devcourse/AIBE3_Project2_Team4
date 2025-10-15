@@ -433,7 +433,7 @@ export default function ServiceRegisterPage() {
                               onClick={() => handleImageClick(index)}
                             >
                               <img
-                                src={preview || "/placeholder.svg"}
+                                src={preview || "/placeholder-image.svg"}
                                 alt={`서비스 이미지 ${index + 1}`}
                                 className="h-32 w-full rounded-lg border border-gray-200 object-cover"
                               />

@@ -213,7 +213,7 @@ export default function ServiceDetailPage() {
           <div className="space-y-4">
             <div className="relative aspect-video overflow-hidden rounded-lg">
               <Image
-                src={service.images[currentImageIndex] || "/placeholder.svg"}
+                src={service.images[currentImageIndex] || "/placeholder-image.svg"}
                 alt={`${service.title} - 이미지 ${currentImageIndex + 1}`}
                 fill
                 className="object-cover"
@@ -252,7 +252,7 @@ export default function ServiceDetailPage() {
                     }`}
                   >
                     <Image
-                      src={image || "/placeholder.svg"}
+                      src={image || "/placeholder-image.svg"}
                       alt={`썸네일 ${index + 1}`}
                       width={80}
                       height={80}

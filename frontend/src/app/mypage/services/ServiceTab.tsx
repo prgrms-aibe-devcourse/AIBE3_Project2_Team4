@@ -113,7 +113,7 @@ export default function ServiceTab() {
                 >
                   <div className="bg-muted relative h-48">
                     <img
-                      src={service.thumbnail || "/placeholder.svg"}
+                      src={service.thumbnail || "/placeholder-image.svg"}
                       alt={service.title}
                       className="h-full w-full object-cover"
                     />
@@ -182,7 +182,7 @@ export default function ServiceTab() {
                 >
                   <div className="bg-muted relative h-48">
                     <img
-                      src={service.thumbnail || "/placeholder.svg"}
+                      src={service.thumbnail || "/placeholder-image.svg"}
                       alt={service.title}
                       className="h-full w-full object-cover"
                     />
