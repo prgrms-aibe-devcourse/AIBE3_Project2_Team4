@@ -22,7 +22,7 @@ export default function useAuthFetchV1<DTO, OUT>(
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error(url + err);
+        console.error(err);
       });
   }, [url, errMsg]);
 

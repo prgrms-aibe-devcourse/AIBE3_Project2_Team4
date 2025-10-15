@@ -23,7 +23,12 @@ export function ServiceCard({
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
       <Link href={`/service/${id}`} className="block">
         <div className="relative aspect-video">
-          <Image src={thumbnail || "/placeholder.svg"} alt={title} fill className="object-cover" />
+          <Image
+            src={thumbnail || "/placeholder-image.svg"}
+            alt={title}
+            fill
+            className="object-cover"
+          />
         </div>
       </Link>
 

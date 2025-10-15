@@ -1,5 +1,6 @@
 package org.team4.project.global.exception;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.team4.project.domain.activeService.exception.OwnerMismatchException;
 import org.team4.project.domain.member.exception.LoginException;
 import org.team4.project.domain.member.exception.PasswordResetException;
 import org.team4.project.domain.member.exception.RefreshTokenException;
@@ -89,5 +91,27 @@ public class GlobalExceptionHandler {
                 request.getMethod(), request.getRequestURI(), e.getMessage(), e);
 
         return new ResponseEntity<>(ErrorResponse.of(request, e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(OwnerMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleOwnerMismatchException(
+            OwnerMismatchException e, HttpServletRequest request) {
+
+        log.warn("owner mismatch at [{} {}]: {}",
+                request.getMethod(), request.getRequestURI(), e.getMessage(), e);
+
+
+        return new ResponseEntity<>(ErrorResponse.of(request, e.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEntityExistsException(
+            EntityExistsException e, HttpServletRequest request) {
+
+        log.warn("conflict at [{} {}]: {}",
+                request.getMethod(), request.getRequestURI(), e.getMessage(), e);
+
+
+        return new ResponseEntity<>(ErrorResponse.of(request, e.getMessage()), HttpStatus.CONFLICT);
     }
 }
