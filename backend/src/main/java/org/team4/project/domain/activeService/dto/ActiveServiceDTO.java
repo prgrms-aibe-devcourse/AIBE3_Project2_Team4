@@ -1,6 +1,5 @@
 package org.team4.project.domain.activeService.dto;
 
-import org.hibernate.usertype.UserType;
 import org.team4.project.domain.activeService.entity.ActiveService;
 import org.team4.project.domain.member.entity.MemberRole;
 import org.team4.project.domain.payment.entity.Payment;
