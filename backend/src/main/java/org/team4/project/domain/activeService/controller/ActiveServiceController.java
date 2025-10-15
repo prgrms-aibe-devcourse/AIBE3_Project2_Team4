@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.team4.project.domain.activeService.dto.ActiveServiceCreateReqBody;
 import org.team4.project.domain.activeService.dto.ActiveServiceDTO;
+import org.team4.project.domain.activeService.dto.ActiveServiceUpdateReqBody;
 import org.team4.project.domain.activeService.service.ActiveServiceService;
 import org.team4.project.global.security.CustomUserDetails;
 
@@ -20,12 +22,16 @@ import java.util.List;
 public class ActiveServiceController {
     final private ActiveServiceService activeServiceService;
 
-    @PostMapping("/create")
+    @PostMapping
     @Operation(summary = "활성 서비스 생성")
     public ResponseEntity<Void> createActiveService(
-            @RequestBody String paymentKey
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestBody ActiveServiceCreateReqBody activeServiceCreateReq
     ) {
-        activeServiceService.createActiveService(paymentKey);
+        activeServiceService.createActiveService(
+                activeServiceCreateReq.paymentKey(),
+                user.getUsername()
+        );
 
         return ResponseEntity.ok().build();
     }
@@ -42,13 +48,17 @@ public class ActiveServiceController {
     }
 
 
-    @PatchMapping("/update")
-    @Operation(summary = "활성 서비스 상태 변경")
+    @PatchMapping
+    @Operation(summary = "활성 서비스 상태 변경 (to 완료)")
     public ResponseEntity<Void> updateActiveService(
             @AuthenticationPrincipal CustomUserDetails user,
-            @RequestBody long id
-    ) {
-        activeServiceService.updateActiveServiceStatus(id);
+            @RequestBody ActiveServiceUpdateReqBody activeServiceUpdateReqBody
+            ) {
+
+        activeServiceService.updateActiveServiceStatus(
+                activeServiceUpdateReqBody.activeServiceId(),
+                user.getUsername()
+        );
         return ResponseEntity.ok().build();
     }
 }

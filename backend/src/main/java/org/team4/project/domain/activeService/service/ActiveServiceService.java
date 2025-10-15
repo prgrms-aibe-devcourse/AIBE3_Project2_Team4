@@ -1,46 +1,53 @@
 package org.team4.project.domain.activeService.service;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.activeService.dto.ActiveServiceDTO;
 import org.team4.project.domain.activeService.entity.ActiveService;
+import org.team4.project.domain.activeService.exception.OwnerMismatchException;
 import org.team4.project.domain.activeService.repository.ActiveServiceRepository;
 import org.team4.project.domain.chat.entity.ChatRoom;
 import org.team4.project.domain.chat.repository.ChatRoomRepository;
 import org.team4.project.domain.member.entity.Member;
-import org.team4.project.domain.member.service.MemberService;
+import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.payment.entity.Payment;
+import org.team4.project.domain.payment.repository.PaymentRepository;
 import org.team4.project.domain.payment.service.PaymentService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ActiveServiceService {
     private final ActiveServiceRepository activeServiceRepository;
-    private final PaymentService paymentService;
-    private final MemberService memberService;
+    private final PaymentRepository paymentRepository;
+    private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
 
 
     @Transactional
-    public void createActiveService(String paymentKey) {
-        Payment payment = paymentService.findPaymentById(paymentKey);
+    public void createActiveService(String paymentKey, String userEmail) {
+        if (activeServiceRepository.existsByPayment_PaymentKey(paymentKey)) {
+            throw new EntityExistsException("이미 활성 서비스가 만들어졌습니다.");
+        }
 
-        ActiveService activeService = new ActiveService(payment);
+        Payment payment = paymentRepository.findByPaymentKeyAndMemberEmail(paymentKey,userEmail)
+                .orElseThrow(() -> new OwnerMismatchException("사용자는 결제의 주인이 아닙니다."));
 
-        activeServiceRepository.save(activeService);
+        activeServiceRepository.save(new ActiveService(payment));
     }
 
     @Transactional(readOnly = true)
     public List<ActiveServiceDTO> getActiveServices(String email) {
-        Member member = memberService.getMemberByEmail(email);
+        Member member = memberRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
 
         Long memberId = member.getId();
-        List<ActiveService> list = activeServiceRepository.findByFreelancer_IdOrClient_Id(memberId, memberId);
+        List<ActiveService> list = activeServiceRepository.findDistinctByFreelancer_IdOrClient_Id(memberId, memberId);
         return list
                 .stream()
                 .map((ac)-> {
@@ -53,11 +60,13 @@ public class ActiveServiceService {
     }
 
     @Transactional
-    public void updateActiveServiceStatus(long id) {
-        ActiveService activeService = activeServiceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 활성 서비스입니다."));
+    public void updateActiveServiceStatus(long actionServiceKey, String userEmail) {
+
+        Member client = memberRepository.findByEmail(userEmail).orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        ActiveService activeService = activeServiceRepository.findByIdAndClient_Id(actionServiceKey, client.getId())
+                .orElseThrow(()->new OwnerMismatchException("사용자가 활성 서비스의 클라이언트가 아닙니다."));
 
         activeService.setFinished(true);
-        activeServiceRepository.save(activeService);
     }
 }

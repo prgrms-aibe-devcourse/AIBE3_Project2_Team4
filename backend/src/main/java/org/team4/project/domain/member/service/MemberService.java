@@ -194,10 +194,4 @@ public class MemberService {
     public Boolean checkNickname(String nickname) {
         return !memberRepository.existsByNickname(nickname);
     }
-
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("존재하지 않는 유저입니다.")
-        );
-    }
 }
