@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, X, Star } from "lucide-react";
 import useCategory from "@/hooks/use-category";
 import { useLoginStore } from "@/store/useLoginStore";
+import { components } from "@/app/services/backend/schemas";
 
 // 카테고리와 태그 데이터
 const categories = useCategory().categories;
@@ -45,7 +46,8 @@ export default function ServiceRegisterPage() {
   const serviceId = searchParams.get("id");
 
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  type Tag = components["schemas"]["Tag"];
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [serviceName, setServiceName] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -75,18 +77,19 @@ export default function ServiceRegisterPage() {
     setSelectedTags([]);
   };
 
-  const toggleTag = (tag: string) => {
+  const toggleTag = (tag: Tag) => {
     setSelectedTags((prev) => {
-      if (prev.includes(tag)) {
-        return prev.filter((t) => t !== tag);
+      const exists = prev.find((t) => t.id === tag.id);
+      if (exists) {
+        return prev.filter((t) => t.id !== tag.id);
       } else {
         return [...prev, tag];
       }
     });
   };
 
-  const removeTag = (tag: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+  const removeTag = (tagId: string) => {
+    setSelectedTags((prev) => prev.filter((t) => t.id !== tagId));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,7 +179,7 @@ export default function ServiceRegisterPage() {
         title: serviceName,
         content: serviceDescription,
         price: Number(price),
-        tagNames: selectedTags,
+        tagNames: selectedTags.map((tag) => tag.id),
         imageUrls: imageUrls,
         mainImageUrl: imageUrls[mainImageIndex],
       };
@@ -270,15 +273,17 @@ export default function ServiceRegisterPage() {
                           <Button
                             key={tag.id}
                             type="button"
-                            variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                            variant={
+                              selectedTags.some((t) => t.id === tag.id) ? "default" : "outline"
+                            }
                             className={`h-11 ${
-                              selectedTags.includes(tag.id)
+                              selectedTags.some((t) => t.id === tag.id)
                                 ? "bg-blue-600 text-white hover:bg-blue-700"
                                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
                             }`}
-                            onClick={() => toggleTag(tag.id)}
+                            onClick={() => toggleTag(tag)}
                           >
-                            {tag.id}
+                            {tag.name}
                           </Button>
                         ))}
                       </div>
@@ -294,10 +299,13 @@ export default function ServiceRegisterPage() {
                         {categories.find((c) => c.id === selectedCategory)?.name}
                       </Badge>
                       {selectedTags.map((tag) => (
-                        <Badge key={tag} className="bg-blue-600 pr-1 text-white hover:bg-blue-700">
-                          {tag}
+                        <Badge
+                          key={tag.id}
+                          className="bg-blue-600 pr-1 text-white hover:bg-blue-700"
+                        >
+                          {tag.name}
                           <button
-                            onClick={() => removeTag(tag)}
+                            onClick={() => removeTag(tag.id)}
                             className="ml-1.5 rounded-full p-0.5 hover:bg-blue-700"
                           >
                             <X className="h-3 w-3" />

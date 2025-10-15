@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Star, MessageCircle, Share2, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,43 +23,6 @@ import { useLoginStore } from "@/store/useLoginStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// const mockService = {
-//   id: "1",
-//   title: "프리미엄 웹사이트 디자인 및 개발",
-//   price: 500000,
-//   rating: 4.8,
-//   reviewCount: 127,
-//   images: [
-//     "/website-design-portfolio-1.jpg",
-//     "/website-design-portfolio-2.jpg",
-//     "/website-design-portfolio-3.jpg",
-//     "/website-design-portfolio-4.jpg",
-//   ],
-//   description: `안녕하세`,
-//   freelancer: {
-//     id: "freelancer-1",
-//     name: "김개발",
-//     avatar: "/developer-profile.png",
-//     rating: 4.9,
-//   },
-//   tags: ["웹개발", "React", "Next.js", "디자인"],
-//   category: "웹개발",
-// };
-
-// const mockReviews = [
-//   {
-//     id: "1",
-//     rating: 5,
-//     content:
-//       "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
-//     images: ["/review-image-1.jpg", "/review-image-2.jpg"],
-//     authorName: "이클라이언트",
-//     authorId: "client-1",
-//     authorProfileImage: "/client-profile-1.jpg",
-//     createdAt: "2024.01.15",
-//   }
-// ];
-
 export default function ServiceDetailPage() {
   const params = useParams();
   const serviceId = params?.id;
@@ -77,6 +40,7 @@ export default function ServiceDetailPage() {
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
   const [totalReviewPage, setTotalReviewPage] = useState(1);
   const { member, accessToken } = useLoginStore();
+  const router = useRouter();
 
   // 서비스 상세 정보
   useEffect(() => {
@@ -279,7 +243,7 @@ export default function ServiceDetailPage() {
               <div className="mb-4 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{service.rating}</span>
+                  <span className="font-medium">{service.rating.toFixed(2)}</span>
                   <span className="text-muted-foreground">({service.reviewCount}개 리뷰)</span>
                 </div>
               </div>
@@ -295,7 +259,7 @@ export default function ServiceDetailPage() {
                   <Link href={`/freelancer/${service.freelancer.id}`}>
                     <Avatar className="hover:ring-primary h-12 w-12 cursor-pointer hover:ring-2">
                       {/* <AvatarImage src={service.freelancer.avatar || "/placeholder.svg"} /> */}
-                      <AvatarImage src={"/placeholder.svg"} />
+                      <AvatarImage src={service.freelancer.profileImageUrl} />
                       <AvatarFallback>{service.freelancer.nickname}</AvatarFallback>
                     </Avatar>
                   </Link>
@@ -333,6 +297,13 @@ export default function ServiceDetailPage() {
           </div>
         </div>
 
+        <Button
+          onClick={() => router.push(`/reviews/register?serviceId=${serviceId}`)}
+          className="bg-primary hover:bg-primary/90 text-white"
+        >
+          리뷰 작성하기 (임시버튼)
+        </Button>
+
         {/* 서비스 상세 설명 */}
         <Card className="mb-12">
           <CardContent className="p-6">
@@ -351,7 +322,7 @@ export default function ServiceDetailPage() {
               <div className="mt-2 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-medium">{service.rating}</span>
+                  <span className="text-lg font-medium">{service.rating.toFixed(2)}</span>
                 </div>
                 <span className="text-muted-foreground">총 {service.reviewCount}개 리뷰</span>
               </div>
