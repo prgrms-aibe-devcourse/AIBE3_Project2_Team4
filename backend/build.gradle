@@ -63,7 +63,20 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+// ==== Querydsl Q-Type 클래스 생성 위치 설정 ==== //
+// 빌드 시 Q-Type 클래스들이 'src/main/generated' 폴더에 생성되도록 설정
+def generated = 'src/main/generated'
+sourceSets {
+    main.java.srcDirs += [ generated ]
+}
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
 
+// ==== clean 작업 시 generated 폴더도 함께 삭제되도록 설정 ==== //
+clean {
+    delete file(generated)
+}
 tasks.named('test') {
     useJUnitPlatform()
 }

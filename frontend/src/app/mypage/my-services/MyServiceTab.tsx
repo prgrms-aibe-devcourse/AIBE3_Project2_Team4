@@ -5,7 +5,7 @@ import { ServiceCard } from "@/components/service-card";
 import Loading from "@/components/loading";
 import { useRouter } from "next/navigation";
 import useAuthFetchV1 from "@/hooks/use-fetch";
-import { Page, ServiceCardDto, ServiceCardType } from "../type/service";
+import { Page, ServiceCardDto, ServiceCardType } from "../../type/service";
 
 const convert = (dto: Page<ServiceCardDto>) => ({
   ...dto,

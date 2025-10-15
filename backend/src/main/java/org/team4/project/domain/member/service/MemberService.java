@@ -6,10 +6,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.team4.project.domain.member.dto.MemberProfileResponseDTO;
-import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
-import org.team4.project.domain.member.dto.PasswordResetConfirmRequestDTO;
-import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
+import org.team4.project.domain.member.dto.response.MemberProfileResponseDTO;
+import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.request.PasswordResetConfirmRequestDTO;
+import org.team4.project.domain.member.dto.response.PaymentHistoryResponseDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.entity.MemberRole;
 import org.team4.project.domain.member.entity.Provider;
@@ -107,7 +107,7 @@ public class MemberService {
     public String generatePasswordResetToken(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("해당 이메일로 가입한 회원이 없습니다."));
 
-        if (member.getProvider().equals(Provider.KAKAO) && member.getPassword() == null) {
+        if (Provider.KAKAO.equals(member.getProvider()) && member.getPassword() == null) {
             throw new PasswordResetException("해당 이메일은 카카오 소셜 로그인으로 가입한 이메일입니다.");
         }
 

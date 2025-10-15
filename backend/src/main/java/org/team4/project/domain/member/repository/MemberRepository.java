@@ -7,7 +7,7 @@ import org.team4.project.domain.member.entity.Member;
 import java.util.Optional;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom{
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);

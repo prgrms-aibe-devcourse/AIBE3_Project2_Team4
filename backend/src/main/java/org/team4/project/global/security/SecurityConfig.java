@@ -1,6 +1,5 @@
 package org.team4.project.global.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -42,17 +41,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CustomAuthenticationFilter customAuthenticationFilter(AuthenticationManager authenticationManager, CustomAuthenticationHandlers handlers, ObjectMapper objectMapper) {
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter("/api/v1/auth/login", objectMapper);
-        filter.setAuthenticationManager(authenticationManager);
-        filter.setAuthenticationSuccessHandler(handlers.successHandler());
-        filter.setAuthenticationFailureHandler(handlers.failureHandler());
-        return filter;
-    }
-
-    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   CustomAuthenticationFilter customAuthenticationFilter,
                                                    JwtFilter jwtFilter,
                                                    CustomOAuth2UserService customOAuth2UserService,
                                                    CustomAuthenticationHandlers handlers) throws Exception {
@@ -68,7 +57,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
@@ -95,6 +83,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/email/verify/**",
                                 "/api/v1/auth/reset-password/**",
                                 "/api/v1/auth/token/refresh",
+                                "/api/v1/auth/login",
                                 "/api/v1/auth/token/logout",
                                 "/api/v1/auth/check-nickname").permitAll()
                         .anyRequest().authenticated()
