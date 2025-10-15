@@ -104,7 +104,7 @@ export function Navigation({ newMessageCount = 0 }: NavigationProps) {
                 {/* 북마크 목록 버튼 (클라이언트 전용) */}
                 {userType === "client" && (
                   <Button variant="ghost" size="icon" asChild>
-                    <Link href="/mypage?tab=bookmarks">
+                    <Link href="/mypage/bookmarks">
                       <Bookmark className="h-5 w-5" />
                     </Link>
                   </Button>
