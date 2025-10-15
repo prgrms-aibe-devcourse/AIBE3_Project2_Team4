@@ -67,12 +67,8 @@ const tagsByCategory_mock = {
 };
 
 export default function useCategory() {
-  const [categories, setCategories] = useState(categories_mock);
-  const [tagsByCategory, setTagsByCategory] = useState(tagsByCategory_mock);
-
-  useEffect(() => {
-    // TODO : 카테고리 및 태그 불러오기
-  }, []);
+  const categories = categories_mock;
+  const tagsByCategory = tagsByCategory_mock;
 
   return { categories, tagsByCategory };
 }
