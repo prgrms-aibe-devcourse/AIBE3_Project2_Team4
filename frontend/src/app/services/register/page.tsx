@@ -18,9 +18,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, Star } from "lucide-react";
-import useCategory from "@/hooks/use-category";
-import { useLoginStore } from "@/store/useLoginStore";
-import { components } from "@/app/services/backend/schemas";
 
 // 카테고리와 태그 데이터
 const categories = useCategory().categories;
@@ -46,8 +43,7 @@ export default function ServiceRegisterPage() {
   const serviceId = searchParams.get("id");
 
   const [selectedCategory, setSelectedCategory] = useState("");
-  type Tag = components["schemas"]["Tag"];
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [serviceName, setServiceName] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -204,6 +200,7 @@ export default function ServiceRegisterPage() {
       if (!serviceRes.ok) throw new Error(`서비스 등록 실패 (${serviceRes.status})`);
 
       alert("서비스가 성공적으로 등록되었습니다!");
+    }
 
       window.location.href = `/service/${data.id}`;
     } catch (err: any) {
