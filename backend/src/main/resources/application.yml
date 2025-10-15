@@ -92,3 +92,8 @@ springdoc:
 
 payment:
   secret-key: ${PAYMENT__SECRET_KEY}
+
+logging:
+  level:
+    org.team4.project: debug
+    org.springframework.web.filter.CommonsRequestLoggingFilter: debug
