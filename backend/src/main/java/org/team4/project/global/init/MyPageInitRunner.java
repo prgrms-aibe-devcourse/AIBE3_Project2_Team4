@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-public class MypageInitRunner {
+public class MyPageInitRunner {
 
     @Autowired
     ServiceService serviceService;
@@ -61,7 +61,7 @@ public class MypageInitRunner {
     BaseInitRunner self;
 
     @Bean
-    public ApplicationRunner init(){
+    public ApplicationRunner initMyPageData(){
         return args -> {
             //self.work1();
             //self.work2();
@@ -95,9 +95,9 @@ public class MypageInitRunner {
         ServiceCreateRqBody scr2 = new ServiceCreateRqBody("서비스2", "서비스2의 내용입니다.", 40000, new ArrayList<>(List.of(TagType.BACKEND)));
         ServiceCreateRqBody scr3 = new ServiceCreateRqBody("서비스3", "서비스3의 내용입니다.", 3000, new ArrayList<>(List.of(TagType.BACKEND)));
 
-        serviceService.createService(scr1, freelancer);
-        serviceService.createService(scr2, freelancer);
-        serviceService.createService(scr3, freelancer);
+        ///serviceService.createService(scr1, freelancer);
+        ///serviceService.createService(scr2, freelancer);
+        ///serviceService.createService(scr3, freelancer);
 
 
     }
