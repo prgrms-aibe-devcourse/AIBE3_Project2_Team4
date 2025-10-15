@@ -17,11 +17,13 @@ import org.team4.project.domain.service.dto.ServiceDetailDTO;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
+import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.domain.service.service.BookMarkService;
 import org.team4.project.domain.service.service.ServiceService;
 import org.team4.project.global.security.CustomUserDetails;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,10 +34,10 @@ public class ServiceController {
 
     @PostMapping
     @Transactional
-    public void createItem(
+    public ProjectService createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        serviceService.createService(serviceCreateRqBody, customUserDetails);
+        return serviceService.createService(serviceCreateRqBody, customUserDetails);
     }
 
     @GetMapping("/{id}")

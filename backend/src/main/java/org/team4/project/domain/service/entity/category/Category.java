@@ -19,4 +19,8 @@ public class Category extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
     private CategoryType name;
+
+    public Category(CategoryType name) {
+        this.name = name;
+    }
 }
