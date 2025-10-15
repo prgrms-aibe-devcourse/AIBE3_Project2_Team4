@@ -3,9 +3,9 @@ import { CheckCircle2, FileText, MessageCircle, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Member } from "@/store/useLoginStore";
 import useAuthFetchV1 from "@/hooks/use-fetch";
 import Loading from "@/components/loading";
+import useLogin from "@/hooks/use-Login";
 
 interface ActionServiceDTO {
   id: string;
@@ -64,7 +64,8 @@ const convert = (dto: ActionServiceDTO[]): ActiveServices => {
   return data;
 };
 
-export default function ServiceTab({ member }: { member: Member }) {
+export default function ServiceTab() {
+  const { member } = useLogin();
   const {
     data: activeServices,
     setData: setActiveServices,
@@ -75,7 +76,7 @@ export default function ServiceTab({ member }: { member: Member }) {
     convert,
   );
 
-  if (isLoading || activeServices == null) return <Loading />;
+  if (isLoading || activeServices == null || member == null) return <Loading />;
 
   const handleCompleteWork = (serviceId: string) => {
     if (confirm("작업을 완료하시겠습니까? 클라이언트에게 작업 완료 메시지가 전송됩니다.")) {
