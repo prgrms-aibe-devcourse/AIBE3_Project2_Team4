@@ -20,13 +20,17 @@ import org.team4.project.domain.service.repository.ServiceReviewRepository;
 public class ReviewService {
     private final ServiceReviewRepository serviceReviewRepository;
     private final ServiceRepository serviceRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public void createReview(Long serviceId, Member member, ReviewRqBody reviewRqBody) {
+    public void createReview(Long serviceId, String email, ReviewRqBody reviewRqBody) {
         ProjectService service = serviceRepository.findById(serviceId).orElseThrow(
                 () -> new ServiceException("서비스가 존재하지 않습니다.")
         );
         Member freelancer = service.getFreelancer();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() ->
+                new ServiceException("존재하지 않는 회원입니다.")
+        );
 
         serviceReviewRepository.save(
                 ServiceReview.createReview(freelancer, member, service, reviewRqBody)

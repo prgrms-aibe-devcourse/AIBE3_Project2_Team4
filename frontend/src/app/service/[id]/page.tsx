@@ -19,6 +19,7 @@ import {
 import { ReviewCard } from "@/components/review-card";
 import { Pagination } from "@/components/pagination";
 import { components } from "@/app/service/backend/schemas";
+import { useLoginStore } from "@/store/useLoginStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -75,19 +76,15 @@ export default function ServiceDetailPage() {
   const [reviews, setReviews] = useState<ServiceReviewDTO[]>([]);
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
   const [totalReviewPage, setTotalReviewPage] = useState(1);
+  const { member, accessToken } = useLoginStore();
 
+  // 서비스 상세 정보
   useEffect(() => {
     const fetchServiceDetail = async () => {
-      if (!serviceId) return;
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/v1/service/${serviceId}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
+        const res = await fetch(`${API_BASE_URL}/api/v1/services/${serviceId}`);
         if (!res.ok) throw new Error(`서비스 정보를 불러오지 못했습니다. (${res.status})`);
-
         const data: ServiceDTO = await res.json();
         setService(data);
       } catch (err: any) {
@@ -101,13 +98,60 @@ export default function ServiceDetailPage() {
     fetchServiceDetail();
   }, [serviceId]);
 
+  // 북마크 여부 조회
+  useEffect(() => {
+    if (!member) return; // 로그인 안했으면 안 불러옴
+    const fetchBookmark = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}/bookmark`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!res.ok) throw new Error(`북마크 정보를 불러오지 못했습니다. (${res.status})`);
+        const data = await res.json();
+        setIsBookmarked(data.content);
+      } catch (err: any) {
+        console.error("북마크 정보 조회 실패:", err);
+        setError(err.message);
+      }
+    };
+
+    fetchBookmark();
+  }, [serviceId, member]);
+
+  // 북마크 토글 함수 (버튼 클릭 시 실행)
+  const handleBookmarkClick = async () => {
+    if (!member) {
+      alert("로그인 후 이용 가능합니다.");
+      return;
+    }
+    try {
+      const method = isBookmarked ? "DELETE" : "POST";
+      const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!res.ok) throw new Error(`북마크 ${isBookmarked ? "삭제" : "등록"} 실패 (${res.status})`);
+
+      // 성공 시 상태 반전
+      setIsBookmarked((prev) => !prev);
+    } catch (err: any) {
+      console.error("북마크 요청 실패:", err);
+      setError(err.message);
+    }
+  };
+
   const reviewSize = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/review/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
+          `${API_BASE_URL}/api/v1/reviews/${serviceId}?page=${currentReviewPage - 1}&?size=${reviewSize}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -139,19 +183,11 @@ export default function ServiceDetailPage() {
   };
 
   const handleChatClick = () => {
-    if (!isLoggedIn) {
+    if (!member) {
       alert("로그인이 필요한 서비스입니다.");
       return;
     }
     console.log("채팅 시작");
-  };
-
-  const handleBookmarkClick = () => {
-    if (!isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다.");
-      return;
-    }
-    setIsBookmarked((prev) => !prev);
   };
 
   const handleShareClick = async () => {
