@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.activeService.repository.ActiveServiceRepository;
 import org.team4.project.domain.activeService.service.ActiveServiceService;
 import org.team4.project.domain.chat.service.ChatRoomService;
-import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.member.service.MemberService;
