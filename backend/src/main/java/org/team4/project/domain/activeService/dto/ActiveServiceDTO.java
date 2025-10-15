@@ -9,28 +9,33 @@ import org.team4.project.domain.service.entity.service.ProjectService;
 
 public record ActiveServiceDTO(
         Long id,
-        String ServiceTitle,
-        Float rating,
-        int rateCount,
-        String partnerName,
+        String thumbnail,
+        String title,
         int price,
+        Float rating,
+        int reviewCount,
+        String partnerName,
+        boolean isFinished,
         String memo,
-        boolean isFinished
+        Long chatId
+
 ) {
-    public ActiveServiceDTO(Long id, Payment payment, ProjectService sc, float avgRate, int rateCount, String partnerName, boolean isFinished) {
+    public ActiveServiceDTO(Long id, Payment payment, ProjectService sc, float avgRate, int rateCount, String partnerName, boolean isFinished, Long chatId) {
         this(
-                id,
-                sc.getTitle(),
-                avgRate,
-                rateCount,
-                partnerName,
-                payment.getTotalAmount(),
-                payment.getMemo(),
-                isFinished
+            id,
+            "----.jpg",
+            sc.getTitle(),
+            payment.getTotalAmount(),
+            avgRate,
+            rateCount,
+            partnerName,
+            isFinished,
+            payment.getMemo(),
+            chatId
         );
     }
 
-    public static ActiveServiceDTO from(ActiveService at, MemberRole memberRole) {
+    public static ActiveServiceDTO from(ActiveService at, MemberRole memberRole, Long chatId) {
         Payment payment = at.getPayment();
         ProjectService service = payment.getProjectService();
         double avgRating = service.getReviews().stream()
@@ -44,6 +49,6 @@ public record ActiveServiceDTO(
         else partnerName = at.getClient().getNickname();
 
         boolean isFinished = at.isFinished();
-        return new ActiveServiceDTO(at.getId(), payment, service, (float) avgRating, rateCount, partnerName, isFinished);
+        return new ActiveServiceDTO(at.getId(), payment, service, (float) avgRating, rateCount, partnerName, isFinished, chatId);
     }
 }

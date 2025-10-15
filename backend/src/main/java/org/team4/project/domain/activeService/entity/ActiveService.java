@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.payment.entity.Payment;
-import org.team4.project.domain.service.entity.service.ProjectService;
 import org.team4.project.global.jpa.entity.BaseEntity;
 
 @Entity
