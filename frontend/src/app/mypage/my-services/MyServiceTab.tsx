@@ -24,7 +24,7 @@ export default function MyServiceTab() {
   const { data: myServices, isLoading } = useAuthFetchV1<
     Page<ServiceCardDto>,
     Page<ServiceCardType>
-  >("/api/v1/service/me", "내 서비스 불러오기에서 오류 발생", convert);
+  >("/api/v1/services/me", "내 서비스 불러오기에서 오류 발생", convert);
 
   const router = useRouter();
 
