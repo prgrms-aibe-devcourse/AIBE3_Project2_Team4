@@ -18,37 +18,24 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, Star } from "lucide-react";
+import useCategory from "@/hooks/use-category";
+import { useLoginStore } from "@/store/useLoginStore";
 
 // 카테고리와 태그 데이터
-const categories = [
-  { id: "development", name: "개발·프로그래밍" },
-  { id: "design", name: "디자인" },
-  { id: "video", name: "영상·사진·음향" },
-  { id: "writing", name: "번역·통역·글쓰기" },
-  { id: "marketing", name: "마케팅" },
-  { id: "business", name: "비즈니스" },
-];
+const categories = useCategory().categories;
+const tagsByCategory = useCategory().tagsByCategory;
 
-const tagsByCategory = {
-  development: ["웹개발", "앱개발", "백엔드", "프론트엔드", "데이터베이스", "API"],
-  design: ["로고디자인", "웹디자인", "브랜딩", "일러스트", "UI/UX", "패키지디자인"],
-  video: ["영상편집", "모션그래픽", "사진촬영", "음향편집", "애니메이션", "라이브스트리밍"],
-  writing: ["한영번역", "영한번역", "콘텐츠작성", "카피라이팅", "교정교열", "기술문서"],
-  marketing: ["SNS마케팅", "콘텐츠마케팅", "광고기획", "브랜드전략", "SEO", "퍼포먼스마케팅"],
-  business: ["사업계획서", "재무분석", "컨설팅", "프로젝트관리", "데이터분석", "시장조사"],
-};
-
-const mockServiceData = {
-  id: "1",
-  category: "development",
-  tags: ["웹개발", "프론트엔드"],
-  serviceName: "반응형 웹사이트 개발",
-  serviceDescription:
-    "최신 기술을 활용한 반응형 웹사이트를 개발해드립니다. React, Next.js를 사용하여 빠르고 안정적인 웹사이트를 제작합니다.",
-  price: "500000",
-  images: ["/web-development-concept.png", "/responsive-design.png"],
-  mainImageIndex: 0,
-};
+// const mockServiceData = {
+//   id: "1",
+//   category: "development",
+//   tags: ["웹개발", "프론트엔드"],
+//   serviceName: "반응형 웹사이트 개발",
+//   serviceDescription:
+//     "최신 기술을 활용한 반응형 웹사이트를 개발해드립니다. React, Next.js를 사용하여 빠르고 안정적인 웹사이트를 제작합니다.",
+//   price: "500000",
+//   images: ["/web-development-concept.png", "/responsive-design.png"],
+//   mainImageIndex: 0,
+// };
 
 export default function ServiceRegisterPage() {
   const router = useRouter();
@@ -65,19 +52,23 @@ export default function ServiceRegisterPage() {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState<number>(0);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const { accessToken, member } = useLoginStore();
 
-  useEffect(() => {
-    if (isEditMode && serviceId) {
-      const serviceData = mockServiceData;
-      setSelectedCategory(serviceData.category);
-      setSelectedTags(serviceData.tags);
-      setServiceName(serviceData.serviceName);
-      setServiceDescription(serviceData.serviceDescription);
-      setPrice(serviceData.price);
-      setImagePreviews(serviceData.images);
-      setMainImageIndex(serviceData.mainImageIndex);
-    }
-  }, [isEditMode, serviceId]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // useEffect(() => {
+  //   if (isEditMode && serviceId) {
+  //     const serviceData = mockServiceData;
+  //     setSelectedCategory(serviceData.category);
+  //     setSelectedTags(serviceData.tags);
+  //     setServiceName(serviceData.serviceName);
+  //     setServiceDescription(serviceData.serviceDescription);
+  //     setPrice(serviceData.price);
+  //     setImagePreviews(serviceData.images);
+  //     setMainImageIndex(serviceData.mainImageIndex);
+  //   }
+  // }, [isEditMode, serviceId]);
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
@@ -140,7 +131,7 @@ export default function ServiceRegisterPage() {
     setMainImageIndex(index);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       !selectedCategory ||
       selectedTags.length === 0 ||
@@ -152,30 +143,70 @@ export default function ServiceRegisterPage() {
       return;
     }
 
-    if (imagePreviews.length === 0) {
+    if (images.length === 0) {
       alert("최소 1장의 이미지를 업로드해주세요.");
       return;
     }
 
-    const serviceData = {
-      category: selectedCategory,
-      tags: selectedTags,
-      serviceName,
-      serviceDescription,
-      price,
-      images,
-      mainImageIndex,
-    };
+    try {
+      // --------------------------
+      // 1️⃣ 이미지 업로드
+      // --------------------------
+      const formData = new FormData();
+      images.forEach((file) => formData.append("files", file));
+      formData.append("fileCategory", "SERVICE_IMAGE");
 
-    if (isEditMode) {
-      console.log("서비스 수정:", { id: serviceId, ...serviceData });
-      alert("서비스가 성공적으로 수정되었습니다!");
-    } else {
-      console.log("서비스 등록:", serviceData);
+      const uploadRes = await fetch(`${API_BASE_URL}/api/v1/uploads/multi`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error(`이미지 업로드 실패 (${uploadRes.status})`);
+
+      const uploadedFiles = await uploadRes.json(); // [{ url: "https://..." }, ...]
+      const imageUrls = uploadedFiles.map((f: any) => f.s3Url);
+
+      // --------------------------
+      // 2️⃣ 서비스 등록
+      // --------------------------
+      const serviceBody = {
+        title: serviceName,
+        content: serviceDescription,
+        price: Number(price),
+        tagNames: selectedTags,
+        imageUrls: imageUrls,
+        mainImageUrl: imageUrls[mainImageIndex],
+      };
+
+      const serviceRes = await fetch(`${API_BASE_URL}/api/v1/services`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(serviceBody),
+      });
+
+      if (!serviceRes.ok) {
+        const text = await serviceRes.text(); // body가 없을 수도 있으니 text로
+        console.log(text);
+        throw new Error(`서비스 등록 실패 (${serviceRes.status}): ${text}`);
+      }
+
+      const data = await serviceRes.json(); // 여기서 JSON parse 가능
+
+      if (!serviceRes.ok) throw new Error(`서비스 등록 실패 (${serviceRes.status})`);
+
       alert("서비스가 성공적으로 등록되었습니다!");
-    }
 
-    router.push("/mypage");
+      window.location.href = `/service/${data.id}`;
+    } catch (err: any) {
+      console.error("서비스 등록 오류:", err);
+      alert(`오류 발생: ${err.message}`);
+    }
   };
 
   const availableTags = selectedCategory
@@ -237,17 +268,17 @@ export default function ServiceRegisterPage() {
                       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                         {availableTags.map((tag) => (
                           <Button
-                            key={tag}
+                            key={tag.id}
                             type="button"
-                            variant={selectedTags.includes(tag) ? "default" : "outline"}
+                            variant={selectedTags.includes(tag.id) ? "default" : "outline"}
                             className={`h-11 ${
-                              selectedTags.includes(tag)
+                              selectedTags.includes(tag.id)
                                 ? "bg-blue-600 text-white hover:bg-blue-700"
                                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
                             }`}
-                            onClick={() => toggleTag(tag)}
+                            onClick={() => toggleTag(tag.id)}
                           >
-                            {tag}
+                            {tag.id}
                           </Button>
                         ))}
                       </div>

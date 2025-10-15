@@ -21,10 +21,10 @@ public record ServiceDTO(
         String content,
         String createdAt
 ) {
-    public ServiceDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
+    public ServiceDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, String mainImage) {
         this(
                 service.getId(),
-                "/-------.jpg",
+                mainImage,
                 service.getTitle(),
                 service.getPrice(),
                 rating, // rating
@@ -38,8 +38,8 @@ public record ServiceDTO(
                 service.getCreatedAt().toString()
         );
     }
-    public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
-        return new ServiceDTO(service, tagServices, category, reviewCount, rating);
+    public static ServiceDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, String mainImage) {
+        return new ServiceDTO(service, tagServices, category, reviewCount, rating, mainImage);
     }
 
     public ServiceDTO(ProjectService service, Integer reviewCount, Float rating) {

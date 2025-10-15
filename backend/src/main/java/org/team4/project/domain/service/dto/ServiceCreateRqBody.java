@@ -17,6 +17,10 @@ public record ServiceCreateRqBody(
         @Max(1000000000)
         Integer price,
         @NotNull
-        List<TagType> tagNames
+        List<TagType> tagNames,
+        @NotNull
+        List<String> imageUrls,
+        @NotNull
+        String mainImageUrl
 ) {
 }

@@ -14,20 +14,22 @@ public record ServiceDetailDTO(
         Integer price,
         Float rating,
         Integer reviewCount,
-        String[] images,
+        List<String> images,
+        String mainImage,
         String description,
         FreelancerDTO freelancer,
         CategoryType category,
         TagType[] tags
 ) {
-    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
+    public ServiceDetailDTO(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, List<String> imageUrls, String mainImage) {
         this(
                 service.getId(),
                 service.getTitle(),
                 service.getPrice(),
                 rating,
                 reviewCount,
-                new String[]{"", "", ""}, // TODO: 실제 이미지 경로 배열로 대체
+                imageUrls,
+                mainImage,
                 service.getContent(),
                 new FreelancerDTO(service.getFreelancer()),
                 category.getName(), // CategoryType을 직접 반환하거나, 변환 로직 필요
@@ -37,7 +39,7 @@ public record ServiceDetailDTO(
         );
     }
 
-    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating) {
-        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating);
+    public static ServiceDetailDTO from(ProjectService service, List<TagService> tagServices, Category category, Integer reviewCount, Float rating, List<String> imageUrls, String mainImage) {
+        return new ServiceDetailDTO(service, tagServices, category, reviewCount, rating, imageUrls, mainImage);
     }
 }

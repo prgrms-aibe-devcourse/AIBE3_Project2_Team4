@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,25 +18,27 @@ import org.team4.project.domain.service.dto.ServiceDetailDTO;
 import org.team4.project.domain.service.entity.category.type.CategoryType;
 import org.team4.project.domain.service.entity.category.type.TagType;
 import org.team4.project.domain.service.entity.service.ProjectService;
+import org.team4.project.domain.service.exception.ServiceException;
 import org.team4.project.domain.service.service.BookMarkService;
 import org.team4.project.domain.service.service.ServiceService;
 import org.team4.project.global.security.CustomUserDetails;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/services")
 public class ServiceController {
     private final ServiceService serviceService;
-    private final BookMarkService bookMarkService;
 
     @PostMapping
     @Transactional
-    public void createItem(
+    public ProjectService createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        serviceService.createService(serviceCreateRqBody, customUserDetails);
+        System.out.println(customUserDetails.getUsername());
+        return serviceService.createService(serviceCreateRqBody, customUserDetails);
     }
 
     @GetMapping("/{id}")
