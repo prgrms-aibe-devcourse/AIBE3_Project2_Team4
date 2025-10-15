@@ -4,7 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.team4.project.domain.member.dto.PaymentHistoryResponseDTO;
+import org.team4.project.domain.member.dto.response.PaymentHistoryResponseDTO;
 
 import java.util.List;
 

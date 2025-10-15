@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +30,13 @@ import java.util.Map;
 @RequestMapping("/api/v1/services")
 public class ServiceController {
     private final ServiceService serviceService;
+    private final BookMarkService bookMarkService;
 
     @PostMapping
     @Transactional
     public ProjectService createItem(
             @Valid @RequestBody ServiceCreateRqBody serviceCreateRqBody,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        System.out.println(customUserDetails.getUsername());
         return serviceService.createService(serviceCreateRqBody, customUserDetails);
     }
 

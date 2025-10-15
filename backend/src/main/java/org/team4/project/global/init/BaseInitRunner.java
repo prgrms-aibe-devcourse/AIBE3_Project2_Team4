@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
-import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
+import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.member.service.MemberService;
@@ -40,7 +40,7 @@ public class BaseInitRunner {
     @Bean
     public ApplicationRunner init(){
         return args -> {
-            self.work1();
+            //self.work1();
         };
     }
 
@@ -62,9 +62,9 @@ public class BaseInitRunner {
         ServiceCreateRqBody scr2 = new ServiceCreateRqBody("서비스2", "서비스2의 내용입니다.", 40000, new ArrayList<>(List.of(TagType.BACKEND)));
         ServiceCreateRqBody scr3 = new ServiceCreateRqBody("서비스3", "서비스3의 내용입니다.", 3000, new ArrayList<>(List.of(TagType.BACKEND)));
 
-        serviceService.createService(scr1, freelancer);
-        serviceService.createService(scr2, freelancer);
-        serviceService.createService(scr3, freelancer);
+        //serviceService.createService(scr1, freelancer);
+        //serviceService.createService(scr2, freelancer);
+        //serviceService.createService(scr3, freelancer);
 
     }
 }
