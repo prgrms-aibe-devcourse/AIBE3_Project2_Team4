@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.activeService.entity.ActiveService;
 import org.team4.project.domain.activeService.repository.ActiveServiceRepository;
 import org.team4.project.domain.activeService.service.ActiveServiceService;
+import org.team4.project.domain.chat.entity.ChatRoom;
+import org.team4.project.domain.chat.service.ChatRoomService;
 import org.team4.project.domain.member.dto.MemberSignUpRequestDTO;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
@@ -31,30 +33,6 @@ import java.util.List;
 
 @Configuration
 public class BaseInitRunner {
-
-    @Autowired
-    ServiceService serviceService;
-    @Autowired
-    ServiceRepository serviceRepository;
-
-    @Autowired
-    MemberService memberService;
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    TagRepository tagRepository;
-
-    @Autowired
-    PaymentRepository paymentRepository;
-
-    @Autowired
-    private ActiveServiceService activeServiceService;
-    @Autowired
-    ActiveServiceRepository activeServiceRepository;
-
-
     @Autowired
     @Lazy
     BaseInitRunner self;
@@ -62,86 +40,7 @@ public class BaseInitRunner {
     @Bean
     public ApplicationRunner init(){
         return args -> {
-            self.work1();
-            self.work2();
+
         };
-    }
-
-    @Transactional
-    public void work1() {
-        if (memberRepository.findByEmail("qweqweqwe1@gmail.com").isPresent()) return ;
-        if (tagRepository.findByName(TagType.BACKEND).isEmpty()) return;
-
-        MemberSignUpRequestDTO memberSignUpRequestDTO1 = new MemberSignUpRequestDTO();
-        memberSignUpRequestDTO1.setEmail("qweqweqwe1@gmail.com");
-        memberSignUpRequestDTO1.setPassword("qweqweqwe1");
-        memberSignUpRequestDTO1.setNickname("qweqweqwe1");
-        memberSignUpRequestDTO1.setRole("FREELANCER");
-        memberService.signUp(memberSignUpRequestDTO1);
-
-        MemberSignUpRequestDTO memberSignUpRequestDTO2 = new MemberSignUpRequestDTO();
-        memberSignUpRequestDTO2.setEmail("qweqweqwe2@gmail.com");
-        memberSignUpRequestDTO2.setPassword("qweqweqwe2");
-        memberSignUpRequestDTO2.setNickname("qweqweqwe2");
-        memberSignUpRequestDTO2.setRole("CLIENT");
-        memberService.signUp(memberSignUpRequestDTO2);
-
-        Member freelancer = memberRepository.findByEmail(memberSignUpRequestDTO1.getEmail()).get();
-
-        ServiceCreateRqBody scr1 = new ServiceCreateRqBody("서비스1", "서비스1의 내용입니다.", 36000, new ArrayList<>(List.of(TagType.BACKEND)));
-        ServiceCreateRqBody scr2 = new ServiceCreateRqBody("서비스2", "서비스2의 내용입니다.", 40000, new ArrayList<>(List.of(TagType.BACKEND)));
-        ServiceCreateRqBody scr3 = new ServiceCreateRqBody("서비스3", "서비스3의 내용입니다.", 3000, new ArrayList<>(List.of(TagType.BACKEND)));
-
-        serviceService.createService(scr1, freelancer);
-        serviceService.createService(scr2, freelancer);
-        serviceService.createService(scr3, freelancer);
-
-
-    }
-
-    @Transactional
-    void work2 () {
-
-        if (activeServiceRepository.findById(1L).isPresent()) return ;
-
-        Member freelancer = memberRepository.findByEmail("qweqweqwe1@gmail.com").get();
-        Member client = memberRepository.findByEmail("qweqweqwe2@gmail.com").get();
-
-        ProjectService ps1 = serviceRepository.findById(1L).get();
-
-        Payment payment1 = new Payment(
-                "qweqweqweqweqweqwe1",
-                client,
-                ps1,
-                "qweqweqweqweqweqwe11",
-                360000,
-                PaymentStatus.DONE,
-                LocalDateTime.now(),
-                PaymentMethod.BANK_TRANSFER,
-                LocalDateTime.now(),
-                "메모입니다1111111111111"
-                );
-
-        paymentRepository.save(payment1);
-
-        Payment payment2 = new Payment(
-                "qweqweqweqweqweqwe2",
-                client,
-                ps1,
-                "qweqweqweqweqweqwe12",
-                360000,
-                PaymentStatus.DONE,
-                LocalDateTime.now(),
-                PaymentMethod.BANK_TRANSFER,
-                LocalDateTime.now(),
-                "메모입니다222222222222"
-        );
-
-        paymentRepository.save(payment2);
-
-
-        activeServiceService.createActiveService("qweqweqweqweqweqwe1");
-        activeServiceService.createActiveService("qweqweqweqweqweqwe2");
-
     }
 }
