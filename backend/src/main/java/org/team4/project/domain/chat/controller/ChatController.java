@@ -3,6 +3,10 @@ package org.team4.project.domain.chat.controller;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.team4.project.domain.service.entity.service.ProjectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -124,9 +128,9 @@ public class ChatController {
                 .orElseThrow(() -> new RuntimeException("해당 ID의 프리랜서를 찾을 수 없습니다: " + freelancerId));
 
         // Pageable로 모든 서비스 가져옴
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 200);
+        Pageable pageable = PageRequest.of(0, 200);
 
-        org.springframework.data.domain.Page<org.team4.project.domain.service.entity.service.ProjectService> servicePage =
+        Page<ProjectService> servicePage =
                 serviceRepository.findAllByFreelancer_Email(freelancer.getEmail(), pageable);
 
         List<FreelancerServiceDto> services = servicePage.getContent().stream()

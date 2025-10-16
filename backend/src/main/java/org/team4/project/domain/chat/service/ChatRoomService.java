@@ -5,6 +5,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.chat.dto.ChatRoomResponseDto;
+import org.team4.project.domain.chat.dto.MessageResponse;
+import org.team4.project.domain.chat.entity.ChatMessage;
 import org.team4.project.domain.chat.entity.ChatRoom;
 import org.team4.project.domain.chat.repository.ChatRoomRepository;
 import org.team4.project.domain.member.entity.Member;
@@ -66,10 +68,10 @@ public class ChatRoomService {
         }
 
         // 상대방에게 보낼 시스템 메시지 생성
-        org.team4.project.domain.chat.dto.MessageResponse leaveMessage = org.team4.project.domain.chat.dto.MessageResponse.builder()
+        MessageResponse leaveMessage = MessageResponse.builder()
             .sender("System")
             .content(currentUser.getNickname() + "님이 대화방을 나가셨습니다.")
-            .messageType(org.team4.project.domain.chat.entity.ChatMessage.MessageType.REVIEW_PROMPT) // 시스템 메시지 타입 재활용
+            .messageType(ChatMessage.MessageType.REVIEW_PROMPT) // 시스템 메시지 타입 재활용
             .createdAt(java.time.LocalDateTime.now())
             .build();
 
