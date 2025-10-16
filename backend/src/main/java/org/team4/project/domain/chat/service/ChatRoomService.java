@@ -5,6 +5,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.chat.dto.ChatRoomResponseDto;
+import org.team4.project.domain.chat.dto.MessageResponse;
+import org.team4.project.domain.chat.entity.ChatMessage;
 import org.team4.project.domain.chat.entity.ChatRoom;
 import org.team4.project.domain.chat.repository.ChatRoomRepository;
 import org.team4.project.domain.member.entity.Member;
@@ -56,7 +58,28 @@ public class ChatRoomService {
     @Transactional
     public void leaveRoom(Long roomId, Member currentUser) {
         ChatRoom room = getRoom(roomId);
-        System.out.println("User " + currentUser.getEmail() + " left room " + roomId);
+
+        // 사용자가 채팅방의 참여자인지 확인
+        boolean isParticipant = room.getClient().getId().equals(currentUser.getId()) ||
+                                room.getFreelancer().getId().equals(currentUser.getId());
+
+        if (!isParticipant) {
+            throw new SecurityException("채팅방을 나갈 권한이 없습니다.");
+        }
+
+        // 상대방에게 보낼 시스템 메시지 생성
+        MessageResponse leaveMessage = MessageResponse.builder()
+            .sender("System")
+            .content(currentUser.getNickname() + "님이 대화방을 나가셨습니다.")
+            .messageType(ChatMessage.MessageType.REVIEW_PROMPT) // 시스템 메시지 타입 재활용
+            .createdAt(java.time.LocalDateTime.now())
+            .build();
+
+        // 채팅방 토픽으로 메시지 전송
+        messagingTemplate.convertAndSend("/topic/rooms/" + roomId, leaveMessage);
+
+        // 채팅방 삭제, 활성서비스와 연관되어 임시 주석처리
+        // chatRoomRepository.delete(room);
     }
 
     @Transactional
