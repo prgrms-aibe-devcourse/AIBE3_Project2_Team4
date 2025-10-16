@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface Member {
+  id: number;
   email: string;
   nickname: string;
   profileImageUrl: string | null;

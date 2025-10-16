@@ -213,6 +213,13 @@ export default function ServiceRegisterPage() {
     ? tagsByCategory[selectedCategory as keyof typeof tagsByCategory] || []
     : [];
 
+  const getTagNameById = (tagId: string) => {
+    if (!selectedCategory) return tagId;
+    const tags = tagsByCategory[selectedCategory as keyof typeof tagsByCategory] || [];
+    const tag = tags.find((t) => t.id === tagId);
+    return tag ? tag.name : tagId;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-4xl px-4 py-12">
@@ -278,7 +285,7 @@ export default function ServiceRegisterPage() {
                             }`}
                             onClick={() => toggleTag(tag.id)}
                           >
-                            {tag.id}
+                            {tag.name}
                           </Button>
                         ))}
                       </div>
@@ -295,7 +302,7 @@ export default function ServiceRegisterPage() {
                       </Badge>
                       {selectedTags.map((tag) => (
                         <Badge key={tag} className="bg-blue-600 pr-1 text-white hover:bg-blue-700">
-                          {tag}
+                          {getTagNameById(tag)}
                           <button
                             onClick={() => removeTag(tag)}
                             className="ml-1.5 rounded-full p-0.5 hover:bg-blue-700"

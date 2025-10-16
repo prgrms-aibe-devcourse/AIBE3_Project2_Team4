@@ -28,6 +28,7 @@ export default function PaymentPage() {
   const memo = searchParams.get("memo") || "웹사이트 디자인 및 개발 프로젝트 1차 결제입니다.";
   const serviceName = searchParams.get("service") || "웹사이트 디자인 및 개발";
   const chatId = searchParams.get("chatId") || "";
+  const serviceId = searchParams.get("serviceId");
 
   // 토스페이먼츠 위젯 초기화
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function PaymentPage() {
         },
         orderId: orderId,
         orderName: serviceName,
-        successUrl: `${window.location.origin}/payment/success?chatId=${chatId}&memo=${encodeURIComponent(memo)}`,
+        successUrl: `${window.location.origin}/payment/success?chatId=${chatId}&memo=${encodeURIComponent(memo)}&serviceId=${serviceId}`,
         failUrl: `${window.location.origin}/payment/fail`,
         customerEmail: member?.email,
         customerName: member?.nickname,

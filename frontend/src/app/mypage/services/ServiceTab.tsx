@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import useAuthFetchV1 from "@/hooks/use-fetch";
 import Loading from "@/components/loading";
 import useLogin from "@/hooks/use-Login";
+import { useRouter } from "next/navigation";
 
 interface ActionServiceDTO {
   id: string;
@@ -66,6 +67,7 @@ const convert = (dto: ActionServiceDTO[]): ActiveServices => {
 
 export default function ServiceTab() {
   const { member } = useLogin();
+  const router = useRouter();
   const {
     data: activeServices,
     setData: setActiveServices,
@@ -90,6 +92,10 @@ export default function ServiceTab() {
         completed: [...activeServices.completed, { ...service, status: "completed" }],
       });
     }
+  };
+
+  const handleMoveChatRoom = (chatId: string) => {
+    router.push(`/mypage/chat?chatId=${chatId}`);
   };
 
   return (
@@ -161,7 +167,12 @@ export default function ServiceTab() {
                           <CheckCircle2 className="h-4 w-4" />
                           작업 완료
                         </Button>
-                        <Button variant="outline" className="w-full gap-2 bg-transparent" size="sm">
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2 bg-transparent"
+                          size="sm"
+                          onClick={() => handleMoveChatRoom(service.chatId)}
+                        >
                           <MessageCircle className="h-4 w-4" />
                           채팅하기
                         </Button>

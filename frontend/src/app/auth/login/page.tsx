@@ -81,6 +81,7 @@ export default function LoginPage() {
       if (!meResp.ok) throw new Error("프로필 조회 중 오류가 발생했습니다.");
       const me = await meResp.json();
       setMember({
+        id: me.id,
         email: me.email,
         nickname: me.nickname,
         profileImageUrl: me.profileImageUrl,

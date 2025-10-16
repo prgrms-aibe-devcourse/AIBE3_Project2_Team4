@@ -26,6 +26,7 @@ interface ChatMessage {
   createdAt: string;
   messageType: "TALK" | "PAYMENT_REQUEST" | "REVIEW_PROMPT" | "MEETING_REQUEST";
   amount?: number;
+  serviceId?: number; // 서비스 ID 추가
 }
 
 type UserRole = "freelancer" | "client" | "admin" | "unassigned" | undefined;
@@ -64,7 +65,7 @@ interface MeetingRequestMessageProps {
 interface PaymentRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSend: (service: string, amount: number, memo: string) => void;
+  onSend: (service: string, amount: number, memo: string, serviceId: number) => void;
 }
 
 // --- Child Components ---
@@ -118,13 +119,19 @@ const PaymentRequestModal = ({
   onSend,
   services,
 }: PaymentRequestModalProps & { services: { id: number; title: string }[] }) => {
-  const [service, setService] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState("");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
+    // When modal opens and services are loaded, select the first one by default
     if (isOpen && services.length > 0) {
-      setService(services[0].title);
+      setSelectedServiceId(services[0].id.toString());
+    } else if (!isOpen) {
+      // Reset when closed
+      setSelectedServiceId("");
+      setAmount("");
+      setMemo("");
     }
   }, [isOpen, services]);
 
@@ -132,7 +139,9 @@ const PaymentRequestModal = ({
 
   const handleSend = () => {
     const numericAmount = parseFloat(amount);
-    if (!service.trim()) {
+    const selectedService = services.find((s) => s.id.toString() === selectedServiceId);
+
+    if (!selectedService) {
       alert("서비스를 선택해주세요.");
       return;
     }
@@ -140,7 +149,8 @@ const PaymentRequestModal = ({
       alert("유효한 금액을 입력해주세요.");
       return;
     }
-    onSend(service, numericAmount, memo);
+    // Pass the service title, amount, memo, AND the service ID
+    onSend(selectedService.title, numericAmount, memo, selectedService.id);
   };
 
   return (
@@ -163,15 +173,17 @@ const PaymentRequestModal = ({
         <div style={{ marginBottom: "1rem" }}>
           <label>서비스명</label>
           <select
-            value={service}
-            onChange={(e) => setService(e.target.value)}
+            value={selectedServiceId}
+            onChange={(e) => setSelectedServiceId(e.target.value)}
             style={{ width: "100%", padding: "0.5rem" }}
           >
             {services.length === 0 ? (
-              <option disabled>서비스를 불러오는 중...</option>
+              <option value="" disabled>
+                서비스를 불러오는 중...
+              </option>
             ) : (
               services.map((s) => (
-                <option key={s.id} value={s.title}>
+                <option key={s.id} value={s.id}>
                   {s.title}
                 </option>
               ))
@@ -469,33 +481,51 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
     }
   }, [selectedChat, accessToken]);
 
-  const handleSendPaymentRequest = (service: string, amount: number, memo: string) => {
+  const handleSendPaymentRequest = (
+    service: string,
+    amount: number,
+    memo: string,
+    serviceId: number,
+  ) => {
     if (!clientRef.current?.connected || !selectedChat || !member) return;
+
+    const payload = {
+      roomId: selectedChat.id,
+      messageType: "PAYMENT_REQUEST" as const,
+      content: service,
+      amount: amount,
+      memo: memo,
+      sender: member.nickname,
+      serviceId: serviceId,
+    };
+    console.log("백엔드로 보내는 결제요청 페이로드:", payload);
 
     clientRef.current.publish({
       destination: "/app/chats/sendPaymentRequest",
-      body: JSON.stringify({
-        roomId: selectedChat.id,
-        messageType: "PAYMENT_REQUEST",
-        content: service,
-        amount: amount,
-        memo: memo,
-        sender: member.nickname,
-      }),
+      body: JSON.stringify(payload),
     });
 
     setPaymentModalOpen(false);
   };
 
   const handlePay = (paymentMessage: ChatMessage) => {
-    if (!selectedChat) return;
-    const params = new URLSearchParams({
+    console.log("handlePay에 전달된 메시지 객체:", paymentMessage);
+    if (!selectedChat || !paymentMessage.serviceId) {
+      console.log("handlePay 중단: selectedChat 또는 serviceId 없음");
+      return;
+    }
+
+    const params = {
       amount: paymentMessage.amount?.toString() || "0",
       service: paymentMessage.content,
       memo: paymentMessage.memo || "",
       chatId: selectedChat.id,
-    });
-    router.push(`/payment?${params.toString()}`);
+      serviceId: paymentMessage.serviceId.toString(),
+    };
+
+    console.log("결제 페이지로 전달되는 파라미터:", params);
+
+    router.push(`/payment?${new URLSearchParams(params).toString()}`);
   };
 
   const handleJoinMeeting = () => {

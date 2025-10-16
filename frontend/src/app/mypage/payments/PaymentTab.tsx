@@ -42,8 +42,7 @@ interface PaymentHistory {
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-export default function PaymentTab() {
-  const { isLoggedIn, member } = useLogin();
+export default function PaymentTab({ isLoggedIn }: { isLoggedIn: boolean }) {
   const router = useRouter();
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);

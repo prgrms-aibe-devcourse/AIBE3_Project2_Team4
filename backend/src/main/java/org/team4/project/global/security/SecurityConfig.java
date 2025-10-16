@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.global.security.jwt.JwtFilter;
 import org.team4.project.global.security.jwt.JwtUtil;
 
@@ -36,8 +37,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtFilter jwtFilter(JwtUtil jwtUtil) {
-        return new JwtFilter(jwtUtil);
+    public JwtFilter jwtFilter(JwtUtil jwtUtil, MemberRepository memberRepository) {
+        return new JwtFilter(jwtUtil, memberRepository);
     }
 
     @Bean
@@ -79,6 +80,8 @@ public class SecurityConfig {
                                 "/api/v1/services/tags",
                                 "/api/v1/services",
                                 "/api/v1/services/recommendation",
+                                "/api/v1/services/search",
+                                "/api/v1/bookmarks/services/{id:\\d++}/bookmark",
                                 "/api/v1/reviews/{id:\\d++}",
                                 "/api/v1/freelancers/ranking").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()
@@ -102,7 +105,6 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedOrigins(List.of("http://localhost:4000"));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
