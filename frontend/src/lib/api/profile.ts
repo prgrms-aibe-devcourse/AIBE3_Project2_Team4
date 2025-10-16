@@ -7,6 +7,7 @@ export interface ProfileResponse {
   averageRating: number;
   profileType: 'CLIENT' | 'FREELANCER';
   reviewCount?: number;
+  profileImageUrl?: string;
   companyName?: string;
   teamName?: string;
   techStacks?: string[];
@@ -49,6 +50,7 @@ export interface PortfolioResponse {
 export interface ProfileUpdateRequest {
   nickname: string;
   introduction: string;
+  profileImageUrl?: string;
   companyName?: string;
   teamName?: string;
   techStacks?: string[];
@@ -159,6 +161,27 @@ export const profileApi = {
     if (!response.ok) {
       throw new Error(`프로필 수정 실패: ${response.status}`);
     }
+  },
+
+  // 프로필 이미지 업로드
+  uploadProfileImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('fileCategory', 'PROFILE_IMAGE');
+    // referenceId는 로그인한 사용자의 memberId로 설정 (백엔드에서 처리)
+
+    const response = await authorizedFetch(`${API_BASE_URL}/uploads/single`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`이미지 업로드 실패: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('파일 업로드 응답:', result);
+    return result.s3Url; // 업로드된 이미지 URL 반환
   },
 };
 

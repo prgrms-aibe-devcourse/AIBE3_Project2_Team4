@@ -18,6 +18,7 @@ public class ProfileResponse {
     private final double averageRating;
     private final String profileType; // "CLIENT" or "FREELANCER"
     private final Integer reviewCount; // 리뷰 수
+    private final String profileImageUrl; // 프로필 이미지 URL
 
     // 클라이언트 필드
     private final String companyName;
@@ -31,9 +32,12 @@ public class ProfileResponse {
 
     // Profile -> ProfileResponse
     public static ProfileResponse from(Profile profile, Integer reviewCount) {
+        System.out.println("ProfileResponse 생성 - 프로필 이미지 URL: " + profile.getProfileImageUrl());
+        
         ProfileResponseBuilder builder = ProfileResponse.builder()
                 .nickname(profile.getNickname())
                 .introduction(profile.getIntroduction())
+                .profileImageUrl(profile.getProfileImageUrl())
                 .averageRating(profile.getAverageRating())
                 .reviewCount(reviewCount != null ? reviewCount : 0);
 

@@ -23,11 +23,13 @@ public abstract class Profile {
     // 공통 필드
     private String nickname;
     private String introduction;
+    private String profileImageUrl;
     private double averageRating = 0.0;
 
-    public void updateProfile(String nickname, String introduction) {
+    public void updateProfile(String nickname, String introduction, String profileImageUrl) {
         this.nickname = nickname;
         this.introduction = introduction;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void setMember(Member member) {
@@ -36,5 +38,9 @@ public abstract class Profile {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

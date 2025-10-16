@@ -47,6 +47,7 @@ export default function Profile() {
 
   const [userProfile, setUserProfile] = useState<ProfileResponse | null>(null);
   const [profileImage, setProfileImage] = useState<string>("/placeholder-user.jpg");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -66,8 +67,12 @@ export default function Profile() {
         const profile = await profileApi.getMyProfile();
         setUserProfile(profile);
         
-        // 프로필 이미지가 있다면 설정 (현재는 기본 이미지 사용)
-        // TODO: 프로필 이미지 URL을 백엔드에서 가져와서 설정
+        // 프로필 이미지 URL 설정
+        if (profile.profileImageUrl) {
+          setProfileImage(profile.profileImageUrl);
+        } else {
+          setProfileImage("/placeholder-user.jpg");
+        }
       } catch (error) {
         console.error('프로필 로드 실패:', error);
         console.error('Error details:', error);
@@ -85,10 +90,37 @@ export default function Profile() {
     try {
       setSaving(true);
       
+      let profileImageUrl = userProfile.profileImageUrl;
+      
+      // 선택된 이미지 파일이 있으면 업로드
+      if (selectedImageFile) {
+        try {
+          setUploadingImage(true);
+          profileImageUrl = await profileApi.uploadProfileImage(selectedImageFile);
+          console.log('이미지 업로드 완료:', profileImageUrl);
+          
+          // userProfile 상태에도 업로드된 이미지 URL 업데이트
+          setUserProfile({
+            ...userProfile,
+            profileImageUrl: profileImageUrl
+          });
+        } catch (uploadError) {
+          console.error('이미지 업로드 실패:', uploadError);
+          alert('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+      
       const updateData: ProfileUpdateRequest = {
         nickname: userProfile.nickname,
         introduction: userProfile.introduction,
+        profileImageUrl: profileImageUrl,
       };
+      
+      console.log('프로필 업데이트 데이터:', updateData);
+      console.log('profileImageUrl 변수 값:', profileImageUrl);
 
       if (userProfile.profileType === 'CLIENT') {
         updateData.companyName = userProfile.companyName;
@@ -104,9 +136,24 @@ export default function Profile() {
       setIsEditMode(false);
       setIsEditing(false);
       
+      // 선택된 파일 상태 초기화
+      setSelectedImageFile(null);
+      
       // 프로필 다시 로드
       const updatedProfile = await profileApi.getMyProfile();
       setUserProfile(updatedProfile);
+      
+      console.log('업데이트된 프로필:', updatedProfile);
+      console.log('프로필 이미지 URL:', updatedProfile.profileImageUrl);
+      
+      // 프로필 이미지 URL 설정 (업로드된 URL 또는 기존 URL)
+      if (updatedProfile.profileImageUrl) {
+        setProfileImage(updatedProfile.profileImageUrl);
+        console.log('프로필 이미지 설정됨:', updatedProfile.profileImageUrl);
+      } else {
+        setProfileImage("/placeholder-user.jpg");
+        console.log('기본 프로필 이미지 설정됨');
+      }
     } catch (error) {
       console.error('프로필 저장 실패:', error);
       alert('프로필 저장에 실패했습니다.');
@@ -115,13 +162,31 @@ export default function Profile() {
     }
   };
 
-  // 프로필 이미지 업로드 (현재 비활성화)
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // 프로필 이미지 선택 (업로드는 저장 시 실행)
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // TODO: 이미지 업로드 기능 구현 예정
-    alert('이미지 업로드 기능은 곧 구현될 예정입니다.');
+    // 파일 크기 제한 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    // 이미지 파일 형식 확인
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
+      return;
+    }
+
+    // 선택된 파일을 임시 저장
+    setSelectedImageFile(file);
+    
+    // 미리보기를 위해 파일 URL 생성
+    const imageUrl = URL.createObjectURL(file);
+    setProfileImage(imageUrl);
+    
+    console.log('이미지 파일이 선택되었습니다. 저장 버튼을 눌러 업로드하세요.');
   };
 
   const handleAddSkill = () => {
@@ -320,7 +385,17 @@ export default function Profile() {
                 <Save className="mr-2 h-4 w-4" />
                 {saving ? "저장 중..." : "저장"}
               </Button>
-              <Button onClick={() => setIsEditMode(false)} variant="outline" size="sm">
+              <Button onClick={() => {
+                setIsEditMode(false);
+                // 선택된 이미지 파일 초기화
+                setSelectedImageFile(null);
+                // 프로필 이미지를 원래대로 복원
+                if (userProfile?.profileImageUrl) {
+                  setProfileImage(userProfile.profileImageUrl);
+                } else {
+                  setProfileImage("/placeholder-user.jpg");
+                }
+              }} variant="outline" size="sm">
                 <X className="mr-2 h-4 w-4" />
                 취소
               </Button>
@@ -340,9 +415,9 @@ export default function Profile() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={handleImageSelect}
                     className="hidden"
-                    disabled={uploadingImage}
+                    disabled={uploadingImage || saving}
                   />
                 </label>
               )}

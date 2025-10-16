@@ -79,7 +79,10 @@ public class ProfileService {
         Profile profile = profileRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("내 프로필 정보를 찾을 수 없습니다."));
 
-        profile.updateProfile(request.getNickname(), request.getIntroduction());
+        System.out.println("프로필 업데이트 요청 - memberId: " + memberId);
+        System.out.println("프로필 이미지 URL: " + request.getProfileImageUrl());
+        
+        profile.updateProfile(request.getNickname(), request.getIntroduction(), request.getProfileImageUrl());
 
         if (profile instanceof ClientProfile) {
             updateClientProfile((ClientProfile) profile, request);
@@ -127,17 +130,20 @@ public class ProfileService {
             ClientProfile clientProfile = new ClientProfile();
             clientProfile.setMember(member);
             clientProfile.setNickname(member.getNickname());
+            clientProfile.setProfileImageUrl(member.getProfileImageUrl());
             profile = clientProfile;
         } else if (member.getMemberRole() == MemberRole.FREELANCER) {
             FreelancerProfile freelancerProfile = new FreelancerProfile();
             freelancerProfile.setMember(member);
             freelancerProfile.setNickname(member.getNickname());
+            freelancerProfile.setProfileImageUrl(member.getProfileImageUrl());
             profile = freelancerProfile;
         } else {
             // UNASSIGNED인 경우 기본적으로 CLIENT로 생성
             ClientProfile clientProfile = new ClientProfile();
             clientProfile.setMember(member);
             clientProfile.setNickname(member.getNickname());
+            clientProfile.setProfileImageUrl(member.getProfileImageUrl());
             profile = clientProfile;
         }
 
