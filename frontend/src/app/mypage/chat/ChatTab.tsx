@@ -1,7 +1,6 @@
 "use client";
-
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
-import { useRouter } from "next/navigation";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useLoginStore } from "@/store/useLoginStore";
@@ -340,6 +339,13 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
+  const params = useParams<{ chatId?: string }>();
+  const searchParams = useSearchParams();
+
+  // 우선순위: props > /chats/[chatId] > ?chatId=...
+  const rawId = initialChatId ?? params?.chatId ?? searchParams.get("chatId");
+  const currentChatId = rawId ? String(rawId) : null;
+
   // --- Effects ---
 
   useEffect(() => {
@@ -366,19 +372,19 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
       .then((data) => {
         if (!Array.isArray(data)) throw new Error("API did not return an array");
         setChatList(data);
-        if (initialChatId) {
-          const chatToSelect = data.find((chat: ChatRoom) => chat.id === initialChatId);
-          if (chatToSelect) {
-            setSelectedChat(chatToSelect);
-          }
-        }
       })
       .catch((err) => {
         console.error("채팅방 불러오기 실패:", err);
         setError(err.message);
       })
       .finally(() => setLoadingRooms(false));
-  }, [accessToken, initialChatId]);
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!currentChatId || chatList.length === 0) return;
+    const found = chatList.find((c) => String(c.id) === String(currentChatId));
+    setSelectedChat(found ?? null);
+  }, [currentChatId, chatList]);
 
   useEffect(() => {
     if (!selectedChat || !accessToken) return;
@@ -566,7 +572,13 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
               {chatList.map((chat) => (
                 <li
                   key={chat.id}
-                  onClick={() => setSelectedChat(chat)}
+                  onClick={() => {
+                    setSelectedChat(chat);
+
+                    const sp = new URLSearchParams(searchParams.toString());
+                    sp.set("chatId", String(chat.id));
+                    router.replace(`?${sp.toString()}`, { scroll: false });
+                  }}
                   style={{
                     padding: "1rem",
                     cursor: "pointer",

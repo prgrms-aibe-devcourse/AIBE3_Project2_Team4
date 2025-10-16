@@ -211,12 +211,16 @@ public class ServiceService {
     // email 기반으로 서비스 목록 찾기
     public Page<ServiceDTO> getServicesByEmail(String username, Pageable pageable) {
         return serviceRepository.findAllByFreelancer_Email(username, pageable)
-                .map((page)->{
-                    double avgRating = page.getReviews().stream()
+                .map((service)->{
+                    String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
+                            .map(resource -> resource.getFile().getS3Url())
+                            .orElse(null);
+
+                    double avgRating = service.getReviews().stream()
                             .mapToDouble(ServiceReview::getRating)
                             .average()
                             .orElse(0.0);
-                    return ServiceDTO.fromCardOnly(page, page.getReviews().size(), (float) avgRating);
+                    return ServiceDTO.fromCardOnly(service, service.getReviews().size(), (float) avgRating, mainImage);
                 });
     }
 }
