@@ -34,6 +34,7 @@ public class ChatMessageService {
                 .messageType(ChatMessage.MessageType.PAYMENT_REQUEST)
                 .amount(messageRequest.getAmount())
                 .memo(messageRequest.getMemo())
+                .serviceId(messageRequest.getServiceId())
                 .build();
         return chatMessageRepository.save(message);
     }

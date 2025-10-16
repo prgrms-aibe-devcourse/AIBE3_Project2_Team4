@@ -10,4 +10,5 @@ public class MessageRequest {
     private ChatMessage.MessageType messageType;
     private Double amount;
     private String memo;
+    private Long serviceId;
 }
