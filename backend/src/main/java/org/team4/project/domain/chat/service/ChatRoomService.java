@@ -78,8 +78,8 @@ public class ChatRoomService {
         // 채팅방 토픽으로 메시지 전송
         messagingTemplate.convertAndSend("/topic/rooms/" + roomId, leaveMessage);
 
-        // 채팅방 삭제
-        chatRoomRepository.delete(room);
+        // 채팅방 삭제, 활성서비스와 연관되어 임시 주석처리
+        // chatRoomRepository.delete(room);
     }
 
     @Transactional

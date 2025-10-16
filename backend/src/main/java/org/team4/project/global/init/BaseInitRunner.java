@@ -5,6 +5,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
+import org.team4.project.domain.service.entity.category.type.TagType;
 
 @Configuration
 public class BaseInitRunner {
