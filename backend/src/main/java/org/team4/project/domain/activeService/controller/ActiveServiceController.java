@@ -22,20 +22,6 @@ import java.util.List;
 public class ActiveServiceController {
     final private ActiveServiceService activeServiceService;
 
-    @PostMapping
-    @Operation(summary = "활성 서비스 생성")
-    public ResponseEntity<Void> createActiveService(
-            @AuthenticationPrincipal CustomUserDetails user,
-            @RequestBody ActiveServiceCreateReqBody activeServiceCreateReq
-    ) {
-        activeServiceService.createActiveService(
-                activeServiceCreateReq.paymentKey(),
-                user.getUsername()
-        );
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping
     @Operation(summary = "내 활성 서비스 목록 조회")
     public ResponseEntity<List<ActiveServiceDTO>> getActiveServices(
@@ -46,7 +32,6 @@ public class ActiveServiceController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 
     @PatchMapping
     @Operation(summary = "활성 서비스 상태 변경 (to 완료)")
