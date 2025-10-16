@@ -83,7 +83,9 @@ public class SecurityConfig {
                                 "/api/v1/services/search",
                                 "/api/v1/bookmarks/services/{id:\\d++}/bookmark",
                                 "/api/v1/reviews/{id:\\d++}",
-                                "/api/v1/freelancers/ranking").permitAll()
+                                "/api/v1/freelancers/ranking",
+                                "api/v1/profiles/clients/{id:\\d++}",
+                                "api/v1/profiles/freelancers/{id:\\d++}").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()
                         .requestMatchers("/api/v1/auth/register",
                                 "/api/v1/auth/email/verify/**",
