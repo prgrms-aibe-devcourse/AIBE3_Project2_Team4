@@ -1,33 +1,44 @@
 package org.team4.project.global.websocket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+import org.team4.project.domain.chat.entity.ChatRoom;
+import org.team4.project.domain.chat.repository.ChatRoomRepository;
 import org.team4.project.domain.member.entity.Member;
-import org.team4.project.domain.member.entity.MemberRole;
+import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.global.security.CustomUserDetails;
 import org.team4.project.global.security.jwt.JwtUtil;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.security.Principal;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class StompHandler implements ChannelInterceptor {
 
     private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        // STOMP CONNECT 요청일 때 JWT 토큰 검증
+        if (accessor == null) {
+            throw new SecurityException("메시지 헤더를 찾을 수 없습니다.");
+        }
+
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String jwtToken = accessor.getFirstNativeHeader("Authorization");
 
@@ -35,26 +46,47 @@ public class StompHandler implements ChannelInterceptor {
                 jwtToken = jwtToken.substring(7);
             }
 
-            // 토큰 유효성 검증
             if (jwtToken != null && !jwtUtil.isExpired(jwtToken)) {
                 String email = jwtUtil.getEmail(jwtToken);
-                String role = jwtUtil.getRole(jwtToken);
+                Member member = memberRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("인증된 사용자를 DB에서 찾을 수 없습니다."));
 
-                // CustomUserDetails를 생성하기 위해, 토큰 정보로 임시 Member 객체를 생성합니다.
-                Member member = Member.builder()
-                        .email(email)
-                        .memberRole(MemberRole.valueOf(role))
-                        .build();
                 CustomUserDetails userDetails = new CustomUserDetails(member);
-
-                // 스프링 시큐리티 인증 토큰을 생성합니다.
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                
-                // STOMP 세션에 인증 정보를 저장하여, 이후 @AuthenticationPrincipal로 접근할 수 있게 합니다.
+                        userDetails, null, userDetails.getAuthorities()
+                );
                 accessor.setUser(authentication);
             }
+        } 
+        else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            String destination = accessor.getDestination();
+            Principal principal = accessor.getUser();
+
+            if (destination != null && destination.startsWith("/topic/canvas/")) {
+                if (principal == null) {
+                    throw new SecurityException("캔버스 구독은 인증된 사용자만 가능합니다.");
+                }
+
+                Authentication user = (Authentication) principal;
+                CustomUserDetails userDetails = (CustomUserDetails) user.getPrincipal();
+
+                String canvasIdStr = destination.substring("/topic/canvas/".length());
+                Long canvasId = Long.parseLong(canvasIdStr);
+                
+                String email = userDetails.getEmail();
+                Member member = memberRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다: " + email));
+                Long memberId = member.getId();
+
+                ChatRoom chatRoom = chatRoomRepository.findById(canvasId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캔버스(채팅방) ID 입니다: " + canvasId));
+
+                if (!Objects.equals(chatRoom.getClient().getId(), memberId) && !Objects.equals(chatRoom.getFreelancer().getId(), memberId)) {
+                    throw new SecurityException("해당 캔버스에 접근할 권한이 없습니다.");
+                }
+            }
         }
+
         return message;
     }
 }

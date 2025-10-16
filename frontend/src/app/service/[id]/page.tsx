@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Star, MessageCircle, Share2, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +63,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function ServiceDetailPage() {
   const params = useParams();
   const serviceId = params?.id;
+  const router = useRouter();
 
   type ServiceReviewDTO = components["schemas"]["ServiceReviewDTO"];
   type ServiceDTO = components["schemas"]["ServiceDTO"];
@@ -182,12 +183,37 @@ export default function ServiceDetailPage() {
     setCurrentImageIndex((prev) => (prev - 1 + service.images.length) % service.images.length);
   };
 
-  const handleChatClick = () => {
+  const handleChatClick = async () => {
     if (!member) {
       alert("로그인이 필요한 서비스입니다.");
       return;
     }
-    console.log("채팅 시작");
+    if (!service || !service.freelancer?.id) {
+      alert("프리랜서 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/chats/rooms`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ freelancerId: service.freelancer.id }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "채팅방 생성에 실패했습니다.");
+      }
+
+      const room = await res.json();
+      router.push(`/mypage/chat/${room.id}`);
+    } catch (err: any) {
+      console.error("채팅 시작 실패:", err);
+      alert(err.message);
+    }
   };
 
   const handleShareClick = async () => {
@@ -319,10 +345,12 @@ export default function ServiceDetailPage() {
 
             {/* 인터랙션 버튼들 */}
             <div className="flex space-x-3">
-              <Button onClick={handleChatClick} className="flex-1">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                채팅하기
-              </Button>
+              {member?.role === "client" && (
+                <Button onClick={handleChatClick} className="flex-1">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  채팅하기
+                </Button>
+              )}
               <Button variant="outline" onClick={handleBookmarkClick}>
                 <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
               </Button>
