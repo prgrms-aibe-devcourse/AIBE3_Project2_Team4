@@ -42,7 +42,7 @@ public record ActiveServiceDTO(
         int rateCount = projectService.getReviews().size();
 
         String partnerName = null;
-        if (memberRole.equals(org.team4.project.domain.member.entity.MemberRole.CLIENT)) partnerName = at.getFreelancer().getNickname();
+        if (memberRole.equals(MemberRole.CLIENT)) partnerName = at.getFreelancer().getNickname();
         else partnerName = at.getClient().getNickname();
 
         boolean isFinished = at.isFinished();
