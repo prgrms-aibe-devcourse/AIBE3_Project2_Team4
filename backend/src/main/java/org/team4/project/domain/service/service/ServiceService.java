@@ -160,21 +160,6 @@ public class ServiceService {
                 });
     }
 
-    //서비스 다건 조회
-    public Page<ServiceDTO> getRecommendationServices(Pageable pageable) {
-        return serviceRepository.findAllOrderByReviewCountDesc(pageable)
-                .map(service -> {
-                    List<TagService> tagServices = findByService(service);
-                    Category category = tagServices.getFirst().getTag().getCategory();
-                    Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
-                    Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
-                    String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
-                            .map(resource -> resource.getFile().getS3Url())
-                            .orElse(null);
-                    return new ServiceDTO(service, tagServices, category, reviewCount, rating, mainImage);
-                });
-    }
-
     //서비스 다건 조회 (카테고리)
     public Page<ServiceDTO> getServicesByCategory(Pageable pageable, CategoryType category) {
         return tagServiceRepository.findByCategory(category,pageable)
