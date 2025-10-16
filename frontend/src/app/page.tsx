@@ -8,68 +8,14 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import useCategory from "@/hooks/use-category";
-
-// 추천 서비스 더미 데이터
-const recommendedServices = [
-  {
-    id: "1",
-    thumbnail: "/-------.jpg",
-    title: "반응형 웹사이트 개발해드립니다",
-    price: 500000,
-    rating: 4.9,
-    reviewCount: 127,
-    freelancerName: "김개발자",
-  },
-  {
-    id: "2",
-    thumbnail: "/------.jpg",
-    title: "브랜드 로고 디자인 작업",
-    price: 150000,
-    rating: 4.8,
-    reviewCount: 89,
-    freelancerName: "박디자이너",
-  },
-  {
-    id: "3",
-    thumbnail: "/-----.jpg",
-    title: "유튜브 영상 편집 및 썸네일 제작",
-    price: 80000,
-    rating: 4.7,
-    reviewCount: 156,
-    freelancerName: "이편집자",
-  },
-  {
-    id: "4",
-    thumbnail: "/-----.jpg",
-    title: "모바일 앱 개발 (iOS/Android)",
-    price: 1200000,
-    rating: 4.9,
-    reviewCount: 43,
-    freelancerName: "최앱개발",
-  },
-  {
-    id: "5",
-    thumbnail: "/------.jpg",
-    title: "SNS 마케팅 전략 수립 및 운영",
-    price: 300000,
-    rating: 4.6,
-    reviewCount: 72,
-    freelancerName: "정마케터",
-  },
-  {
-    id: "6",
-    thumbnail: "/translation-service.png",
-    title: "전문 번역 서비스 (한↔영)",
-    price: 50000,
-    rating: 4.8,
-    reviewCount: 234,
-    freelancerName: "한번역가",
-  },
-];
+import { components } from "@/app/services/backend/schemas";
 
 export default function HomePage() {
   const { categories } = useCategory();
   const [searchQuery, setSearchQuery] = useState("");
+  type ServiceDTO = components["schemas"]["ServiceDTO"];
+  const [recommendedServices, setRecommendedServices] = useState<ServiceDTO[]>([]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
 
   const handleCategorySelect = (categoryId: string) => {
@@ -83,6 +29,23 @@ export default function HomePage() {
       router.push("/services");
     }
   };
+
+  const itemsPerPage = 6;
+  const fetchServices = async () => {
+    let url = `${API_BASE_URL}/api/v1/services/recommendation?page=0&size=${itemsPerPage}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("서비스 목록 불러오기 실패");
+      const data = await res.json();
+      setRecommendedServices(data.content);
+
+      console.log(data.content);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  if (recommendedServices.length === 0) fetchServices();
 
   return (
     <div className="bg-background min-h-screen">
@@ -170,7 +133,7 @@ export default function HomePage() {
             {recommendedServices.map((service) => (
               <ServiceCard
                 key={service.id}
-                id={service.id}
+                id={service.id.toString()}
                 thumbnail={service.thumbnail}
                 title={service.title}
                 price={service.price}
