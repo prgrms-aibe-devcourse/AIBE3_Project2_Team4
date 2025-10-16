@@ -27,4 +27,7 @@ public interface ServiceRepository extends JpaRepository<ProjectService, Long> {
         ORDER BY COUNT(r) DESC
         """)
     Page<ProjectService> findAllOrderByReviewCountDesc(Pageable pageable);
+
+    @Query("SELECT s FROM ProjectService s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<ProjectService> searchByTitle(@Param("keyword") String keyword, Pageable pageable);
 }

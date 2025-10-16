@@ -79,6 +79,8 @@ public class SecurityConfig {
                                 "/api/v1/services/tags",
                                 "/api/v1/services",
                                 "/api/v1/services/recommendation",
+                                "/api/v1/services/search",
+                                "/api/v1/bookmarks/services/{id:\\d++}/bookmark",
                                 "/api/v1/reviews/{id:\\d++}",
                                 "/api/v1/freelancers/ranking").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()

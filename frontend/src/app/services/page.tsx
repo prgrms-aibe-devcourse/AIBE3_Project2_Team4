@@ -15,19 +15,83 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, AlertCircle } from "lucide-react";
 import useCategory from "@/hooks/use-category";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-import { components } from "@/app/services/backend/schemas";
+import type { components } from "@/app/services/backend/schemas";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const MOCK_SERVICES = [
+  {
+    id: 1,
+    thumbnail: "/web-design-mockup.png",
+    title: "프로페셔널 웹사이트 디자인",
+    price: 500000,
+    rating: 4.8,
+    reviewCount: 24,
+    freelancerName: "김디자이너",
+    createdAt: "2024-01-15T10:00:00Z",
+  },
+  {
+    id: 2,
+    thumbnail: "/mobile-app-development.png",
+    title: "모바일 앱 개발 서비스",
+    price: 1200000,
+    rating: 4.9,
+    reviewCount: 18,
+    freelancerName: "박개발자",
+    createdAt: "2024-01-14T10:00:00Z",
+  },
+  {
+    id: 3,
+    thumbnail: "/generic-logo-design.png",
+    title: "브랜드 로고 디자인",
+    price: 300000,
+    rating: 4.7,
+    reviewCount: 32,
+    freelancerName: "이크리에이터",
+    createdAt: "2024-01-13T10:00:00Z",
+  },
+  {
+    id: 4,
+    thumbnail: "/seo-marketing-concept.png",
+    title: "SEO 최적화 컨설팅",
+    price: 800000,
+    rating: 4.6,
+    reviewCount: 15,
+    freelancerName: "최마케터",
+    createdAt: "2024-01-12T10:00:00Z",
+  },
+  {
+    id: 5,
+    thumbnail: "/video-editing-workspace.png",
+    title: "영상 편집 및 제작",
+    price: 600000,
+    rating: 4.9,
+    reviewCount: 28,
+    freelancerName: "정크리에이터",
+    createdAt: "2024-01-11T10:00:00Z",
+  },
+  {
+    id: 6,
+    thumbnail: "/content-writing-concept.png",
+    title: "블로그 콘텐츠 작성",
+    price: 200000,
+    rating: 4.5,
+    reviewCount: 21,
+    freelancerName: "강작가",
+    createdAt: "2024-01-10T10:00:00Z",
+  },
+];
 
 function ServicesPageContent() {
   const { categories, tagsByCategory } = useCategory();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get("category"),
   );
@@ -39,10 +103,58 @@ function ServicesPageContent() {
   type ServiceDTO = components["schemas"]["ServiceDTO"];
   const [allServices, setAllServices] = useState<ServiceDTO[]>([]);
   const [filteredServices, setFilteredServices] = useState<ServiceDTO[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [useMockData, setUseMockData] = useState(false);
 
   const itemsPerPage = 9;
 
   const fetchServices = async () => {
+    if (!API_BASE_URL) {
+      console.warn("[v0] API_BASE_URL not set, using mock data");
+      setUseMockData(true);
+      setAllServices(MOCK_SERVICES as any);
+      setFilteredServices(MOCK_SERVICES as any);
+      setTotalElements(MOCK_SERVICES.length);
+      setTotalPages(1);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // If there's a search query, use the /search endpoint
+    if (searchQuery.trim()) {
+      const url = `${API_BASE_URL}/api/v1/services/search?keyword=${encodeURIComponent(searchQuery)}&page=${currentPage - 1}&size=${itemsPerPage}&sort=id&direction=DESC`;
+      console.log("[v0] Fetching from:", url);
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`검색 실패: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        setAllServices(data.content);
+        setFilteredServices(data.content);
+        setTotalElements(data.totalElements);
+        setTotalPages(data.totalPages);
+        setUseMockData(false);
+        console.log("[v0] Fetched services:", data.content);
+      } catch (err) {
+        console.error("[v0] Fetch error:", err);
+        setUseMockData(true);
+        const filtered = MOCK_SERVICES.filter((s) =>
+          s.title.toLowerCase().includes(searchQuery.toLowerCase()),
+        ) as any;
+        setAllServices(filtered);
+        setFilteredServices(filtered);
+        setTotalElements(filtered.length);
+        setTotalPages(1);
+        setError(`백엔드 연결 실패 (${err instanceof Error ? err.message : "알 수 없는 오류"})`);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     let url = `${API_BASE_URL}/api/v1/services?page=${currentPage - 1}&size=${itemsPerPage}`;
 
     // 카테고리만 선택
@@ -56,18 +168,28 @@ function ServicesPageContent() {
       url = `${API_BASE_URL}/api/v1/services/tags?page=${currentPage - 1}&size=${itemsPerPage}${tagQuery}`;
     }
 
+    console.log("[v0] Fetching from:", url);
+
     try {
       const res = await fetch(url);
-      if (!res.ok) throw new Error("서비스 목록 불러오기 실패");
+      if (!res.ok) throw new Error(`서비스 목록 불러오기 실패: ${res.status} ${res.statusText}`);
       const data = await res.json();
       setAllServices(data.content);
       setFilteredServices(data.content);
       setTotalElements(data.totalElements);
       setTotalPages(data.totalPages);
-
-      console.log(data.content);
+      setUseMockData(false);
+      console.log("[v0] Fetched services:", data.content);
     } catch (err) {
-      console.error(err);
+      console.error("[v0] Fetch error:", err);
+      setUseMockData(true);
+      setAllServices(MOCK_SERVICES as any);
+      setFilteredServices(MOCK_SERVICES as any);
+      setTotalElements(MOCK_SERVICES.length);
+      setTotalPages(1);
+      setError(`백엔드 연결 실패 (${err instanceof Error ? err.message : "알 수 없는 오류"})`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -82,42 +204,23 @@ function ServicesPageContent() {
 
     let filtered = [...allServices];
 
-    // 검색어 필터링
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (service) =>
-          service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          service.freelancerName.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-
-    // 카테고리 필터링
-    if (selectedCategory) {
-      filtered = filtered.filter((service) => service.category === selectedCategory);
-    }
-
-    // 태그 필터링
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((service) =>
-        selectedTags.some((tag) => service.tags?.includes(tag)),
-      );
-    }
-
-    // 정렬
-    if (sortBy === "latest") {
-      filtered = filtered.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    } else if (sortBy === "rating") {
-      filtered = filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    // 정렬 (검색 시에는 백엔드에서 정렬되므로 검색어가 없을 때만 적용)
+    if (!searchQuery.trim()) {
+      if (sortBy === "latest") {
+        filtered = filtered.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+      } else if (sortBy === "rating") {
+        filtered = filtered.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+      }
     }
 
     setFilteredServices(filtered);
-  }, [searchQuery, selectedCategory, selectedTags, sortBy, allServices]);
+  }, [sortBy, allServices, searchQuery]);
 
   const handleCategorySelect = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
-    setSelectedTags([]); // 카테고리 변경 시 태그 초기화
+    setSelectedTags([]);
 
     const params = new URLSearchParams(searchParams.toString());
     if (categoryId) {
@@ -125,7 +228,6 @@ function ServicesPageContent() {
     } else {
       params.delete("category");
     }
-    // 검색어는 유지
     if (searchQuery) {
       params.set("search", searchQuery);
     }
@@ -139,25 +241,24 @@ function ServicesPageContent() {
   };
 
   const handleSearch = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    setCurrentPage(1);
+    setSelectedCategory(null);
+    setSelectedTags([]);
+
+    const params = new URLSearchParams();
     if (searchQuery.trim()) {
       params.set("search", searchQuery.trim());
-    } else {
-      params.delete("search");
-    }
-    // 카테고리는 유지
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
     }
     router.push(`${pathname}?${params.toString()}`);
+
+    // 검색 실행
+    fetchServices();
   };
 
   const currentTags = selectedCategory
     ? tagsByCategory[selectedCategory as keyof typeof tagsByCategory]
     : [];
 
-  // 페이지네이션
-  const startIndex = (currentPage - 1) * itemsPerPage;
   const currentServices = filteredServices;
 
   return (
@@ -258,8 +359,12 @@ function ServicesPageContent() {
               </Select>
             </div>
 
-            {/* 서비스 목록 */}
-            {currentServices.length > 0 ? (
+            {isLoading ? (
+              <div className="py-16 text-center">
+                <div className="mb-4 text-4xl">⏳</div>
+                <p className="text-muted-foreground">로딩 중...</p>
+              </div>
+            ) : currentServices.length > 0 ? (
               <>
                 <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {currentServices.map((service) => (
