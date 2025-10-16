@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 "/api/v1/services/{id:\\d++}",
                                 "/api/v1/services/tags",
                                 "/api/v1/services",
+                                "/api/v1/services/recommendation",
                                 "/api/v1/reviews/{id:\\d++}",
                                 "/api/v1/freelancers/ranking").permitAll()
                         .requestMatchers("/ws-stomp/**").permitAll()
@@ -101,6 +102,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:4000"));
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);

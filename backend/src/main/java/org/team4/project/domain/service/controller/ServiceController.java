@@ -53,6 +53,13 @@ public class ServiceController {
         return serviceService.getServices(pageable);
     }
 
+    @GetMapping("/recommendation")
+    @Transactional(readOnly = true)
+    public Page<ServiceDTO> getRecommendationServices(
+            @PageableDefault(page = 0, size = 10, sort="id", direction = Sort.Direction.DESC)Pageable pageable) {
+        return serviceService.getRecommendationServices(pageable);
+    }
+
     @GetMapping("/category")
     @Transactional(readOnly = true)
     public Page<ServiceDTO> getServicesByCategory(

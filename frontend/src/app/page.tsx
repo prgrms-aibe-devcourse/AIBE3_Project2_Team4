@@ -32,7 +32,7 @@ export default function HomePage() {
 
   const itemsPerPage = 6;
   const fetchServices = async () => {
-    let url = `${API_BASE_URL}/api/v1/services?page=0&size=${itemsPerPage}`;
+    let url = `${API_BASE_URL}/api/v1/services/recommendation?page=0&size=${itemsPerPage}`;
 
     try {
       const res = await fetch(url);
