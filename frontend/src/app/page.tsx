@@ -32,7 +32,7 @@ export default function HomePage() {
 
   const itemsPerPage = 6;
   const fetchServices = async () => {
-    let url = `${API_BASE_URL}/api/v1/services/recommendation?page=0&size=${itemsPerPage}`;
+    const url = `${API_BASE_URL}/api/v1/services/recommendation?page=0&size=${itemsPerPage}`;
 
     try {
       const res = await fetch(url);
@@ -51,22 +51,22 @@ export default function HomePage() {
     <div className="bg-background min-h-screen">
       {/* 플랫폼 소개 섹션 */}
       <section className="relative flex h-80 flex-col items-center justify-center overflow-hidden">
-        <div className="from-primary/10 to-secondary/10 absolute inset-0 flex justify-center bg-gradient-to-br">
+        <div className="from-primary/10 to-secondary/10 absolute inset-0 z-0 flex justify-center overflow-hidden bg-gradient-to-br before:pointer-events-none before:absolute before:inset-0 before:z-10 before:bg-black/75 before:content-['']">
           <Image
-            src={"/main_banner.jpg"}
-            width={1240}
-            height={320}
-            alt={"대표 이미지"}
-            className="absolute"
+            src="/main_banner.jpg"
+            alt="대표 이미지"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
         </div>
-        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-foreground mb-6 text-4xl font-bold text-balance md:text-6xl">
-            전문가와 함께하는
-            <br />
-            <span className="text-primary">프리랜서 매칭 플랫폼</span>
+
+        <div className="relative z-20 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <h1 className="mb-6 pb-0.5 text-4xl font-bold text-white md:text-6xl">
+            <p className="mb-2.5">전문가와 함께하는</p>
+            <span className="text-primary text-white">프리랜서 매칭 플랫폼</span>
           </h1>
-          <p className="text-muted-foreground mx-auto max-w-2xl text-xl text-pretty">
+          <p className="max-w mx-auto text-xl text-white/90">
             다양한 분야의 전문 프리랜서들과 연결되어 당신의 프로젝트를 성공으로 이끌어보세요
           </p>
         </div>
