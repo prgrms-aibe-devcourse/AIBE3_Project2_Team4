@@ -64,17 +64,31 @@ export default function ServiceDetailPage() {
 
   // 북마크 여부 조회
   useEffect(() => {
-    if (!member) return; // 로그인 안했으면 안 불러옴
+    if (!member || !accessToken) return; // 토큰 준비되면 실행
     const fetchBookmark = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}/bookmark`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+          credentials: "include",
         });
         if (!res.ok) throw new Error(`북마크 정보를 불러오지 못했습니다. (${res.status})`);
-        const data = await res.json();
-        setIsBookmarked(data.content);
+
+        // 유연한 불리언 파싱
+        const text = await res.text();
+        let parsed = false as boolean;
+        try {
+          const json = JSON.parse(text);
+          if (typeof json === "boolean") parsed = json;
+          else if (typeof json?.content === "boolean") parsed = json.content;
+          else if (typeof json?.bookmarked === "boolean") parsed = json.bookmarked;
+          else if (typeof json?.data === "boolean") parsed = json.data;
+          else parsed = String(json).toLowerCase() === "true";
+        } catch {
+          parsed = text.toLowerCase() === "true";
+        }
+        setIsBookmarked(parsed);
       } catch (err: any) {
         console.error("북마크 정보 조회 실패:", err);
         setError(err.message);
@@ -82,7 +96,7 @@ export default function ServiceDetailPage() {
     };
 
     fetchBookmark();
-  }, [serviceId, member]);
+  }, [serviceId, member, accessToken]);
 
   // 북마크 토글 함수 (버튼 클릭 시 실행)
   const handleBookmarkClick = async () => {
@@ -315,7 +329,10 @@ export default function ServiceDetailPage() {
                 </Button>
               )}
               <Button variant="outline" onClick={handleBookmarkClick}>
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+                <Bookmark
+                  className={`h-4 w-4 ${isBookmarked ? "text-primary" : ""}`}
+                  fill={isBookmarked ? "currentColor" : "none"}
+                />
               </Button>
               <Button variant="outline" onClick={handleShareClick}>
                 <Share2 className="h-4 w-4" />
