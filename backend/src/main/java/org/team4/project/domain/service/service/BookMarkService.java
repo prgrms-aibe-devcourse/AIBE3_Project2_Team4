@@ -43,6 +43,7 @@ public class BookMarkService {
     }
 
     public boolean isBookmarked(String memberEmail, Long serviceId) {
+        if (memberEmail == null || memberEmail.isEmpty()) return false;
         Member member = memberRepository.findByEmail(memberEmail).orElseThrow(() ->
                 new ServiceException("멤버가 존재하지 않습니다.")
         );
