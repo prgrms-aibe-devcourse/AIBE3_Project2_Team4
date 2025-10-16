@@ -25,7 +25,7 @@ public class FreelancerRankingController {
      */
     @GetMapping("/ranking")
     public ResponseEntity<Page<FreelancerRankingResponse>> getFreelancerRanking(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 100) Pageable pageable) {
         Page<FreelancerRankingResponse> ranking = freelancerRankingService.getFreelancerRanking(pageable);
         return ResponseEntity.ok(ranking);
     }
