@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.team4.project.domain.activeService.service.ActiveServiceService;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.payment.dto.PaymentConfirmDTO;
@@ -44,6 +45,8 @@ public class PaymentService {
     private final MemberRepository memberRepository;
     private final PaymentRepository paymentRepository;
     private final ServiceRepository serviceRepository;
+    private final ActiveServiceService activeServiceService;
+
 
     @Transactional
     public PaymentResponseDTO confirmPayment(PaymentConfirmRequestDTO paymentConfirmRequestDTO, String email) {
@@ -64,6 +67,12 @@ public class PaymentService {
 
         paymentRepository.save(convertToEntity(response, member, projectService, memo));
         redisRepository.deleteValue(generateKey(orderId));
+
+        // 활성 서비스 추가 단
+        activeServiceService.createActiveService(
+                paymentConfirmRequestDTO.paymentKey(),
+                email
+        );
 
         String receiptUrl = response.get("receipt").get("url").asText(null);
         return new PaymentResponseDTO(receiptUrl);
