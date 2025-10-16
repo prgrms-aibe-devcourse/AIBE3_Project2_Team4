@@ -31,6 +31,7 @@ public class BookMarkController {
     public boolean isBookmarked(
             @PathVariable Long serviceId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        if (customUserDetails == null || customUserDetails.getEmail().isEmpty()) return false;
         return bookMarkService.isBookmarked(customUserDetails.getEmail(), serviceId);
     }
 

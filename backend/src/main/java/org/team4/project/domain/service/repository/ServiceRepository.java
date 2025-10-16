@@ -18,4 +18,13 @@ public interface ServiceRepository extends JpaRepository<ProjectService, Long> {
 
     @EntityGraph(attributePaths = {"freelancer", "reviews"})
     Page<ProjectService> findAllByFreelancer_Email(String email, Pageable pageable);
+
+    @Query("""
+        SELECT s
+        FROM ProjectService s
+        LEFT JOIN s.reviews r
+        GROUP BY s
+        ORDER BY COUNT(r) DESC
+        """)
+    Page<ProjectService> findAllOrderByReviewCountDesc(Pageable pageable);
 }

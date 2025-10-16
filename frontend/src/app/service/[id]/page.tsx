@@ -100,7 +100,7 @@ export default function ServiceDetailPage() {
 
   // 북마크 토글 함수 (버튼 클릭 시 실행)
   const handleBookmarkClick = async () => {
-    if (!member) {
+    if (!member || !member.email) {
       alert("로그인 후 이용 가능합니다.");
       return;
     }
