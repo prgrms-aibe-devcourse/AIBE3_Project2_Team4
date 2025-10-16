@@ -41,7 +41,6 @@ export default function ServiceDetailPage() {
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
   const [totalReviewPage, setTotalReviewPage] = useState(1);
   const { member, accessToken } = useLoginStore();
-  const router = useRouter();
 
   // 서비스 상세 정보
   useEffect(() => {
@@ -65,7 +64,7 @@ export default function ServiceDetailPage() {
 
   // 북마크 여부 조회
   useEffect(() => {
-    if (!member) return; // 로그인 안했으면 안 불러옴
+    if (!member || !member.email) return; // 로그인 안했으면 안 불러옴
     const fetchBookmark = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}/bookmark`, {
@@ -87,7 +86,7 @@ export default function ServiceDetailPage() {
 
   // 북마크 토글 함수 (버튼 클릭 시 실행)
   const handleBookmarkClick = async () => {
-    if (!member) {
+    if (!member || !member.email) {
       alert("로그인 후 이용 가능합니다.");
       return;
     }
