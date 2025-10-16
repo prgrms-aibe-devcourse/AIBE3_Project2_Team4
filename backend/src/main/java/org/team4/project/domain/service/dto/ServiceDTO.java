@@ -42,10 +42,10 @@ public record ServiceDTO(
         return new ServiceDTO(service, tagServices, category, reviewCount, rating, mainImage);
     }
 
-    public ServiceDTO(ProjectService service, Integer reviewCount, Float rating) {
+    public ServiceDTO(ProjectService service, Integer reviewCount, Float rating, String mainImage) {
         this(
                 service.getId(),
-                "/-------.jpg",
+                mainImage,
                 service.getTitle(),
                 service.getPrice(),
                 rating, // rating
@@ -58,7 +58,7 @@ public record ServiceDTO(
         );
     }
 
-    public static ServiceDTO fromCardOnly(ProjectService service, Integer reviewCount, Float rating) {
-        return new ServiceDTO(service, reviewCount, rating);
+    public static ServiceDTO fromCardOnly(ProjectService service, Integer reviewCount, Float rating, String mainImage) {
+        return new ServiceDTO(service, reviewCount, rating, mainImage);
     }
 }
