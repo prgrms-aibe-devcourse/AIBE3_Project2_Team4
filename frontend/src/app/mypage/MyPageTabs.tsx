@@ -63,13 +63,31 @@ export default function MyPageTabs({ children }: { children: React.ReactNode }) 
         <h1 className="mb-8 text-3xl font-bold">마이페이지</h1>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-5">
-            <TabsTrigger value="profile">내 프로필</TabsTrigger>
-            <TabsTrigger value="services">서비스</TabsTrigger>
-            {userType === "freelancer" && <TabsTrigger value="my-services">내 서비스</TabsTrigger>}
-            <TabsTrigger value="chat">채팅 목록</TabsTrigger>
-            {userType === "client" && <TabsTrigger value="payments">결제 내역</TabsTrigger>}
-            {userType === "client" && <TabsTrigger value="bookmarks">북마크</TabsTrigger>}
+          <TabsList className="flex w-full justify-between">
+            <TabsTrigger value="profile" className="cursor-pointer">
+              내 프로필
+            </TabsTrigger>
+            <TabsTrigger value="services" className="cursor-pointer">
+              서비스
+            </TabsTrigger>
+            {userType === "freelancer" && (
+              <TabsTrigger value="my-services" className="cursor-pointer">
+                내 서비스
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="chat" className="cursor-pointer">
+              채팅 목록
+            </TabsTrigger>
+            {userType === "client" && (
+              <TabsTrigger value="payments" className="cursor-pointer">
+                결제 내역
+              </TabsTrigger>
+            )}
+            {userType === "client" && (
+              <TabsTrigger value="bookmarks" className="cursor-pointer">
+                북마크
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {children}

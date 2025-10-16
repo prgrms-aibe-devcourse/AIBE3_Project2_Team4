@@ -41,7 +41,6 @@ export default function ServiceDetailPage() {
   const [currentReviewPage, setCurrentReviewPage] = useState(1);
   const [totalReviewPage, setTotalReviewPage] = useState(1);
   const { member, accessToken } = useLoginStore();
-  const router = useRouter();
 
   // 서비스 상세 정보
   useEffect(() => {
