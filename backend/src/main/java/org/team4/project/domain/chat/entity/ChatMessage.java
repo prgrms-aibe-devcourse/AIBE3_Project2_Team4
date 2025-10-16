@@ -35,6 +35,8 @@ public class ChatMessage extends BaseEntity {
 
     private String memo;
 
+    private Long serviceId;
+
     public enum MessageType {
         TALK, PAYMENT_REQUEST, REVIEW_PROMPT, MEETING_REQUEST
     }

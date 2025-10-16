@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Award, Star } from "lucide-react";
 import Image from "next/image";
 import useLogin from "@/hooks/use-Login";
+import { rankingApi, FreelancerRankingResponse, RankingPageResponse } from "@/lib/api/profile";
 
 interface RankedFreelancer {
   rank: number;

@@ -24,4 +24,7 @@ public interface ServiceReviewRepository extends JpaRepository<ServiceReview,Lon
     WHERE sr.service.id = :serviceId
 """)
     Page<ServiceReview> findByServiceId(@Param("serviceId") Long serviceId, Pageable pageable);
+
+    @Query("SELECT COUNT(sr) FROM ServiceReview sr WHERE sr.freelancer.id = :freelancerId")
+    Integer countByFreelancerId(@Param("freelancerId") Long freelancerId);
 }
