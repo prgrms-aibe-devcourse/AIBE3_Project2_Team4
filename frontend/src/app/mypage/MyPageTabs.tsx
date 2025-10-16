@@ -68,7 +68,7 @@ export default function MyPageTabs({ children }: { children: React.ReactNode }) 
             <TabsTrigger value="services">서비스</TabsTrigger>
             {userType === "freelancer" && <TabsTrigger value="my-services">내 서비스</TabsTrigger>}
             <TabsTrigger value="chat">채팅 목록</TabsTrigger>
-            <TabsTrigger value="payments">결제 내역</TabsTrigger>
+            {userType === "client" && <TabsTrigger value="payments">결제 내역</TabsTrigger>}
             {userType === "client" && <TabsTrigger value="bookmarks">북마크</TabsTrigger>}
           </TabsList>
 
