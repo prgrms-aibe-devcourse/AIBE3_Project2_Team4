@@ -12,25 +12,27 @@ public record ServiceReviewDTO(
         Long id,
         Float rating,
         String content,
-        String[] images,
+        List<String> images,
+        String mainImage,
         String freelancerName,
         String freelancerEmail,
         String FreelancerProfileImage,
         String createdAt
 ) {
-    public ServiceReviewDTO(ServiceReview review) {
+    public ServiceReviewDTO(ServiceReview review, List<String> imageUrls, String mainImageUrl) {
         this(
                 review.getId(),
                 review.getRating(),
                 review.getContent(),
-                new String[]{"", "", ""}, // TODO: 실제 이미지 경로 배열로 대체
+                imageUrls, // TODO: 실제 이미지 경로 배열로 대체
+                mainImageUrl,
                 review.getService().getFreelancer().getNickname(),
                 review.getService().getFreelancer().getEmail(),
-                "/profile.jpg", // TODO: 실제 프로필 이미지 경로로 대체
+                review.getMember().getProfileImageUrl(),
                 review.getCreatedAt().toString()
         );
     }
-    public static ServiceReviewDTO from(ServiceReview review) {
-        return new ServiceReviewDTO(review);
+    public static ServiceReviewDTO from(ServiceReview review, List<String> imageUrls, String mainImageUrl) {
+        return new ServiceReviewDTO(review, imageUrls, mainImageUrl);
     }
 }

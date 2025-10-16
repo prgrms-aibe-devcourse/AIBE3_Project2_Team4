@@ -52,7 +52,7 @@ export function ServiceCard({
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{rating}</span>
+            <span className="font-medium">{rating?.toFixed(2) || 0}</span>
             <span className="text-muted-foreground">({reviewCount})</span>
           </div>
 

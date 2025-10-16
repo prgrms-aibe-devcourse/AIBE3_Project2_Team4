@@ -2,6 +2,7 @@ export interface FreelancerDTO {
   id: number;
   nickname: string;
   email: string;
+  profileImageUrl: string;
 }
 
 export interface ServiceDTO {
