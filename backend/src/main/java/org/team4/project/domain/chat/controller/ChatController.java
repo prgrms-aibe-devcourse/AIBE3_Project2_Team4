@@ -3,6 +3,10 @@ package org.team4.project.domain.chat.controller;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.team4.project.domain.service.entity.service.ProjectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,7 @@ import org.team4.project.domain.chat.service.ChatRoomService;
 import org.team4.project.domain.member.entity.Member;
 import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.global.security.CustomUserDetails;
+import org.team4.project.domain.service.repository.ServiceRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +32,7 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final MemberRepository memberRepository;
+    private final ServiceRepository serviceRepository;
 
     @Getter
     @Setter
@@ -111,5 +117,26 @@ public class ChatController {
         // Add role check here if needed, e.g., if (member.getRole() != Role.FREELANCER) { ... }
         chatRoomService.requestPayment(roomId, member);
         return ResponseEntity.ok().build();
+    }
+
+    // 임시 dto
+    public record FreelancerServiceDto(Long id, String title) {}
+
+    @GetMapping("/freelancers/{freelancerId}/services")
+    public ResponseEntity<List<FreelancerServiceDto>> getFreelancerServices(@PathVariable Long freelancerId) {
+        Member freelancer = memberRepository.findById(freelancerId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 프리랜서를 찾을 수 없습니다: " + freelancerId));
+
+        // Pageable로 모든 서비스 가져옴
+        Pageable pageable = PageRequest.of(0, 200);
+
+        Page<ProjectService> servicePage =
+                serviceRepository.findAllByFreelancer_Email(freelancer.getEmail(), pageable);
+
+        List<FreelancerServiceDto> services = servicePage.getContent().stream()
+                .map(service -> new FreelancerServiceDto(service.getId(), service.getTitle()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(services);
     }
 }
