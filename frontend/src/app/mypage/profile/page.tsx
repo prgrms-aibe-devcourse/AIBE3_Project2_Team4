@@ -335,6 +335,19 @@ export default function Profile() {
     }
   };
 
+  // 포트폴리오 링크 클릭 핸들러
+  const handlePortfolioClick = (link: string) => {
+    if (link) {
+      // URL이 http:// 또는 https://로 시작하지 않으면 https://를 추가
+      const url = link.startsWith('http://') || link.startsWith('https://') 
+        ? link 
+        : `https://${link}`;
+      
+      // 새 탭에서 링크 열기
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   if (loading) {
     return (
       <TabsContent value="profile">
@@ -613,7 +626,10 @@ export default function Profile() {
                   {(userProfile.portfolios || []).map((project, index) => (
                     <div
                       key={index}
-                      className="hover:bg-accent group flex items-center gap-3 rounded-lg border p-3 transition-colors"
+                      className={`hover:bg-accent group flex items-center gap-3 rounded-lg border p-3 transition-colors ${
+                        !isEditMode ? 'cursor-pointer' : ''
+                      }`}
+                      onClick={!isEditMode ? () => handlePortfolioClick(project.link) : undefined}
                     >
                       <ExternalLink className="text-muted-foreground group-hover:text-primary h-5 w-5 flex-shrink-0 transition-colors" />
                       <div className="min-w-0 flex-1">
@@ -625,7 +641,7 @@ export default function Profile() {
                         </p>
                       </div>
                       {isEditMode && (
-                        <div className="flex gap-1">
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                           <Button
                             onClick={() => handleOpenPortfolioDialog(index)}
                             size="icon"
