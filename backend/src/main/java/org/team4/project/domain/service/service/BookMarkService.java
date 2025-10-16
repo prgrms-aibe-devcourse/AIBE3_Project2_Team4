@@ -47,7 +47,7 @@ public class BookMarkService {
         Member member = memberRepository.findByEmail(memberEmail).orElseThrow(() ->
                 new ServiceException("멤버가 존재하지 않습니다.")
         );
-        return bookMarkRepository.existsByServiceIdAndMemberId(member.getId(), serviceId);
+        return bookMarkRepository.existsByServiceIdAndMemberId(serviceId, member.getId());
     }
 
     public Page<ServiceDTO> getBookmarkedServices(String memberEmail, Pageable page) {
