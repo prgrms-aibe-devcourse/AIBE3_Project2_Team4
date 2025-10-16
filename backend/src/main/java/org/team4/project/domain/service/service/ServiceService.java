@@ -130,9 +130,24 @@ public class ServiceService {
                 });
     }
 
-    //서비스 다건 조회
+    //추천 서비스 다건 조회
     public Page<ServiceDTO> getRecommendationServices(Pageable pageable) {
         return serviceRepository.findAllOrderByReviewCountDesc(pageable)
+                .map(service -> {
+                    List<TagService> tagServices = findByService(service);
+                    Category category = tagServices.getFirst().getTag().getCategory();
+                    Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
+                    Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
+                    String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
+                            .map(resource -> resource.getFile().getS3Url())
+                            .orElse(null);
+                    return new ServiceDTO(service, tagServices, category, reviewCount, rating, mainImage);
+                });
+    }
+
+    //서비스 검색 다건 조회
+    public Page<ServiceDTO> getSearchedServices(String keyWord, Pageable pageable) {
+        return serviceRepository.searchByTitle(keyWord, pageable)
                 .map(service -> {
                     List<TagService> tagServices = findByService(service);
                     Category category = tagServices.getFirst().getTag().getCategory();
@@ -149,14 +164,14 @@ public class ServiceService {
     public Page<ServiceDTO> getServicesByCategory(Pageable pageable, CategoryType category) {
         return tagServiceRepository.findByCategory(category,pageable)
                 .map(service -> {
-                    List<TagService> tagServices = findByService(service.getService());
+                    List<TagService> tagServices = findByService(service);
                     Category c = tagServices.getFirst().getTag().getCategory();
                     Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
                     Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
                     String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
                             .map(resource -> resource.getFile().getS3Url())
                             .orElse(null);
-                    return new ServiceDTO(service.getService(), tagServices, c, reviewCount, rating, mainImage);
+                    return new ServiceDTO(service, tagServices, c, reviewCount, rating, mainImage);
                 });
     }
 
@@ -164,14 +179,14 @@ public class ServiceService {
     public Page<ServiceDTO> getServicesByTags(Pageable pageable, List<TagType> tags) {
         return tagServiceRepository.findByTags(tags, pageable)
                 .map(service -> {
-                    List<TagService> tagServices = findByService(service.getService());
+                    List<TagService> tagServices = findByService(service);
                     Category category = tagServices.getFirst().getTag().getCategory();
                     Integer reviewCount = serviceReviewRepository.countByServiceId(service.getId());
                     Float rating = serviceReviewRepository.findAvgRatingByService(service.getId());
                     String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
                             .map(resource -> resource.getFile().getS3Url())
                             .orElse(null);
-                    return new ServiceDTO(service.getService(), tagServices, category, reviewCount, rating, mainImage);
+                    return new ServiceDTO(service, tagServices, category, reviewCount, rating, mainImage);
                 });
     }
 

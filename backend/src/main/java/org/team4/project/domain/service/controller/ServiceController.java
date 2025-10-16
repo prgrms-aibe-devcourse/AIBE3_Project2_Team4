@@ -60,6 +60,14 @@ public class ServiceController {
         return serviceService.getRecommendationServices(pageable);
     }
 
+    @GetMapping("/search")
+    @Transactional(readOnly = true)
+    public Page<ServiceDTO> getSearchedServices(
+            @RequestParam("keyword") String keyword,
+            @PageableDefault(page = 0, size = 10, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return serviceService.getSearchedServices(keyword, pageable);
+    }
+
     @GetMapping("/category")
     @Transactional(readOnly = true)
     public Page<ServiceDTO> getServicesByCategory(

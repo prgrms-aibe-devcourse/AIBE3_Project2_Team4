@@ -16,35 +16,28 @@ import java.util.List;
 @Repository
 public interface TagServiceRepository extends JpaRepository<TagService, Long> {
 
-    @Query(
-        value = """
-            select ts from TagService ts
-            join fetch ts.tag t
-            join fetch t.category c
-            where c.name = :category
-        """,
-        countQuery = """
-            select count(ts) from TagService ts
-            join ts.tag t
-            join t.category c
-            where c.name = :category
-        """)
-    Page<TagService> findByCategory(@Param("category") CategoryType category,
-                                    Pageable pageable);
-
-    @Query(
-        value = """ 
-            select distinct ts from TagService ts
-            join fetch ts.tag t
-            where t.name in :tags
-        """,
-        countQuery = """
-            select count(distinct ts) from TagService ts
-            join ts.tag t
-            where t.name in :tags
+    @Query("""
+        select distinct s
+        from ProjectService s
+        join s.tags ts
+        join ts.tag t
+        join t.category c
+        where c.name = :category
     """)
-    Page<TagService> findByTags(@Param("tags") List<TagType> tags,
-                                Pageable pageable);
+    Page<ProjectService> findByCategory(@Param("category") CategoryType category,
+                                        Pageable pageable);
+
+    @Query("""
+    select distinct s
+    from ProjectService s
+    join s.tags ts
+    join ts.tag t
+    where t.name in :tags
+""")
+    Page<ProjectService> findByTags(
+            @Param("tags") List<TagType> tags,
+            Pageable pageable
+    );
     @Query("""
         select ts from TagService ts
         join fetch ts.service s
