@@ -16,6 +16,9 @@ import org.team4.project.domain.member.repository.MemberRepository;
 import org.team4.project.domain.payment.entity.Payment;
 import org.team4.project.domain.payment.repository.PaymentRepository;
 import org.team4.project.domain.payment.service.PaymentService;
+import org.team4.project.domain.service.entity.service.ProjectService;
+import org.team4.project.domain.service.repository.ServiceRepository;
+import org.team4.project.domain.service.repository.ServiceResourceRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,7 @@ public class ActiveServiceService {
     private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ServiceResourceRepository serviceResourceRepository;
 
 
     @Transactional
@@ -54,7 +58,14 @@ public class ActiveServiceService {
                     ChatRoom chatRoom = chatRoomRepository.findByClientAndFreelancer(ac.getClient(), ac.getFreelancer())
                             .orElseThrow(()->new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
-                    return ActiveServiceDTO.from(ac, member.getMemberRole(), chatRoom.getId());
+                    Payment payment = ac.getPayment();
+                    ProjectService service = payment.getProjectService();
+
+                    String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(service.getId())
+                            .map(resource -> resource.getFile().getS3Url())
+                            .orElse(null);
+
+                    return ActiveServiceDTO.from(ac, payment, service, member.getMemberRole(), chatRoom.getId(), mainImage);
                 })
                 .toList();
     }

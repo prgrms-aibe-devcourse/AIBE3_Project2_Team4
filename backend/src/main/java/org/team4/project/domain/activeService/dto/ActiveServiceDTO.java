@@ -19,10 +19,10 @@ public record ActiveServiceDTO(
         Long chatId
 
 ) {
-    public ActiveServiceDTO(Long id, Payment payment, ProjectService sc, float avgRate, int rateCount, String partnerName, boolean isFinished, Long chatId) {
+    public ActiveServiceDTO(Long id, Payment payment, ProjectService sc, float avgRate, int rateCount, String partnerName, boolean isFinished, Long chatId, String mainImage) {
         this(
             id,
-            "----.jpg",
+            mainImage,
             sc.getTitle(),
             payment.getTotalAmount(),
             avgRate,
@@ -34,20 +34,18 @@ public record ActiveServiceDTO(
         );
     }
 
-    public static ActiveServiceDTO from(ActiveService at, MemberRole memberRole, Long chatId) {
-        Payment payment = at.getPayment();
-        ProjectService service = payment.getProjectService();
-        double avgRating = service.getReviews().stream()
+    public static ActiveServiceDTO from(ActiveService at, Payment payment, ProjectService projectService, MemberRole memberRole, Long chatId, String mainImage) {
+        double avgRating = projectService.getReviews().stream()
                 .mapToDouble(ServiceReview::getRating)
                 .average()
                 .orElse(0.0);
-        int rateCount = service.getReviews().size();
+        int rateCount = projectService.getReviews().size();
 
         String partnerName = null;
         if (memberRole.equals(MemberRole.CLIENT)) partnerName = at.getFreelancer().getNickname();
         else partnerName = at.getClient().getNickname();
 
         boolean isFinished = at.isFinished();
-        return new ActiveServiceDTO(at.getId(), payment, service, (float) avgRating, rateCount, partnerName, isFinished, chatId);
+        return new ActiveServiceDTO(at.getId(), payment, projectService, (float) avgRating, rateCount, partnerName, isFinished, chatId, mainImage);
     }
 }

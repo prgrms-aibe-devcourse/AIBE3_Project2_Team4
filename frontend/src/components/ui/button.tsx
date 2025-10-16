@@ -43,7 +43,7 @@ function Button({
     asChild?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
-
+  className += " cursor-pointer";
   return (
     <Comp
       data-slot="button"
