@@ -186,7 +186,7 @@ export default function ServiceDetailPage() {
       }
 
       const room = await res.json();
-      router.push(`/mypage/chat/${room.id}`);
+      router.push(`/mypage/chat?chatId=${room.id}`);
     } catch (err: any) {
       console.error("채팅 시작 실패:", err);
       alert(err.message);
