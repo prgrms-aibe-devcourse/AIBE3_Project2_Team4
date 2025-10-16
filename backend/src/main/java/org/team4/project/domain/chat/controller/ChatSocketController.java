@@ -69,4 +69,26 @@ public class ChatSocketController {
         MessageResponse messageResponse = MessageResponse.from(savedMessage);
         messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
     }
+
+    @MessageMapping("/chats/sendWorkCompleteRequest")
+    public void sendWorkCompleteRequest(@Payload MessageRequest messageRequest, Principal principal) {
+        Member member = getMemberFromPrincipal(principal);
+        ChatRoom room = chatRoomService.getRoom(messageRequest.getRoomId());
+
+        ChatMessage savedMessage = chatMessageService.saveWorkCompleteRequest(room, member, messageRequest);
+
+        MessageResponse messageResponse = MessageResponse.from(savedMessage);
+        messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
+    }
+
+
+    public void confirmWorkComplete(@Payload MessageRequest messageRequest, Principal principal) {
+        Member member = getMemberFromPrincipal(principal);
+        ChatRoom room = chatRoomService.getRoom(messageRequest.getRoomId());
+
+        ChatMessage systemMessage = chatMessageService.confirmWorkComplete(room, member, messageRequest.getServiceId());
+
+        MessageResponse messageResponse = MessageResponse.from(systemMessage);
+        messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
+    }
 }

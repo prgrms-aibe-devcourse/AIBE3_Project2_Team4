@@ -49,7 +49,7 @@ public class ChatController {
     }
 
     @PostMapping("/rooms")
-    public ChatRoom findOrCreateRoom(@AuthenticationPrincipal CustomUserDetails currentUser,
+    public ChatRoomResponseDto findOrCreateRoom(@AuthenticationPrincipal CustomUserDetails currentUser,
                                      @RequestBody CreateRoomRequest request){
         System.out.println("=== ChatController /rooms POST ===");
         System.out.println("Request freelancerId: " + request.getFreelancerId());
@@ -61,7 +61,8 @@ public class ChatController {
 
         Member client = getCurrentMember(currentUser);
         System.out.println("Client member: " + client.getEmail());
-        return chatRoomService.findOrCreateRoom(client, request.getFreelancerId());
+        ChatRoom room = chatRoomService.findOrCreateRoom(client, request.getFreelancerId());
+        return ChatRoomResponseDto.from(room);
     }
 
     @GetMapping("/rooms")
@@ -114,7 +115,7 @@ public class ChatController {
     @PostMapping("/rooms/{roomId}/request-payment")
     public ResponseEntity<Void> requestPayment(@PathVariable Long roomId, @AuthenticationPrincipal CustomUserDetails currentUser) {
         Member member = getCurrentMember(currentUser);
-        // Add role check here if needed, e.g., if (member.getRole() != Role.FREELANCER) { ... }
+
         chatRoomService.requestPayment(roomId, member);
         return ResponseEntity.ok().build();
     }
@@ -138,5 +139,18 @@ public class ChatController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(services);
+    }
+
+    @Getter
+    @Setter
+    public static class CompleteWorkRequest {
+        private Long serviceId;
+    }
+
+    @PostMapping("/rooms/{roomId}/complete-work")
+    public ResponseEntity<Void> completeWork(@PathVariable String roomId, @RequestBody CompleteWorkRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) {
+        Member member = getCurrentMember(currentUser);
+        chatRoomService.sendWorkCompleteRequest(roomId, member, request.getServiceId());
+        return ResponseEntity.ok().build();
     }
 }
