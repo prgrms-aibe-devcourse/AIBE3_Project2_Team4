@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search } from "lucide-react";
-import banner from "@/public/main_banner.jpg";
 import useCategory from "@/hooks/use-category";
 
 // 추천 서비스 더미 데이터
@@ -90,7 +89,13 @@ export default function HomePage() {
       {/* 플랫폼 소개 섹션 */}
       <section className="relative flex h-80 flex-col items-center justify-center overflow-hidden">
         <div className="from-primary/10 to-secondary/10 absolute inset-0 flex justify-center bg-gradient-to-br">
-          <Image src={banner} alt={"대표 이미지"} className="absolute" />
+          <Image
+            src={"/main_banner.jpg"}
+            width={1240}
+            height={320}
+            alt={"대표 이미지"}
+            className="absolute"
+          />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h1 className="text-foreground mb-6 text-4xl font-bold text-balance md:text-6xl">

@@ -47,7 +47,7 @@ export function ReviewCard({
             {images.map((image, index) => (
               <div key={index} className="relative h-16 w-16">
                 <Image
-                  src={image || "/placeholder.svg"}
+                  src={image || "/placeholder-image.svg"}
                   alt={`리뷰 이미지 ${index + 1}`}
                   fill
                   className="rounded object-cover"

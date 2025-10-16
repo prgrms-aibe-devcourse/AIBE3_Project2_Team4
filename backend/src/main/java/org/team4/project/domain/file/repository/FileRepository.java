@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface FileRepository extends JpaRepository<File, Long> {
     Optional<File> findByIdAndFileCategoryAndReferenceId(Long id, String fileCategory, Long referenceId);
     List<File> findByFileCategoryAndReferenceId(String fileCategory, Long referenceId);
+    List<File> findAllByS3UrlIn(List<String> s3Urls);
 }

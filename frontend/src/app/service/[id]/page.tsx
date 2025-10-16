@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Star, MessageCircle, Share2, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,46 +23,10 @@ import { useLoginStore } from "@/store/useLoginStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// const mockService = {
-//   id: "1",
-//   title: "프리미엄 웹사이트 디자인 및 개발",
-//   price: 500000,
-//   rating: 4.8,
-//   reviewCount: 127,
-//   images: [
-//     "/website-design-portfolio-1.jpg",
-//     "/website-design-portfolio-2.jpg",
-//     "/website-design-portfolio-3.jpg",
-//     "/website-design-portfolio-4.jpg",
-//   ],
-//   description: `안녕하세`,
-//   freelancer: {
-//     id: "freelancer-1",
-//     name: "김개발",
-//     avatar: "/developer-profile.png",
-//     rating: 4.9,
-//   },
-//   tags: ["웹개발", "React", "Next.js", "디자인"],
-//   category: "웹개발",
-// };
-
-// const mockReviews = [
-//   {
-//     id: "1",
-//     rating: 5,
-//     content:
-//       "정말 만족스러운 결과물이었습니다. 요구사항을 완벽하게 이해하고 구현해주셨어요. 디자인도 깔끔하고 기능도 완벽하게 작동합니다. 다음에도 꼭 다시 의뢰하고 싶습니다!",
-//     images: ["/review-image-1.jpg", "/review-image-2.jpg"],
-//     authorName: "이클라이언트",
-//     authorId: "client-1",
-//     authorProfileImage: "/client-profile-1.jpg",
-//     createdAt: "2024.01.15",
-//   }
-// ];
-
 export default function ServiceDetailPage() {
   const params = useParams();
   const serviceId = params?.id;
+  const router = useRouter();
 
   type ServiceReviewDTO = components["schemas"]["ServiceReviewDTO"];
   type ServiceDTO = components["schemas"]["ServiceDTO"];
@@ -100,17 +64,31 @@ export default function ServiceDetailPage() {
 
   // 북마크 여부 조회
   useEffect(() => {
-    if (!member) return; // 로그인 안했으면 안 불러옴
+    if (!member || !accessToken) return; // 토큰 준비되면 실행
     const fetchBookmark = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/v1/bookmarks/services/${serviceId}/bookmark`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+          credentials: "include",
         });
         if (!res.ok) throw new Error(`북마크 정보를 불러오지 못했습니다. (${res.status})`);
-        const data = await res.json();
-        setIsBookmarked(data.content);
+
+        // 유연한 불리언 파싱
+        const text = await res.text();
+        let parsed = false as boolean;
+        try {
+          const json = JSON.parse(text);
+          if (typeof json === "boolean") parsed = json;
+          else if (typeof json?.content === "boolean") parsed = json.content;
+          else if (typeof json?.bookmarked === "boolean") parsed = json.bookmarked;
+          else if (typeof json?.data === "boolean") parsed = json.data;
+          else parsed = String(json).toLowerCase() === "true";
+        } catch {
+          parsed = text.toLowerCase() === "true";
+        }
+        setIsBookmarked(parsed);
       } catch (err: any) {
         console.error("북마크 정보 조회 실패:", err);
         setError(err.message);
@@ -118,7 +96,7 @@ export default function ServiceDetailPage() {
     };
 
     fetchBookmark();
-  }, [serviceId, member]);
+  }, [serviceId, member, accessToken]);
 
   // 북마크 토글 함수 (버튼 클릭 시 실행)
   const handleBookmarkClick = async () => {
@@ -182,12 +160,37 @@ export default function ServiceDetailPage() {
     setCurrentImageIndex((prev) => (prev - 1 + service.images.length) % service.images.length);
   };
 
-  const handleChatClick = () => {
+  const handleChatClick = async () => {
     if (!member) {
       alert("로그인이 필요한 서비스입니다.");
       return;
     }
-    console.log("채팅 시작");
+    if (!service || !service.freelancer?.id) {
+      alert("프리랜서 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/chats/rooms`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ freelancerId: service.freelancer.id }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "채팅방 생성에 실패했습니다.");
+      }
+
+      const room = await res.json();
+      router.push(`/mypage/chat/${room.id}`);
+    } catch (err: any) {
+      console.error("채팅 시작 실패:", err);
+      alert(err.message);
+    }
   };
 
   const handleShareClick = async () => {
@@ -213,7 +216,7 @@ export default function ServiceDetailPage() {
           <div className="space-y-4">
             <div className="relative aspect-video overflow-hidden rounded-lg">
               <Image
-                src={service.images[currentImageIndex] || "/placeholder.svg"}
+                src={service.images[currentImageIndex] || "/placeholder-image.svg"}
                 alt={`${service.title} - 이미지 ${currentImageIndex + 1}`}
                 fill
                 className="object-cover"
@@ -252,7 +255,7 @@ export default function ServiceDetailPage() {
                     }`}
                   >
                     <Image
-                      src={image || "/placeholder.svg"}
+                      src={image || "/placeholder-image.svg"}
                       alt={`썸네일 ${index + 1}`}
                       width={80}
                       height={80}
@@ -279,7 +282,7 @@ export default function ServiceDetailPage() {
               <div className="mb-4 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{service.rating}</span>
+                  <span className="font-medium">{service?.rating?.toFixed(2) || 0}</span>
                   <span className="text-muted-foreground">({service.reviewCount}개 리뷰)</span>
                 </div>
               </div>
@@ -295,7 +298,7 @@ export default function ServiceDetailPage() {
                   <Link href={`/freelancer/${service.freelancer.id}`}>
                     <Avatar className="hover:ring-primary h-12 w-12 cursor-pointer hover:ring-2">
                       {/* <AvatarImage src={service.freelancer.avatar || "/placeholder.svg"} /> */}
-                      <AvatarImage src={"/placeholder.svg"} />
+                      <AvatarImage src={service.freelancer.profileImageUrl} />
                       <AvatarFallback>{service.freelancer.nickname}</AvatarFallback>
                     </Avatar>
                   </Link>
@@ -319,12 +322,17 @@ export default function ServiceDetailPage() {
 
             {/* 인터랙션 버튼들 */}
             <div className="flex space-x-3">
-              <Button onClick={handleChatClick} className="flex-1">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                채팅하기
-              </Button>
+              {member?.role === "client" && (
+                <Button onClick={handleChatClick} className="flex-1">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  채팅하기
+                </Button>
+              )}
               <Button variant="outline" onClick={handleBookmarkClick}>
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+                <Bookmark
+                  className={`h-4 w-4 ${isBookmarked ? "text-primary" : ""}`}
+                  fill={isBookmarked ? "currentColor" : "none"}
+                />
               </Button>
               <Button variant="outline" onClick={handleShareClick}>
                 <Share2 className="h-4 w-4" />
@@ -332,6 +340,13 @@ export default function ServiceDetailPage() {
             </div>
           </div>
         </div>
+
+        <Button
+          onClick={() => router.push(`/reviews/register?serviceId=${serviceId}`)}
+          className="bg-primary hover:bg-primary/90 text-white"
+        >
+          리뷰 작성하기 (임시버튼)
+        </Button>
 
         {/* 서비스 상세 설명 */}
         <Card className="mb-12">
@@ -351,7 +366,7 @@ export default function ServiceDetailPage() {
               <div className="mt-2 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-medium">{service.rating}</span>
+                  <span className="text-lg font-medium">{service?.rating?.toFixed(2) || 0}</span>
                 </div>
                 <span className="text-muted-foreground">총 {service.reviewCount}개 리뷰</span>
               </div>

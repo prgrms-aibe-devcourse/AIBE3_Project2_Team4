@@ -23,7 +23,12 @@ export function ServiceCard({
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
       <Link href={`/service/${id}`} className="block">
         <div className="relative aspect-video">
-          <Image src={thumbnail || "/placeholder.svg"} alt={title} fill className="object-cover" />
+          <Image
+            src={thumbnail || "/placeholder-image.svg"}
+            alt={title}
+            fill
+            className="object-cover"
+          />
         </div>
       </Link>
 
@@ -47,7 +52,7 @@ export function ServiceCard({
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{rating}</span>
+            <span className="font-medium">{rating?.toFixed(2) || 0}</span>
             <span className="text-muted-foreground">({reviewCount})</span>
           </div>
 
