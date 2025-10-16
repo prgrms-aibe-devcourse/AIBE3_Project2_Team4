@@ -115,7 +115,7 @@ public class ChatController {
         return ResponseEntity.ok().build();
     }
 
-    // DTO for freelancer's services
+    // 임시 dto
     public record FreelancerServiceDto(Long id, String title) {}
 
     @GetMapping("/freelancers/{freelancerId}/services")
@@ -123,7 +123,7 @@ public class ChatController {
         Member freelancer = memberRepository.findById(freelancerId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 프리랜서를 찾을 수 없습니다: " + freelancerId));
 
-        // Pageable을 생성하여 모든 서비스를 가져오도록 요청 (예: 최대 200개)
+        // Pageable로 모든 서비스 가져옴
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 200);
 
         org.springframework.data.domain.Page<org.team4.project.domain.service.entity.service.ProjectService> servicePage =

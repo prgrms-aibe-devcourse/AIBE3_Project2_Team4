@@ -123,7 +123,6 @@ const PaymentRequestModal = ({
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
-    // When modal opens and services are loaded, select the first one by default
     if (isOpen && services.length > 0) {
       setService(services[0].title);
     }
