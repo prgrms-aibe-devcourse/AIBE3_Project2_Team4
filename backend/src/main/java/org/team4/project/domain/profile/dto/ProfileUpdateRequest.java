@@ -11,6 +11,7 @@ public class ProfileUpdateRequest {
     // 공통
     private String nickname;
     private String introduction;
+    private String profileImageUrl;
 
     // 클라이언트
     private String companyName;

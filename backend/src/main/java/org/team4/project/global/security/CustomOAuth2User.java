@@ -25,6 +25,10 @@ public class CustomOAuth2User implements OAuth2User {
         return member.getMemberRole().name();
     }
 
+    public Long getMemberId() {
+        return member.getId();
+    }
+
     @Override
     public Map<String, Object> getAttributes() {
         return Map.of("email", member.getEmail());

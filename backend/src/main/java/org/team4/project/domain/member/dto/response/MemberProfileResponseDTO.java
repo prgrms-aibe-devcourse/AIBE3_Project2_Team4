@@ -9,6 +9,9 @@ import org.team4.project.domain.member.entity.Member;
 @AllArgsConstructor
 @Schema(description = "간편 프로필 DTO")
 public class MemberProfileResponseDTO {
+    @Schema(description = "회원 ID", example = "1")
+    private Long id;
+
     @Schema(description = "회원 이메일", example = "user@example.com")
     private String email;
 
@@ -23,6 +26,6 @@ public class MemberProfileResponseDTO {
 
     public static MemberProfileResponseDTO from(Member member) {
         String role = member.getMemberRole().name().toLowerCase();
-        return new MemberProfileResponseDTO(member.getEmail(), member.getNickname(), member.getProfileImageUrl(), role);
+        return new MemberProfileResponseDTO(member.getId(), member.getEmail(), member.getNickname(), member.getProfileImageUrl(), role);
     }
 }

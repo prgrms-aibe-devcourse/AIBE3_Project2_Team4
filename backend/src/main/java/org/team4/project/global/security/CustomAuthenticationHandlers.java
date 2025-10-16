@@ -25,8 +25,9 @@ public class CustomAuthenticationHandlers {
             CustomOAuth2User user = (CustomOAuth2User) authentication.getPrincipal();
             String email = user.getEmail();
             String role = user.getRole();
+            Long memberId = user.getMemberId();
 
-            String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role, REFRESH_TOKEN_EXPIRE_MILLIS);
+            String refreshToken = jwtUtil.createJwt(TOKEN_TYPE_REFRESH, email, role, memberId, REFRESH_TOKEN_EXPIRE_MILLIS);
             redisRepository.setValue(refreshToken, "value", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
 
             response.addCookie(CookieUtil.createCookie(TOKEN_TYPE_REFRESH, refreshToken, REFRESH_COOKIE_PATH, REFRESH_TOKEN_EXPIRE_SECONDS));

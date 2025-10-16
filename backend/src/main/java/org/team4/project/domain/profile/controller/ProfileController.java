@@ -2,12 +2,14 @@ package org.team4.project.domain.profile.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.team4.project.domain.profile.dto.ClientProfileResponse;
 import org.team4.project.domain.profile.dto.FreelancerProfileResponse;
 import org.team4.project.domain.profile.dto.ProfileResponse;
 import org.team4.project.domain.profile.dto.ProfileUpdateRequest;
 import org.team4.project.domain.profile.service.ProfileService;
+import org.team4.project.global.security.CustomUserDetails;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,9 +60,8 @@ public class ProfileController {
      * 내 프로필 조회
      */
     @GetMapping("/me")
-    public ResponseEntity<ProfileResponse> getMyProfile() {
-        // TODO: 실제 로그인된 ID 가져오기
-        Long memberId = 1L; // 임시 사용자 ID
+    public ResponseEntity<ProfileResponse> getMyProfile(Authentication authentication) {
+        Long memberId = getCurrentMemberId(authentication);
         ProfileResponse response = profileService.findProfileByMemberId(memberId);
 
         return ResponseEntity
@@ -72,13 +73,20 @@ public class ProfileController {
      * 내 프로필 수정
      */
     @PutMapping("/me")
-    public ResponseEntity<ProfileResponse> updateMyProfile(@RequestBody ProfileUpdateRequest request) {
-        // TODO: 실제 로그인된 ID 가져오기
-        Long memberId = 1L; // 임시 사용자 ID
+    public ResponseEntity<ProfileResponse> updateMyProfile(@RequestBody ProfileUpdateRequest request, Authentication authentication) {
+        Long memberId = getCurrentMemberId(authentication);
         profileService.updateMyProfile(memberId, request);
 
         return ResponseEntity
                 .ok()
                 .build();
+    }
+
+    /**
+     * 현재 로그인된 사용자의 멤버 ID를 가져오는 헬퍼 메서드
+     */
+    private Long getCurrentMemberId(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return userDetails.getMemberId();
     }
 }

@@ -20,6 +20,7 @@ export default function OAuthSuccessPage() {
         const me = await res.json();
 
         setMember({
+          id: me.id,
           email: me.email,
           nickname: me.nickname,
           profileImageUrl: me.profileImageUrl,
