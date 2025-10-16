@@ -21,17 +21,29 @@ export class WebsocketService {
   /**
    * 웹소켓 서버에 연결하고 특정 방(canvasId)의 토픽을 구독합니다.
    * @param canvasId 그림판의 고유 ID
+   * @param accessToken 인증을 위한 JWT
    * @param onMessageReceived 서버로부터 메시지를 받았을 때 실행할 콜백 함수
    */
-  public connect(canvasId: string, onMessageReceived: (action: DrawingAction) => void): void {
+  public connect(
+    canvasId: string,
+    accessToken: string | null,
+    onMessageReceived: (action: DrawingAction) => void,
+  ): void {
     if (this.stompClient?.active) {
       console.log("Already connected");
       return;
     }
 
+    if (!accessToken) {
+      console.error("Authentication token is missing. Cannot connect.");
+      return;
+    }
+
     this.stompClient = new Client({
       webSocketFactory: () => new SockJS(this.backendUrl),
-
+      connectHeaders: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       onConnect: (frame) => {
         console.log("Connected: " + frame);
 
