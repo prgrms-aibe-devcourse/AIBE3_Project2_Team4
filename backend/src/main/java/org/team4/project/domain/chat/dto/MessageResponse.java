@@ -18,6 +18,7 @@ public class MessageResponse {
     private ChatMessage.MessageType messageType;
     private Double amount;
     private String memo;
+    private Long serviceId;
 
     public static MessageResponse from(ChatMessage entity) {
         return MessageResponse.builder()
@@ -28,6 +29,7 @@ public class MessageResponse {
                 .messageType(entity.getMessageType())
                 .amount(entity.getAmount())
                 .memo(entity.getMemo())
+                .serviceId(entity.getServiceId())
                 .build();
     }
 }
