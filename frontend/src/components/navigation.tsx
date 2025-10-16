@@ -34,7 +34,6 @@ export function Navigation({ newMessageCount = 0 }: NavigationProps) {
             <Button variant="ghost" asChild>
               <Link href="/ranking" className="flex items-center space-x-2">
                 <Trophy className="h-4 w-4" />
-                <span>랭킹</span>
               </Link>
             </Button>
 

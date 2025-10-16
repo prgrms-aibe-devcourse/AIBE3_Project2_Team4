@@ -99,6 +99,12 @@
   --shadow-color: #000000;
 }
 
+@layer base {
+  html {
+    font-size: 18px; /* 기본 16px → 18px로 상승: 모든 text-*, spacing(rem 기반)도 함께 스케일업 */
+  }
+}
+
 @theme inline {
   --font-sans: "Geist", "Geist Fallback";
   --font-mono: "Geist Mono", "Geist Mono Fallback";
