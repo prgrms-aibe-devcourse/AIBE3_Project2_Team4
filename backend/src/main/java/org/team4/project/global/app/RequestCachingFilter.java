@@ -10,7 +10,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-//@Component
+@Component
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class RequestCachingFilter extends OncePerRequestFilter {
 

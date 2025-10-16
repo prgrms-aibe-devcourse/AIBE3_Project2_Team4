@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-//@Component
+@Component
 public class ApiLoggingFilter extends CommonsRequestLoggingFilter {
 
     @Override
