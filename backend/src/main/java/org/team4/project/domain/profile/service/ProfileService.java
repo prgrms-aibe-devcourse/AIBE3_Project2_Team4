@@ -53,7 +53,6 @@ public class ProfileService {
     /**
      * 프로필 조회
      */
-    @Transactional(readOnly = true)
     public ProfileResponse findProfileByMemberId(Long memberId) {
         Profile profile = profileRepository.findByMemberId(memberId)
                 .orElse(null);
