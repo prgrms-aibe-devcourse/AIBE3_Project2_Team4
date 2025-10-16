@@ -231,7 +231,10 @@ public class ServiceService {
                             .mapToDouble(ServiceReview::getRating)
                             .average()
                             .orElse(0.0);
-                    return ServiceDTO.fromCardOnly(page, page.getReviews().size(), (float) avgRating);
+                    String mainImage = serviceResourceRepository.findByProjectServiceAndIsRepresentative(page.getId())
+                            .map(resource -> resource.getFile().getS3Url())
+                            .orElse(null);
+                    return ServiceDTO.fromCardOnly(page, page.getReviews().size(), (float) avgRating, mainImage);
                 });
     }
 }
