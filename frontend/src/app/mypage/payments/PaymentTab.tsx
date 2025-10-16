@@ -37,6 +37,7 @@ interface PaymentHistory {
     | "PARTIAL_CANCELED"
     | "ABORTED"
     | "EXPIRED";
+  serviceImageUrl?: string;
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -234,11 +235,27 @@ export default function PaymentTab({ isLoggedIn }: { isLoggedIn: boolean }) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredAndSortedData.map((payment, idx) => (
               <Card key={payment.paymentKey} className="transition hover:shadow-md">
-                <div className="bg-muted flex h-40 items-center justify-center">
-                  <FileText className="text-muted-foreground h-10 w-10" />
+                <div
+                  className="bg-muted flex h-40 cursor-pointer items-center justify-center overflow-hidden transition hover:opacity-80"
+                  onClick={() => router.push(`/service/${payment.serviceId}`)}
+                >
+                  {payment.serviceImageUrl ? (
+                    <img
+                      src={payment.serviceImageUrl}
+                      alt={payment.serviceTitle}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <FileText className="text-muted-foreground h-10 w-10" />
+                  )}
                 </div>
                 <CardContent className="space-y-3 p-4">
-                  <h3 className="font-bold">{payment.serviceTitle}</h3>
+                  <h3
+                    className="hover:text-primary cursor-pointer font-bold transition"
+                    onClick={() => router.push(`/service/${payment.serviceId}`)}
+                  >
+                    {payment.serviceTitle}
+                  </h3>
                   <div className="flex items-baseline justify-between">
                     <span className="text-primary text-xl font-bold">
                       {payment.price.toLocaleString()}원
@@ -257,11 +274,21 @@ export default function PaymentTab({ isLoggedIn }: { isLoggedIn: boolean }) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleSaveMemo(payment.paymentKey)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveMemo(payment.paymentKey);
+                            }}
                           >
                             <Save className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setIsEditingMemo(null)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsEditingMemo(null);
+                            }}
+                          >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -269,7 +296,8 @@ export default function PaymentTab({ isLoggedIn }: { isLoggedIn: boolean }) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setIsEditingMemo(idx);
                             setEditMemoText(payment.memo || "");
                           }}
@@ -283,6 +311,7 @@ export default function PaymentTab({ isLoggedIn }: { isLoggedIn: boolean }) {
                       <Textarea
                         value={editMemoText}
                         onChange={(e) => setEditMemoText(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
                         rows={3}
                         className="text-sm"
                         maxLength={MEMO_MAX_LENGTH}

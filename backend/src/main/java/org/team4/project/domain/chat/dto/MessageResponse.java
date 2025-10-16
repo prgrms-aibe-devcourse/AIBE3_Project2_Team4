@@ -1,6 +1,7 @@
 package org.team4.project.domain.chat.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.team4.project.domain.chat.entity.ChatMessage;
 
@@ -8,18 +9,25 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class MessageResponse {
     private Long id;
-    private String sender; //수정필요
+    private String sender;
     private String content;
     private LocalDateTime createdAt;
+    private ChatMessage.MessageType messageType;
+    private Double amount;
+    private String memo;
 
     public static MessageResponse from(ChatMessage entity) {
-        return new MessageResponse(
-                entity.getId(),
-                entity.getMember().getNickname(), //수정필요
-                entity.getContent(),
-                entity.getCreatedAt()
-        );
+        return MessageResponse.builder()
+                .id(entity.getId())
+                .sender(entity.getMember().getNickname())
+                .content(entity.getContent())
+                .createdAt(entity.getCreatedAt())
+                .messageType(entity.getMessageType())
+                .amount(entity.getAmount())
+                .memo(entity.getMemo())
+                .build();
     }
 }

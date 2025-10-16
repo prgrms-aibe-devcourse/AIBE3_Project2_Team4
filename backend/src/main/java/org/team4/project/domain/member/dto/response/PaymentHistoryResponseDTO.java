@@ -12,5 +12,6 @@ public record PaymentHistoryResponseDTO(
         Integer price,
         String memo,
         LocalDateTime approvedAt,
-        PaymentStatus paymentStatus) {
+        PaymentStatus paymentStatus,
+        String serviceImageUrl) {
 }
