@@ -88,9 +88,9 @@ export default function RankingPage() {
   };
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="h-6 w-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-6 w-6 text-gray-400" />;
-    if (rank === 3) return <Award className="h-6 w-6 text-amber-600" />;
+    if (rank === 1) return <Trophy className="h-15 w-15 text-yellow-500" />;
+    if (rank === 2) return <Medal className="h-15 w-15 text-gray-400" />;
+    if (rank === 3) return <Award className="h-15 w-15 text-amber-600" />;
     return <span className="text-muted-foreground text-2xl font-bold">#{rank}</span>;
   };
 
@@ -196,7 +196,7 @@ export default function RankingPage() {
                   <Card key={freelancer.rank} className="relative overflow-hidden">
                     <div className="absolute top-4 left-4 z-10">{getRankIcon(freelancer.rank)}</div>
                     <CardContent className="p-6 pt-16 text-center">
-                      <div className="relative mx-auto mb-4 h-20 w-20">
+                      <div className="relative mx-auto mb-4 h-25 w-25">
                         <Image
                           src="/placeholder-user.jpg"
                           alt={freelancer.nickname}
