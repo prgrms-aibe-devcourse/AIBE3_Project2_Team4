@@ -6,24 +6,26 @@ import { Star, Award, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { authorizedFetch } from "@/lib/api";
 
 type Profile = {
   nickname: string;
   introduction: string | null;
   averageRating: number;
-  profileType: "FREELANCER" | "CLIENT" | string;
-  reviewCount: number;
-  profileImageUrl: string | null;
-  companyName: string | null;
-  teamName: string | null;
+  // 선택 필드 (API 응답에 있으면 사용)
+  reviewCount?: number;
+  profileImageUrl?: string | null;
+  // 프리랜서 필드
   techStacks: string[];
   certificates: string[];
   careers: { position: string; companyName: string; term: string; description: string }[];
   portfolios: { title: string; description: string; link: string }[];
 };
 
-export default function FreelancerProfile() {
+interface Props {
+  params: { id: string };
+}
+
+export default function FreelancerProfile({ params }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,9 @@ export default function FreelancerProfile() {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     const load = async () => {
       try {
-        const res = await authorizedFetch(`${baseUrl}/api/v1/profiles/me`);
+        const res = await fetch(`${baseUrl}/api/v1/profiles/freelancers/${params.id}`, {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error(`프로필을 불러오지 못했습니다. (${res.status})`);
         const data: Profile = await res.json();
         setProfile(data);
@@ -43,7 +47,7 @@ export default function FreelancerProfile() {
       }
     };
     load();
-  }, []);
+  }, [params.id]);
 
   if (loading) return <div className="p-10 text-center">로딩 중...</div>;
   if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
@@ -68,7 +72,7 @@ export default function FreelancerProfile() {
                 <div className="mb-4 flex items-center justify-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{profile.averageRating.toFixed(2)}</span>
-                  <span className="text-muted-foreground">({profile.reviewCount}개 리뷰)</span>
+                  <span className="text-muted-foreground">({profile.reviewCount ?? 0}개 리뷰)</span>
                 </div>
               </CardContent>
             </Card>
