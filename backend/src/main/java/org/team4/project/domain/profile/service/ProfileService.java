@@ -10,12 +10,18 @@ import org.team4.project.domain.profile.dto.ProfileResponse;
 import org.team4.project.domain.profile.dto.ProfileUpdateRequest;
 import org.team4.project.domain.profile.entity.*;
 import org.team4.project.domain.profile.repository.ProfileRepository;
+import org.team4.project.domain.service.repository.ServiceReviewRepository;
+import org.team4.project.domain.member.entity.Member;
+import org.team4.project.domain.member.repository.MemberRepository;
+import org.team4.project.domain.member.entity.MemberRole;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ProfileService {
     private final ProfileRepository profileRepository;
+    private final ServiceReviewRepository serviceReviewRepository;
+    private final MemberRepository memberRepository;
     /**
      * 클라이언트 프로필 상세 조회
      */
@@ -50,9 +56,20 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public ProfileResponse findProfileByMemberId(Long memberId) {
         Profile profile = profileRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 회원의 프로필을 찾을 수 없습니다. memberId: " + memberId));
+                .orElse(null);
 
-        return ProfileResponse.from(profile);
+        // 프로필이 없으면 기본 프로필 생성
+        if (profile == null) {
+            profile = createDefaultProfile(memberId);
+        }
+
+        // 프리랜서인 경우 리뷰 수 조회
+        Integer reviewCount = null;
+        if (profile instanceof FreelancerProfile) {
+            reviewCount = serviceReviewRepository.countByFreelancerId(memberId);
+        }
+
+        return ProfileResponse.from(profile, reviewCount);
     }
 
     /**
@@ -94,5 +111,36 @@ public class ProfileService {
         request.getPortfolios().forEach(dto -> {
             freelancer.addPortfolio(Portfolio.from(dto, freelancer));
         });
+    }
+
+    /**
+     * 기본 프로필 생성
+     */
+    @Transactional
+    private Profile createDefaultProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다: " + memberId));
+
+        Profile profile;
+        
+        if (member.getMemberRole() == MemberRole.CLIENT) {
+            ClientProfile clientProfile = new ClientProfile();
+            clientProfile.setMember(member);
+            clientProfile.setNickname(member.getNickname());
+            profile = clientProfile;
+        } else if (member.getMemberRole() == MemberRole.FREELANCER) {
+            FreelancerProfile freelancerProfile = new FreelancerProfile();
+            freelancerProfile.setMember(member);
+            freelancerProfile.setNickname(member.getNickname());
+            profile = freelancerProfile;
+        } else {
+            // UNASSIGNED인 경우 기본적으로 CLIENT로 생성
+            ClientProfile clientProfile = new ClientProfile();
+            clientProfile.setMember(member);
+            clientProfile.setNickname(member.getNickname());
+            profile = clientProfile;
+        }
+
+        return profileRepository.save(profile);
     }
 }

@@ -7,15 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Award, Star } from "lucide-react";
 import Image from "next/image";
 import useLogin from "@/hooks/use-Login";
+import { rankingApi, FreelancerRankingResponse, RankingPageResponse } from "@/lib/api/profile";
 
-interface RankedFreelancer {
+// 백엔드 API 응답을 UI에 맞게 확장한 인터페이스
+interface RankedFreelancer extends FreelancerRankingResponse {
   id: string;
   profileImage: string;
   name: string;
-  rating: number;
-  reviewCount: number;
   completedProjects: number;
-  rank: number;
   totalEarnings: number;
 }
 
@@ -24,53 +23,56 @@ export default function RankingPage() {
   const userType = member?.role;
   const [freelancers, setFreelancers] = useState<RankedFreelancer[]>([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0); // Spring Boot는 0부터 시작
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 내 랭킹 정보 (로그인한 프리랜서인 경우)
   const myRanking = {
     rank: 42,
     name: "김프리랜서",
-    rating: 4.8,
+    averageRating: 4.8,
     reviewCount: 156,
     completedProjects: 89,
-    profileImage: "/professional-developer-portrait.png",
+    profileImage: "/placeholder-user.jpg",
     totalEarnings: 15600000,
   };
 
   // 초기 데이터 로드
   useEffect(() => {
-    loadFreelancers(1);
+    loadFreelancers(0);
   }, []);
 
   const loadFreelancers = async (pageNum: number) => {
     setLoading(true);
+    setError(null);
 
-    // 실제로는 API 호출
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response: RankingPageResponse = await rankingApi.getFreelancerRanking(pageNum, 20);
+      
+      // 백엔드 데이터를 UI에 맞게 변환
+      const newFreelancers: RankedFreelancer[] = response.content.map((item, index) => ({
+        ...item,
+        id: `freelancer-${item.rank}`,
+        profileImage: `/placeholder-user.jpg`, // 기본 이미지 사용
+        name: item.nickname, // nickname을 name으로 매핑
+        completedProjects: Math.floor(Math.random() * 150) + 20, // 임시 데이터 (백엔드에 없음)
+        totalEarnings: Math.floor(Math.random() * 50000000) + 5000000, // 임시 데이터 (백엔드에 없음)
+      }));
 
-    const newFreelancers: RankedFreelancer[] = Array.from({ length: 20 }, (_, i) => {
-      const rank = (pageNum - 1) * 20 + i + 1;
-      return {
-        id: `freelancer-${rank}`,
-        profileImage: `/professional-developer-portrait.png`,
-        name: `프리랜서${rank}`,
-        rating: Math.random() * 1 + 4, // 4.0 ~ 5.0
-        reviewCount: Math.floor(Math.random() * 200) + 50,
-        completedProjects: Math.floor(Math.random() * 150) + 20,
-        rank,
-        totalEarnings: Math.floor(Math.random() * 50000000) + 5000000,
-      };
-    });
+      if (pageNum === 0) {
+        setFreelancers(newFreelancers);
+      } else {
+        setFreelancers((prev) => [...prev, ...newFreelancers]);
+      }
 
-    if (pageNum === 1) {
-      setFreelancers(newFreelancers);
-    } else {
-      setFreelancers((prev) => [...prev, ...newFreelancers]);
+      setHasMore(!response.last); // last가 false면 더 많은 데이터가 있음
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '랭킹 데이터를 불러오는데 실패했습니다.');
+      console.error('랭킹 로드 실패:', err);
+    } finally {
+      setLoading(false);
     }
-
-    setHasMore(pageNum < 5); // 최대 100명 (5페이지)
-    setLoading(false);
   };
 
   // 무한 스크롤
@@ -134,7 +136,7 @@ export default function RankingPage() {
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span>
-                            {myRanking.rating.toFixed(1)} ({myRanking.reviewCount})
+                            {myRanking.averageRating.toFixed(1)} ({myRanking.reviewCount})
                           </span>
                         </div>
                         <span>작업 수: {myRanking.completedProjects}개</span>
@@ -150,6 +152,19 @@ export default function RankingPage() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="mb-8 rounded-lg bg-red-50 p-4 text-center">
+              <p className="text-red-600">{error}</p>
+              <button 
+                onClick={() => loadFreelancers(0)} 
+                className="mt-2 rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              >
+                다시 시도
+              </button>
             </div>
           )}
 
@@ -174,7 +189,7 @@ export default function RankingPage() {
                     <h3 className="text-foreground mb-2 text-lg font-bold">{freelancer.name}</h3>
                     <div className="mb-2 flex items-center justify-center space-x-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{freelancer.rating.toFixed(1)}</span>
+                      <span className="text-sm font-medium">{freelancer.averageRating.toFixed(1)}</span>
                       <span className="text-muted-foreground text-sm">
                         ({freelancer.reviewCount})
                       </span>
@@ -218,7 +233,7 @@ export default function RankingPage() {
                       <div className="flex items-center space-x-6 text-sm">
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium">{freelancer.rating.toFixed(1)}</span>
+                          <span className="font-medium">{freelancer.averageRating.toFixed(1)}</span>
                           <span className="text-muted-foreground">({freelancer.reviewCount})</span>
                         </div>
                         <span className="text-muted-foreground">

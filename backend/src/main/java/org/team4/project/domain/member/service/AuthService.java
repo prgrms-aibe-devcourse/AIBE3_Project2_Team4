@@ -29,6 +29,7 @@ public class AuthService {
         return jwtUtil.createJwt(JwtContents.TOKEN_TYPE_ACCESS,
                 jwtUtil.getEmail(refreshToken),
                 jwtUtil.getRole(refreshToken),
+                jwtUtil.getMemberId(refreshToken),
                 JwtContents.ACCESS_TOKEN_EXPIRE_MILLIS);
     }
 
@@ -40,6 +41,7 @@ public class AuthService {
         String newRefreshToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_REFRESH,
                 jwtUtil.getEmail(oldRefreshToken),
                 jwtUtil.getRole(oldRefreshToken),
+                jwtUtil.getMemberId(oldRefreshToken),
                 JwtContents.REFRESH_TOKEN_EXPIRE_MILLIS);
 
         redisRepository.setValue(newRefreshToken, "valid", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
@@ -56,9 +58,10 @@ public class AuthService {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             String email = userDetails.getEmail();
             String role = userDetails.getAuthorities().iterator().next().getAuthority().replaceFirst("^ROLE_", "");
+            Long memberId = userDetails.getMemberId();
 
-            String accessToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_ACCESS, email, role, JwtContents.ACCESS_TOKEN_EXPIRE_MILLIS);
-            String refreshToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_REFRESH, email, role, JwtContents.REFRESH_TOKEN_EXPIRE_MILLIS);
+            String accessToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_ACCESS, email, role, memberId, JwtContents.ACCESS_TOKEN_EXPIRE_MILLIS);
+            String refreshToken = jwtUtil.createJwt(JwtContents.TOKEN_TYPE_REFRESH, email, role, memberId, JwtContents.REFRESH_TOKEN_EXPIRE_MILLIS);
 
             redisRepository.setValue(refreshToken, "valid", Duration.ofSeconds(JwtContents.REFRESH_TOKEN_EXPIRE_SECONDS));
 

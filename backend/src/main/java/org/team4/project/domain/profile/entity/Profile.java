@@ -29,4 +29,12 @@ public abstract class Profile {
         this.nickname = nickname;
         this.introduction = introduction;
     }
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

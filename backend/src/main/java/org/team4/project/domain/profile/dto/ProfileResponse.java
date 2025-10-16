@@ -17,6 +17,7 @@ public class ProfileResponse {
     private final String introduction;
     private final double averageRating;
     private final String profileType; // "CLIENT" or "FREELANCER"
+    private final Integer reviewCount; // 리뷰 수
 
     // 클라이언트 필드
     private final String companyName;
@@ -29,11 +30,12 @@ public class ProfileResponse {
     private final List<PortfolioResponseDto> portfolios;
 
     // Profile -> ProfileResponse
-    public static ProfileResponse from(Profile profile) {
+    public static ProfileResponse from(Profile profile, Integer reviewCount) {
         ProfileResponseBuilder builder = ProfileResponse.builder()
                 .nickname(profile.getNickname())
                 .introduction(profile.getIntroduction())
-                .averageRating(profile.getAverageRating());
+                .averageRating(profile.getAverageRating())
+                .reviewCount(reviewCount != null ? reviewCount : 0);
 
         if (profile instanceof ClientProfile) {
             ClientProfile client = (ClientProfile) profile;

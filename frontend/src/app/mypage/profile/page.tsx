@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Edit, Save, X, Star, Plus, ExternalLink, Briefcase, Trash2 } from "lucide-react";
+import { Edit, Save, X, Star, Plus, ExternalLink, Briefcase, Trash2, Camera } from "lucide-react";
 import useLogin from "@/hooks/use-Login";
 import {
   Dialog,
@@ -20,6 +20,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { profileApi, ProfileResponse, ProfileUpdateRequest } from "@/lib/api/profile";
+import { authorizedFetch } from "@/lib/api";
 
 export default function Profile() {
   const { isLoggedIn, member } = useLogin();
@@ -43,64 +45,90 @@ export default function Profile() {
   const [experiencePeriod, setExperiencePeriod] = useState("");
   const [experienceDescription, setExperienceDescription] = useState("");
 
-  const [userProfile, setUserProfile] = useState({
-    nickname: "김개발자",
-    avatar: "/professional-developer-portrait.png",
-    introduction:
-      "5년차 풀스택 개발자입니다. React, Node.js, Python을 주로 사용하며 사용자 경험을 중시하는 개발을 지향합니다.",
-    rating: 4.8,
-    reviewCount: 127,
-    skills: ["React", "Node.js", "Python", "TypeScript", "AWS"],
-    certificates: ["정보처리기사", "AWS Solutions Architect"],
-    completedProjects: 89,
-    experience: [
-      {
-        title: "시니어 풀스택 개발자",
-        company: "테크스타트업 A",
-        period: "2022년 1월 - 현재",
-        description:
-          "React와 Node.js를 활용한 SaaS 플랫폼 개발 및 유지보수를 담당했습니다. 팀 리드로서 5명의 개발자를 관리하며 프로젝트를 성공적으로 완료했습니다.",
-      },
-      {
-        title: "풀스택 개발자",
-        company: "IT 솔루션 B",
-        period: "2020년 3월 - 2021년 12월",
-        description:
-          "Vue.js와 Python Django를 사용한 웹 애플리케이션 개발을 담당했습니다. 클라이언트 요구사항 분석부터 배포까지 전체 개발 프로세스를 경험했습니다.",
-      },
-    ],
-    portfolio: [
-      {
-        title: "이커머스 플랫폼",
-        description: "React와 Node.js로 구축한 완전한 이커머스 솔루션",
-        link: "https://example.com/ecommerce",
-      },
-      {
-        title: "프로젝트 관리 도구",
-        description: "팀 협업을 위한 실시간 프로젝트 관리 애플리케이션",
-        link: "https://example.com/project-manager",
-      },
-      {
-        title: "데이터 시각화 대시보드",
-        description: "비즈니스 인텔리전스를 위한 인터랙티브 대시보드",
-        link: "https://example.com/dashboard",
-      },
-    ],
-    companyName: "테크스타트업",
-    teamName: "개발팀",
-  });
+  const [userProfile, setUserProfile] = useState<ProfileResponse | null>(null);
+  const [profileImage, setProfileImage] = useState<string>("/placeholder-user.jpg");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const handleSaveProfile = () => {
-    // Save profile logic here
-    setIsEditMode(false);
-    setIsEditing(false);
+  // 프로필 데이터 로드
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!member) {
+        console.log('Member not found:', member);
+        return;
+      }
+      
+      console.log('Current member:', member);
+      
+      try {
+        setLoading(true);
+        const profile = await profileApi.getMyProfile();
+        setUserProfile(profile);
+        
+        // 프로필 이미지가 있다면 설정 (현재는 기본 이미지 사용)
+        // TODO: 프로필 이미지 URL을 백엔드에서 가져와서 설정
+      } catch (error) {
+        console.error('프로필 로드 실패:', error);
+        console.error('Error details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [member]);
+
+  const handleSaveProfile = async () => {
+    if (!userProfile || !member) return;
+    
+    try {
+      setSaving(true);
+      
+      const updateData: ProfileUpdateRequest = {
+        nickname: userProfile.nickname,
+        introduction: userProfile.introduction,
+      };
+
+      if (userProfile.profileType === 'CLIENT') {
+        updateData.companyName = userProfile.companyName;
+        updateData.teamName = userProfile.teamName;
+      } else if (userProfile.profileType === 'FREELANCER') {
+        updateData.techStacks = userProfile.techStacks || [];
+        updateData.certificates = userProfile.certificates || [];
+        updateData.careers = userProfile.careers || [];
+        updateData.portfolios = userProfile.portfolios || [];
+      }
+
+      await profileApi.updateMyProfile(updateData);
+      setIsEditMode(false);
+      setIsEditing(false);
+      
+      // 프로필 다시 로드
+      const updatedProfile = await profileApi.getMyProfile();
+      setUserProfile(updatedProfile);
+    } catch (error) {
+      console.error('프로필 저장 실패:', error);
+      alert('프로필 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 프로필 이미지 업로드 (현재 비활성화)
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // TODO: 이미지 업로드 기능 구현 예정
+    alert('이미지 업로드 기능은 곧 구현될 예정입니다.');
   };
 
   const handleAddSkill = () => {
-    if (newSkill.trim()) {
+    if (newSkill.trim() && userProfile) {
       setUserProfile({
         ...userProfile,
-        skills: [...userProfile.skills, newSkill.trim()],
+        techStacks: [...(userProfile.techStacks || []), newSkill.trim()],
       });
       setNewSkill("");
       setIsSkillDialogOpen(false);
@@ -108,17 +136,17 @@ export default function Profile() {
   };
 
   const handleDeleteSkill = (index: number) => {
-    if (confirm("이 기술 스택을 삭제하시겠습니까?")) {
-      const updatedSkills = userProfile.skills.filter((_, i) => i !== index);
-      setUserProfile({ ...userProfile, skills: updatedSkills });
+    if (confirm("이 기술 스택을 삭제하시겠습니까?") && userProfile) {
+      const updatedSkills = (userProfile.techStacks || []).filter((_, i) => i !== index);
+      setUserProfile({ ...userProfile, techStacks: updatedSkills });
     }
   };
 
   const handleAddCertificate = () => {
-    if (newCertificate.trim()) {
+    if (newCertificate.trim() && userProfile) {
       setUserProfile({
         ...userProfile,
-        certificates: [...userProfile.certificates, newCertificate.trim()],
+        certificates: [...(userProfile.certificates || []), newCertificate.trim()],
       });
       setNewCertificate("");
       setIsCertificateDialogOpen(false);
@@ -126,19 +154,19 @@ export default function Profile() {
   };
 
   const handleDeleteCertificate = (index: number) => {
-    if (confirm("이 자격증을 삭제하시겠습니까?")) {
-      const updatedCertificates = userProfile.certificates.filter((_, i) => i !== index);
+    if (confirm("이 자격증을 삭제하시겠습니까?") && userProfile) {
+      const updatedCertificates = (userProfile.certificates || []).filter((_, i) => i !== index);
       setUserProfile({ ...userProfile, certificates: updatedCertificates });
     }
   };
 
   const handleOpenExperienceDialog = (index: number | null = null) => {
-    if (index !== null) {
-      const exp = userProfile.experience[index];
+    if (index !== null && userProfile?.careers) {
+      const exp = userProfile.careers[index];
       setEditingExperienceIndex(index);
-      setExperienceTitle(exp.title);
-      setExperienceCompany(exp.company);
-      setExperiencePeriod(exp.period);
+      setExperienceTitle(exp.position);
+      setExperienceCompany(exp.companyName);
+      setExperiencePeriod(exp.term);
       setExperienceDescription(exp.description);
     } else {
       setEditingExperienceIndex(null);
@@ -151,26 +179,26 @@ export default function Profile() {
   };
 
   const handleSaveExperience = () => {
-    if (!experienceTitle.trim() || !experienceCompany.trim() || !experiencePeriod.trim()) {
+    if (!experienceTitle.trim() || !experienceCompany.trim() || !experiencePeriod.trim() || !userProfile) {
       alert("직책, 회사명, 기간을 입력해주세요.");
       return;
     }
 
     const newExperience = {
-      title: experienceTitle,
-      company: experienceCompany,
-      period: experiencePeriod,
+      position: experienceTitle,
+      companyName: experienceCompany,
+      term: experiencePeriod,
       description: experienceDescription,
     };
 
     if (editingExperienceIndex !== null) {
-      const updatedExperience = [...userProfile.experience];
+      const updatedExperience = [...(userProfile.careers || [])];
       updatedExperience[editingExperienceIndex] = newExperience;
-      setUserProfile({ ...userProfile, experience: updatedExperience });
+      setUserProfile({ ...userProfile, careers: updatedExperience });
     } else {
       setUserProfile({
         ...userProfile,
-        experience: [...userProfile.experience, newExperience],
+        careers: [...(userProfile.careers || []), newExperience],
       });
     }
 
@@ -183,15 +211,15 @@ export default function Profile() {
   };
 
   const handleDeleteExperience = (index: number) => {
-    if (confirm("이 경력을 삭제하시겠습니까?")) {
-      const updatedExperience = userProfile.experience.filter((_, i) => i !== index);
-      setUserProfile({ ...userProfile, experience: updatedExperience });
+    if (confirm("이 경력을 삭제하시겠습니까?") && userProfile) {
+      const updatedExperience = (userProfile.careers || []).filter((_, i) => i !== index);
+      setUserProfile({ ...userProfile, careers: updatedExperience });
     }
   };
 
   const handleOpenPortfolioDialog = (index: number | null = null) => {
-    if (index !== null) {
-      const portfolio = userProfile.portfolio[index];
+    if (index !== null && userProfile?.portfolios) {
+      const portfolio = userProfile.portfolios[index];
       setEditingPortfolioIndex(index);
       setPortfolioTitle(portfolio.title);
       setPortfolioDescription(portfolio.description);
@@ -206,7 +234,7 @@ export default function Profile() {
   };
 
   const handleSavePortfolio = () => {
-    if (!portfolioTitle.trim() || !portfolioLink.trim()) {
+    if (!portfolioTitle.trim() || !portfolioLink.trim() || !userProfile) {
       alert("제목과 링크를 입력해주세요.");
       return;
     }
@@ -218,13 +246,13 @@ export default function Profile() {
     };
 
     if (editingPortfolioIndex !== null) {
-      const updatedPortfolio = [...userProfile.portfolio];
+      const updatedPortfolio = [...(userProfile.portfolios || [])];
       updatedPortfolio[editingPortfolioIndex] = newPortfolio;
-      setUserProfile({ ...userProfile, portfolio: updatedPortfolio });
+      setUserProfile({ ...userProfile, portfolios: updatedPortfolio });
     } else {
       setUserProfile({
         ...userProfile,
-        portfolio: [...userProfile.portfolio, newPortfolio],
+        portfolios: [...(userProfile.portfolios || []), newPortfolio],
       });
     }
 
@@ -236,11 +264,45 @@ export default function Profile() {
   };
 
   const handleDeletePortfolio = (index: number) => {
-    if (confirm("이 포트폴리오를 삭제하시겠습니까?")) {
-      const updatedPortfolio = userProfile.portfolio.filter((_, i) => i !== index);
-      setUserProfile({ ...userProfile, portfolio: updatedPortfolio });
+    if (confirm("이 포트폴리오를 삭제하시겠습니까?") && userProfile) {
+      const updatedPortfolio = (userProfile.portfolios || []).filter((_, i) => i !== index);
+      setUserProfile({ ...userProfile, portfolios: updatedPortfolio });
     }
   };
+
+  if (loading) {
+    return (
+      <TabsContent value="profile">
+        <Card>
+          <CardHeader>
+            <CardTitle>내 프로필</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-muted-foreground">프로필을 불러오는 중...</div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <TabsContent value="profile">
+        <Card>
+          <CardHeader>
+            <CardTitle>내 프로필</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="text-muted-foreground">프로필을 찾을 수 없습니다.</div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    );
+  }
 
   return (
     <TabsContent value="profile">
@@ -254,9 +316,9 @@ export default function Profile() {
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button onClick={handleSaveProfile} size="sm">
+              <Button onClick={handleSaveProfile} size="sm" disabled={saving}>
                 <Save className="mr-2 h-4 w-4" />
-                저장
+                {saving ? "저장 중..." : "저장"}
               </Button>
               <Button onClick={() => setIsEditMode(false)} variant="outline" size="sm">
                 <X className="mr-2 h-4 w-4" />
@@ -267,21 +329,39 @@ export default function Profile() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={userProfile.avatar || "/placeholder.svg"} />
-              <AvatarFallback>{userProfile.nickname[0]}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={profileImage} />
+                <AvatarFallback>{userProfile.nickname?.[0] || "U"}</AvatarFallback>
+              </Avatar>
+              {isEditMode && (
+                <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Camera className="h-3 w-3" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                </label>
+              )}
+            </div>
             <div className="flex-1">
               {isEditMode ? (
-                <Input defaultValue={userProfile.nickname} className="text-xl font-semibold" />
+                <Input 
+                  value={userProfile.nickname || ""} 
+                  onChange={(e) => setUserProfile({...userProfile, nickname: e.target.value})}
+                  className="text-xl font-semibold" 
+                />
               ) : (
-                <h2 className="text-xl font-semibold">{userProfile.nickname}</h2>
+                <h2 className="text-xl font-semibold">{userProfile.nickname || "닉네임 없음"}</h2>
               )}
               <div className="mt-1 flex items-center space-x-2">
                 <div className="flex items-center">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-1 font-medium">{userProfile.rating}</span>
-                  <span className="text-muted-foreground ml-1">({userProfile.reviewCount})</span>
+                  <span className="ml-1 font-medium">{userProfile.averageRating.toFixed(1)}</span>
+                  <span className="text-muted-foreground ml-1">({userProfile.reviewCount || 0})</span>
                 </div>
               </div>
             </div>
@@ -290,19 +370,19 @@ export default function Profile() {
           <div>
             <label className="mb-2 block text-sm font-medium">자기소개</label>
             {isEditMode ? (
-              <Textarea defaultValue={userProfile.introduction} rows={4} />
+              <Textarea 
+                value={userProfile.introduction || ""} 
+                onChange={(e) => setUserProfile({...userProfile, introduction: e.target.value})}
+                rows={4} 
+                placeholder="자기소개를 입력해주세요..."
+              />
             ) : (
-              <p className="text-muted-foreground">{userProfile.introduction}</p>
+              <p className="text-muted-foreground">{userProfile.introduction || ""}</p>
             )}
           </div>
 
-          {userType === "freelancer" && (
+          {userProfile.profileType === "FREELANCER" && (
             <>
-              <div>
-                <label className="mb-2 block text-sm font-medium">완료 프로젝트</label>
-                <p className="text-muted-foreground">{userProfile.completedProjects}개</p>
-              </div>
-
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-sm font-medium">기술 스택</label>
@@ -319,7 +399,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {userProfile.skills.map((skill, index) => (
+                  {(userProfile.techStacks || []).map((skill, index) => (
                     <Badge key={index} variant="secondary" className="gap-1">
                       {skill}
                       {isEditMode && (
@@ -332,6 +412,9 @@ export default function Profile() {
                       )}
                     </Badge>
                   ))}
+                  {(!userProfile.techStacks || userProfile.techStacks.length === 0) && !isEditMode && (
+                    <p className="text-muted-foreground text-sm"></p>
+                  )}
                 </div>
               </div>
 
@@ -351,7 +434,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {userProfile.certificates.map((cert, index) => (
+                  {(userProfile.certificates || []).map((cert, index) => (
                     <Badge key={index} variant="outline" className="gap-1">
                       {cert}
                       {isEditMode && (
@@ -364,6 +447,9 @@ export default function Profile() {
                       )}
                     </Badge>
                   ))}
+                  {(!userProfile.certificates || userProfile.certificates.length === 0) && !isEditMode && (
+                    <p className="text-muted-foreground text-sm"></p>
+                  )}
                 </div>
               </div>
 
@@ -388,15 +474,15 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-6">
-                  {userProfile.experience.map((exp, index) => (
+                  {(userProfile.careers || []).map((exp, index) => (
                     <div key={index}>
                       <div className="mb-2 flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold">{exp.title}</h3>
-                          <p className="text-muted-foreground">{exp.company}</p>
+                          <h3 className="font-semibold">{exp.position}</h3>
+                          <p className="text-muted-foreground">{exp.companyName}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline">{exp.period}</Badge>
+                          <Badge variant="outline">{exp.term}</Badge>
                           {isEditMode && (
                             <div className="flex gap-1">
                               <Button
@@ -422,9 +508,12 @@ export default function Profile() {
                       <p className="text-muted-foreground text-sm leading-relaxed">
                         {exp.description}
                       </p>
-                      {index < userProfile.experience.length - 1 && <Separator className="mt-6" />}
+                      {index < (userProfile.careers?.length || 0) - 1 && <Separator className="mt-6" />}
                     </div>
                   ))}
+                  {(!userProfile.careers || userProfile.careers.length === 0) && !isEditMode && (
+                    <p className="text-muted-foreground text-sm"></p>
+                  )}
                 </div>
               </div>
 
@@ -446,7 +535,7 @@ export default function Profile() {
                   )}
                 </div>
                 <div className="space-y-3">
-                  {userProfile.portfolio.map((project, index) => (
+                  {(userProfile.portfolios || []).map((project, index) => (
                     <div
                       key={index}
                       className="hover:bg-accent group flex items-center gap-3 rounded-lg border p-3 transition-colors"
@@ -482,27 +571,38 @@ export default function Profile() {
                       )}
                     </div>
                   ))}
+                  {(!userProfile.portfolios || userProfile.portfolios.length === 0) && !isEditMode && (
+                    <p className="text-muted-foreground text-sm"></p>
+                  )}
                 </div>
               </div>
             </>
           )}
 
-          {userType === "client" && (
+          {userProfile.profileType === "CLIENT" && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium">회사명</label>
                 {isEditMode ? (
-                  <Input defaultValue={userProfile.companyName} />
+                  <Input 
+                    value={userProfile.companyName || ""} 
+                    onChange={(e) => setUserProfile({...userProfile, companyName: e.target.value})}
+                    placeholder="회사명을 입력해주세요..."
+                  />
                 ) : (
-                  <p className="text-muted-foreground">{userProfile.companyName}</p>
+                  <p className="text-muted-foreground">{userProfile.companyName || ""}</p>
                 )}
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium">팀명</label>
                 {isEditMode ? (
-                  <Input defaultValue={userProfile.teamName} />
+                  <Input 
+                    value={userProfile.teamName || ""} 
+                    onChange={(e) => setUserProfile({...userProfile, teamName: e.target.value})}
+                    placeholder="팀명을 입력해주세요..."
+                  />
                 ) : (
-                  <p className="text-muted-foreground">{userProfile.teamName}</p>
+                  <p className="text-muted-foreground">{userProfile.teamName || ""}</p>
                 )}
               </div>
             </div>
