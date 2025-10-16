@@ -112,17 +112,29 @@ const ChatMenu = ({ userRole, onBlock, onReport, onLeave, onRequestPayment }: Ch
   );
 };
 
-const PaymentRequestModal = ({ isOpen, onClose, onSend }: PaymentRequestModalProps) => {
+const PaymentRequestModal = ({
+  isOpen,
+  onClose,
+  onSend,
+  services,
+}: PaymentRequestModalProps & { services: { id: number; title: string }[] }) => {
   const [service, setService] = useState("");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
+
+  useEffect(() => {
+    // When modal opens and services are loaded, select the first one by default
+    if (isOpen && services.length > 0) {
+      setService(services[0].title);
+    }
+  }, [isOpen, services]);
 
   if (!isOpen) return null;
 
   const handleSend = () => {
     const numericAmount = parseFloat(amount);
     if (!service.trim()) {
-      alert("서비스명을 입력해주세요.");
+      alert("서비스를 선택해주세요.");
       return;
     }
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -151,12 +163,21 @@ const PaymentRequestModal = ({ isOpen, onClose, onSend }: PaymentRequestModalPro
         <h2>결제 요청</h2>
         <div style={{ marginBottom: "1rem" }}>
           <label>서비스명</label>
-          <input
-            type="text"
+          <select
             value={service}
             onChange={(e) => setService(e.target.value)}
             style={{ width: "100%", padding: "0.5rem" }}
-          />
+          >
+            {services.length === 0 ? (
+              <option disabled>서비스를 불러오는 중...</option>
+            ) : (
+              services.map((s) => (
+                <option key={s.id} value={s.title}>
+                  {s.title}
+                </option>
+              ))
+            )}
+          </select>
         </div>
         <div style={{ marginBottom: "1rem" }}>
           <label>요청 금액</label>
@@ -316,6 +337,7 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
   const member = useLoginStore((s) => s.member);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [freelancerServices, setFreelancerServices] = useState<{ id: number; title: string }[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -426,10 +448,27 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
     });
   };
 
-  const handleRequestPayment = useCallback(() => {
+  const handleRequestPayment = useCallback(async () => {
+    if (!selectedChat) return;
     setMenuOpen(false);
-    setPaymentModalOpen(true);
-  }, []);
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/v1/chats/freelancers/${selectedChat.freelancerId}/services`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+      if (!res.ok) {
+        throw new Error("서비스 목록을 불러오는 데 실패했습니다.");
+      }
+      const data = await res.json();
+      setFreelancerServices(data);
+      setPaymentModalOpen(true);
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    }
+  }, [selectedChat, accessToken]);
 
   const handleSendPaymentRequest = (service: string, amount: number, memo: string) => {
     if (!clientRef.current?.connected || !selectedChat || !member) return;
@@ -473,12 +512,35 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
     console.log("Report user");
     setMenuOpen(false);
   }, []);
-  const handleLeave = useCallback(() => {
-    if (window.confirm("채팅방을 나가시겠습니까?")) {
-      console.log("Leave room");
-      setMenuOpen(false);
+  const handleLeave = useCallback(async () => {
+    if (!selectedChat) return;
+
+    if (window.confirm("정말 채팅방을 나가시겠습니까?")) {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/v1/chats/rooms/${selectedChat.id}/leave`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (!res.ok) {
+          throw new Error("채팅방을 나가는 데 실패했습니다.");
+        }
+
+        // 성공 시 UI에서 즉시 방 제거
+        setChatList((prev) => prev.filter((chat) => chat.id !== selectedChat.id));
+        setSelectedChat(null);
+        setMenuOpen(false);
+      } catch (error: any) {
+        console.error("채팅방 나가기 오류:", error);
+        alert(error.message);
+      }
     }
-  }, []);
+  }, [selectedChat, accessToken]);
 
   // --- Render ---
   return (
@@ -487,6 +549,7 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
         isOpen={isPaymentModalOpen}
         onClose={() => setPaymentModalOpen(false)}
         onSend={handleSendPaymentRequest}
+        services={freelancerServices}
       />
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", height: "720px" }}

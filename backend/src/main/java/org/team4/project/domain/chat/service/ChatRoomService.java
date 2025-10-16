@@ -56,7 +56,28 @@ public class ChatRoomService {
     @Transactional
     public void leaveRoom(Long roomId, Member currentUser) {
         ChatRoom room = getRoom(roomId);
-        System.out.println("User " + currentUser.getEmail() + " left room " + roomId);
+
+        // 사용자가 채팅방의 참여자인지 확인
+        boolean isParticipant = room.getClient().getId().equals(currentUser.getId()) ||
+                                room.getFreelancer().getId().equals(currentUser.getId());
+
+        if (!isParticipant) {
+            throw new SecurityException("채팅방을 나갈 권한이 없습니다.");
+        }
+
+        // 상대방에게 보낼 시스템 메시지 생성
+        org.team4.project.domain.chat.dto.MessageResponse leaveMessage = org.team4.project.domain.chat.dto.MessageResponse.builder()
+            .sender("System")
+            .content(currentUser.getNickname() + "님이 대화방을 나가셨습니다.")
+            .messageType(org.team4.project.domain.chat.entity.ChatMessage.MessageType.REVIEW_PROMPT) // 시스템 메시지 타입 재활용
+            .createdAt(java.time.LocalDateTime.now())
+            .build();
+
+        // 채팅방 토픽으로 메시지 전송
+        messagingTemplate.convertAndSend("/topic/rooms/" + roomId, leaveMessage);
+
+        // 채팅방 삭제
+        chatRoomRepository.delete(room);
     }
 
     @Transactional
