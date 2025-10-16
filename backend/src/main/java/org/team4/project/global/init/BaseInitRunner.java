@@ -57,10 +57,10 @@ public class BaseInitRunner {
         memberService.signUp(memberSignUpRequestDTO);
 
         Member freelancer = memberRepository.findByEmail(memberSignUpRequestDTO.getEmail()).get();
-
-        ServiceCreateRqBody scr1 = new ServiceCreateRqBody("서비스1", "서비스1의 내용입니다.", 36000, new ArrayList<>(List.of(TagType.BACKEND)));
-        ServiceCreateRqBody scr2 = new ServiceCreateRqBody("서비스2", "서비스2의 내용입니다.", 40000, new ArrayList<>(List.of(TagType.BACKEND)));
-        ServiceCreateRqBody scr3 = new ServiceCreateRqBody("서비스3", "서비스3의 내용입니다.", 3000, new ArrayList<>(List.of(TagType.BACKEND)));
+//
+//        ServiceCreateRqBody scr1 = new ServiceCreateRqBody("서비스1", "서비스1의 내용입니다.", 36000, new ArrayList<>(List.of(TagType.BACKEND)));
+//        ServiceCreateRqBody scr2 = new ServiceCreateRqBody("서비스2", "서비스2의 내용입니다.", 40000, new ArrayList<>(List.of(TagType.BACKEND)));
+//        ServiceCreateRqBody scr3 = new ServiceCreateRqBody("서비스3", "서비스3의 내용입니다.", 3000, new ArrayList<>(List.of(TagType.BACKEND)));
 
         //serviceService.createService(scr1, freelancer);
         //serviceService.createService(scr2, freelancer);

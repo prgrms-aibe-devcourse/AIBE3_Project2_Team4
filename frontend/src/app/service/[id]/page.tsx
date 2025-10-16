@@ -243,7 +243,7 @@ export default function ServiceDetailPage() {
               <div className="mb-4 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{service.rating.toFixed(2)}</span>
+                  <span className="font-medium">{service?.rating?.toFixed(2) || 0}</span>
                   <span className="text-muted-foreground">({service.reviewCount}개 리뷰)</span>
                 </div>
               </div>
@@ -322,7 +322,7 @@ export default function ServiceDetailPage() {
               <div className="mt-2 flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-medium">{service.rating.toFixed(2)}</span>
+                  <span className="text-lg font-medium">{service?.rating?.toFixed(2) || 0}</span>
                 </div>
                 <span className="text-muted-foreground">총 {service.reviewCount}개 리뷰</span>
               </div>
