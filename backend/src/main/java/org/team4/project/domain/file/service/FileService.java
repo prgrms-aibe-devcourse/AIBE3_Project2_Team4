@@ -31,6 +31,7 @@ public class FileService {
             case "PORTFOLIO_FILE" -> "portfolio-files/";
             case "CHAT_FILE" -> "chat-files/";
             case "SERVICE_IMAGE" -> "service-images/";
+            case "REVIEW_IMAGE" -> "review-images/";
             default -> throw new FileUploadException("유효하지 않은 파일 카테고리입니다: " + fileCategory);
         };
     }

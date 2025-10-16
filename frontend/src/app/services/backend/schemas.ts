@@ -23,5 +23,9 @@ export interface components {
       nickname: string;
       email: string;
     };
+    Tag: {
+      id: string;
+      name: string;
+    };
   };
 }
