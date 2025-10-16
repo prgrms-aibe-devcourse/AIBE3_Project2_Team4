@@ -5,34 +5,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.transaction.annotation.Transactional;
-import org.team4.project.domain.member.dto.request.MemberSignUpRequestDTO;
-import org.team4.project.domain.member.entity.Member;
-import org.team4.project.domain.member.repository.MemberRepository;
-import org.team4.project.domain.member.service.MemberService;
-import org.team4.project.domain.service.dto.ServiceCreateRqBody;
-import org.team4.project.domain.service.entity.category.type.TagType;
-import org.team4.project.domain.service.repository.TagRepository;
-import org.team4.project.domain.service.service.ServiceService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 public class BaseInitRunner {
-
-    @Autowired
-    ServiceService serviceService;
-
-    @Autowired
-    MemberService memberService;
-
-    @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    TagRepository tagRepository;
-
     @Autowired
     @Lazy
     BaseInitRunner self;
@@ -66,5 +41,6 @@ public class BaseInitRunner {
         //serviceService.createService(scr2, freelancer);
         //serviceService.createService(scr3, freelancer);
 
+        };
     }
 }

@@ -28,7 +28,9 @@ function ServicesPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    searchParams.get("category"),
+  );
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("latest");
   const [currentPage, setCurrentPage] = useState(1);
@@ -231,15 +233,6 @@ function ServicesPageContent() {
             )}
           </div>
         </section>
-
-        <div className="mx-auto flex max-w-7xl justify-end px-4 py-4 sm:px-6 lg:px-8">
-          <Button
-            onClick={() => router.push("/services/register")} // 작성 페이지 경로
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
-            서비스 등록하기
-          </Button>
-        </div>
 
         {/* 서비스 목록 섹션 */}
         <section className="py-8">
