@@ -81,8 +81,14 @@ public class ProfileService {
 
         System.out.println("프로필 업데이트 요청 - memberId: " + memberId);
         System.out.println("프로필 이미지 URL: " + request.getProfileImageUrl());
-        
+
+        // Profile 엔티티 업데이트
         profile.updateProfile(request.getNickname(), request.getIntroduction(), request.getProfileImageUrl());
+
+        // Member 엔티티의 nickname, profileImageUrl 업데이트
+        Member member = profile.getMember();
+        member.setNickname(request.getNickname());
+        member.setProfileImageUrl(request.getProfileImageUrl());
 
         if (profile instanceof ClientProfile) {
             updateClientProfile((ClientProfile) profile, request);
