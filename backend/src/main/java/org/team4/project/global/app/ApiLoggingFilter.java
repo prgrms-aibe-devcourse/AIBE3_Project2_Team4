@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
@@ -63,6 +64,9 @@ public class ApiLoggingFilter extends CommonsRequestLoggingFilter {
 
     @Override
     protected String getMessagePayload(HttpServletRequest request) {
+        if (MultipartResolutionDelegate.isMultipartRequest(request)) {
+            return "[multipart/form-data - skip log]";
+        }
         try {
             return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {

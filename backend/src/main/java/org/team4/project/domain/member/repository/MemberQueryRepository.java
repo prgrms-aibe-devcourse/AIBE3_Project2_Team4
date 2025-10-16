@@ -8,8 +8,10 @@ import org.team4.project.domain.member.dto.response.PaymentHistoryResponseDTO;
 
 import java.util.List;
 
+import static org.team4.project.domain.file.entity.QFile.file;
 import static org.team4.project.domain.member.entity.QMember.member;
 import static org.team4.project.domain.payment.entity.QPayment.payment;
+import static org.team4.project.domain.service.entity.resource.QServiceResource.serviceResource;
 import static org.team4.project.domain.service.entity.service.QProjectService.projectService;
 
 @Repository
@@ -28,12 +30,15 @@ public class MemberQueryRepository {
                                    payment.totalAmount,
                                    payment.memo,
                                    payment.approvedAt,
-                                   payment.paymentStatus
+                                   payment.paymentStatus,
+                                   file.s3Url
                            ))
                            .from(payment)
-                           //TODO : leftJoin -> join 변경
-                           .leftJoin(payment.member, member)
-                           .leftJoin(payment.projectService, projectService)
+                           .join(payment.member, member)
+                           .join(payment.projectService, projectService)
+                           .leftJoin(serviceResource).on(serviceResource.projectService.eq(projectService)
+                                                                                       .and(serviceResource.isRepresentative.isTrue()))
+                           .leftJoin(serviceResource.file, file)
                            .where(member.email.eq(email))
                            .fetch();
     }

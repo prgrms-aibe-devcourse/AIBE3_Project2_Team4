@@ -8,6 +8,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 
 import java.io.IOException;
 
@@ -17,6 +18,9 @@ public class RequestCachingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        filterChain.doFilter(new CachedHttpServletRequest(request), response);
+        if (!MultipartResolutionDelegate.isMultipartRequest(request)) {
+            request = new CachedHttpServletRequest(request);
+        }
+        filterChain.doFilter(request, response);
     }
 }
