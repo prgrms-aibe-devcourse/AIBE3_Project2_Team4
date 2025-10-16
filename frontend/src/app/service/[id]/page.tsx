@@ -20,6 +20,7 @@ import { ReviewCard } from "@/components/review-card";
 import { Pagination } from "@/components/pagination";
 import { components } from "@/app/service/backend/schemas";
 import { useLoginStore } from "@/store/useLoginStore";
+import useCategory from "@/hooks/use-category";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -27,6 +28,7 @@ export default function ServiceDetailPage() {
   const params = useParams();
   const serviceId = params?.id;
   const router = useRouter();
+  const { tagsByCategory, categories } = useCategory();
 
   type ServiceReviewDTO = components["schemas"]["ServiceReviewDTO"];
   type ServiceDTO = components["schemas"]["ServiceDTO"];
@@ -42,7 +44,19 @@ export default function ServiceDetailPage() {
   const [totalReviewPage, setTotalReviewPage] = useState(1);
   const { member, accessToken } = useLoginStore();
 
-  // 서비스 상세 정보
+  const getTagName = (tagId: string) => {
+    for (const tags of Object.values(tagsByCategory)) {
+      const tag = tags.find((t) => t.id === tagId);
+      if (tag) return tag.name;
+    }
+    return tagId;
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find((c) => c.id === categoryId);
+    if (category) return category.name;
+  };
+
   useEffect(() => {
     const fetchServiceDetail = async () => {
       try {
@@ -271,10 +285,10 @@ export default function ServiceDetailPage() {
           <div className="space-y-6">
             <div>
               <div className="mb-2 flex items-center space-x-2">
-                <Badge variant="secondary">{service.category}</Badge>
+                <Badge variant="secondary">{getCategoryName(service.category)}</Badge>
                 {service.tags.map((tag) => (
                   <Badge key={tag} variant="outline">
-                    {tag}
+                    {getTagName(tag)}
                   </Badge>
                 ))}
               </div>
