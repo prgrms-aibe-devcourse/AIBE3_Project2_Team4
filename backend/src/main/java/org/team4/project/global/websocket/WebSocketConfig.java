@@ -1,6 +1,8 @@
 package org.team4.project.global.websocket;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -8,7 +10,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final StompHandler stompHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -27,5 +32,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 클라이언트에서 서버로 메시지를 보낼 때 사용하는 프리픽스를 설정합니다.
         // 예를 들어, 클라이언트는 /app/chat.sendMessage 와 같은 경로로 메시지를 보냅니다.
         registry.setApplicationDestinationPrefixes("/app");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompHandler);
     }
 }
