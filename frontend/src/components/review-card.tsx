@@ -71,7 +71,16 @@ export function ReviewCard({
             <Link href={link} className="hover:text-primary text-sm font-medium transition-colors">
               {authorName}
             </Link>
-            <p className="text-muted-foreground text-xs">{createdAt}</p>
+            <p className="text-muted-foreground text-xs">
+              {new Date(createdAt).toLocaleString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })}
+            </p>
           </div>
         </div>
       </CardContent>

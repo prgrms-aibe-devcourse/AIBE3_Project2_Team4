@@ -355,13 +355,6 @@ export default function ServiceDetailPage() {
           </div>
         </div>
 
-        <Button
-          onClick={() => router.push(`/reviews/register?serviceId=${serviceId}`)}
-          className="bg-primary hover:bg-primary/90 text-white"
-        >
-          리뷰 작성하기 (임시버튼)
-        </Button>
-
         {/* 서비스 상세 설명 */}
         <Card className="mb-12">
           <CardContent className="p-6">
@@ -405,12 +398,19 @@ export default function ServiceDetailPage() {
                 images={review.images}
                 authorName={review.freelancerName}
                 authorId={review.freelancerEmail}
-                authorProfileImage={review.freelancerProfileImage}
+                authorProfileImage={review.FreelancerProfileImage}
                 createdAt={review.createdAt}
               />
             ))}
           </div>
-
+          <div className="flex justify-end">
+            <Button
+              onClick={() => router.push(`/reviews/register?serviceId=${serviceId}`)}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              리뷰 작성하기
+            </Button>
+          </div>
           <Pagination
             currentPage={currentReviewPage}
             totalPages={totalReviewPage}

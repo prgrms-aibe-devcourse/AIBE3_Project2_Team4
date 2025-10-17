@@ -25,7 +25,7 @@ export interface ServiceReviewDTO {
   images: string[];
   freelancerName: string;
   freelancerEmail: string;
-  freelancerProfileImage: string;
+  FreelancerProfileImage: string;
   createdAt: string;
 }
 
