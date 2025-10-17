@@ -2,13 +2,13 @@ package org.team4.project.domain.chat.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.activeService.service.ActiveServiceService;
 import org.team4.project.domain.chat.dto.MessageRequest;
 import org.team4.project.domain.chat.entity.ChatMessage;
 import org.team4.project.domain.chat.entity.ChatRoom;
 import org.team4.project.domain.chat.repository.ChatMessageRepository;
 import org.team4.project.domain.member.entity.Member;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -68,18 +68,10 @@ public class ChatMessageService {
                 .build();
         return chatMessageRepository.save(message);
     }
-
+    
     @Transactional
-    public ChatMessage confirmWorkComplete(ChatRoom room, Member member, Long serviceId) {
-        // ActiveService의 상태 변경 로직을 ActiveServiceService를 통해 호출
+    public void confirmWorkComplete(Member member, Long serviceId) {
+        // ActiveService의 상태 변경 로직만 수행
         activeServiceService.updateActiveServiceStatus(serviceId, member.getEmail());
-
-        ChatMessage message = ChatMessage.builder()
-                .room(room)
-                .member(null) // 시스템 메시지
-                .content("작업이 최종 완료되었습니다.")
-                .messageType(ChatMessage.MessageType.WORK_CONFIRMED)
-                .build();
-        return chatMessageRepository.save(message);
     }
 }
