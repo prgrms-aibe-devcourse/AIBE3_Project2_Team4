@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team4.project.domain.chat.dto.ChatRoomResponseDto;
+import org.team4.project.domain.chat.dto.MessageRequest;
 import org.team4.project.domain.chat.dto.MessageResponse;
 import org.team4.project.domain.chat.entity.ChatMessage;
 import org.team4.project.domain.chat.entity.ChatRoom;
@@ -20,6 +21,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
+    private final ChatMessageService chatMessageService;
     private final SimpMessagingTemplate messagingTemplate; // 실시간 알림을 위한 SimpMessagingTemplate 주입
 
     @Transactional
@@ -53,6 +55,9 @@ public class ChatRoomService {
 
     public ChatRoom getRoom(Long id) {
         return chatRoomRepository.findById(id).orElseThrow(() -> new RuntimeException("채팅방 없음"));
+    }
+    public ChatRoom getRoom(String id) {
+        return getRoom(Long.parseLong(id));
     }
 
     @Transactional
@@ -98,5 +103,18 @@ public class ChatRoomService {
     public void requestPayment(Long roomId, Member currentUser) {
         ChatRoom room = getRoom(roomId);
         System.out.println("User " + currentUser.getEmail() + " requested payment in room " + roomId);
+    }
+
+    @Transactional
+    public void sendWorkCompleteRequest(String roomId, Member member, Long serviceId) {
+        ChatRoom room = getRoom(roomId);
+        MessageRequest messageRequest = new MessageRequest();
+        messageRequest.setRoomId(Long.parseLong(roomId));
+        messageRequest.setServiceId(serviceId);
+
+        ChatMessage savedMessage = chatMessageService.saveWorkCompleteRequest(room, member, messageRequest);
+
+        MessageResponse messageResponse = MessageResponse.from(savedMessage);
+        messagingTemplate.convertAndSend("/topic/rooms/" + roomId, messageResponse);
     }
 }

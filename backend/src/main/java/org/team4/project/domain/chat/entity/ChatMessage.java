@@ -38,6 +38,6 @@ public class ChatMessage extends BaseEntity {
     private Long serviceId;
 
     public enum MessageType {
-        TALK, PAYMENT_REQUEST, REVIEW_PROMPT, MEETING_REQUEST
+        TALK, PAYMENT_REQUEST, REVIEW_PROMPT, MEETING_REQUEST, WORK_COMPLETE_REQUEST, WORK_CONFIRMED
     }
 }

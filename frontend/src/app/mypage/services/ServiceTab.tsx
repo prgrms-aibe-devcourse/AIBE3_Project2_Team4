@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import useAuthFetchV1 from "@/hooks/use-fetch";
 import Loading from "@/components/loading";
+import { authorizedFetch } from "@/lib/api";
 import useLogin from "@/hooks/use-Login";
 import { useRouter } from "next/navigation";
 
@@ -80,17 +81,35 @@ export default function ServiceTab() {
 
   if (isLoading || activeServices == null || member == null) return <Loading />;
 
-  const handleCompleteWork = (serviceId: string) => {
+  const handleCompleteWork = async (serviceId: string) => {
     if (confirm("작업을 완료하시겠습니까? 클라이언트에게 작업 완료 메시지가 전송됩니다.")) {
-      // Find the service
       const service = activeServices.ongoing.find((s) => s.id === serviceId);
-      if (!service) return;
+      if (!service) {
+        alert("서비스를 찾을 수 없습니다.");
+        return;
+      }
 
-      // Move service to completed 여기서 끝내면 안돼고, 채팅 쪽에서 accept해야 완료임.
-      setActiveServices({
-        ongoing: activeServices.ongoing.filter((s) => s.id !== serviceId),
-        completed: [...activeServices.completed, { ...service, status: "completed" }],
-      });
+      try {
+        const response = await authorizedFetch(
+          `http://localhost:8080/api/v1/chats/rooms/${service.chatId}/complete-work`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ serviceId: parseInt(service.id, 10) }),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("작업 완료 요청에 실패했습니다.");
+        }
+
+        alert("클라이언트에게 작업 완료 요청을 보냈습니다.");
+      } catch (error: any) {
+        console.error("Error completing work:", error);
+        alert(error.message);
+      }
     }
   };
 

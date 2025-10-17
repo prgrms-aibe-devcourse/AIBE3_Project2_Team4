@@ -21,9 +21,11 @@ public class MessageResponse {
     private Long serviceId;
 
     public static MessageResponse from(ChatMessage entity) {
+        String senderName = (entity.getMember() == null) ? "시스템" : entity.getMember().getNickname();
+
         return MessageResponse.builder()
                 .id(entity.getId())
-                .sender(entity.getMember().getNickname())
+                .sender(senderName)
                 .content(entity.getContent())
                 .createdAt(entity.getCreatedAt())
                 .messageType(entity.getMessageType())

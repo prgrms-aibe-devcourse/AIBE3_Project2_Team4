@@ -69,4 +69,33 @@ public class ChatSocketController {
         MessageResponse messageResponse = MessageResponse.from(savedMessage);
         messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
     }
+
+    @MessageMapping("/chats/sendWorkCompleteRequest")
+    public void sendWorkCompleteRequest(@Payload MessageRequest messageRequest, Principal principal) {
+        Member member = getMemberFromPrincipal(principal);
+        ChatRoom room = chatRoomService.getRoom(messageRequest.getRoomId());
+
+        ChatMessage savedMessage = chatMessageService.saveWorkCompleteRequest(room, member, messageRequest);
+
+        MessageResponse messageResponse = MessageResponse.from(savedMessage);
+        messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
+    }
+
+    @MessageMapping("/chats/confirmWorkComplete")
+    public void confirmWorkComplete(@Payload MessageRequest messageRequest, Principal principal) {
+        Member client = getMemberFromPrincipal(principal);
+        ChatRoom room = chatRoomService.getRoom(messageRequest.getRoomId());
+
+        // 1. 서비스 상태를 '완료'로 변경하는 비즈니스 로직 실행
+        chatMessageService.confirmWorkComplete(client, messageRequest.getServiceId());
+
+        // 2. 프리랜서가 보내는 감사 메시지를 생성하고 저장
+        Member freelancer = room.getFreelancer();
+        String content = "모든 프로젝트가 완료되었습니다.\n이용해주셔서 감사합니다.";
+        ChatMessage thankYouMessage = chatMessageService.saveMessage(room, freelancer, content);
+
+        // 3. 저장된 감사 메시지를 실시간으로 클라이언트에게 전송
+        MessageResponse messageResponse = MessageResponse.from(thankYouMessage);
+        messagingTemplate.convertAndSend("/topic/rooms/" + messageRequest.getRoomId(), messageResponse);
+    }
 }

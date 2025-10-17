@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useLoginStore } from "@/store/useLoginStore";
-import { Phone } from "lucide-react";
+import { Phone, CheckCircle } from "lucide-react";
 
 // --- Type Definitions ---
 
@@ -24,7 +24,13 @@ interface ChatMessage {
   content: string; // 서비스명으로 사용
   memo?: string; // 메모 필드 추가
   createdAt: string;
-  messageType: "TALK" | "PAYMENT_REQUEST" | "REVIEW_PROMPT" | "MEETING_REQUEST";
+  messageType:
+    | "TALK"
+    | "PAYMENT_REQUEST"
+    | "REVIEW_PROMPT"
+    | "MEETING_REQUEST"
+    | "WORK_COMPLETE_REQUEST"
+    | "WORK_CONFIRMED";
   amount?: number;
   serviceId?: number; // 서비스 ID 추가
 }
@@ -60,6 +66,12 @@ interface PaymentRequestMessageProps {
 interface MeetingRequestMessageProps {
   message: ChatMessage;
   onJoin: () => void;
+}
+
+interface WorkCompleteRequestMessageProps {
+  message: ChatMessage;
+  onConfirm: () => void;
+  isConfirmable: boolean;
 }
 
 interface PaymentRequestModalProps {
@@ -332,6 +344,56 @@ const MeetingRequestMessage = ({ message, onJoin }: MeetingRequestMessageProps) 
   </div>
 );
 
+const WorkCompleteRequestMessage = ({
+  message,
+  onConfirm,
+  isConfirmable,
+}: WorkCompleteRequestMessageProps) => (
+  <div
+    style={{
+      border: "1px solid #22c55e",
+      borderRadius: "8px",
+      backgroundColor: "#f0fdf4",
+      color: "black",
+      padding: "1rem",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    }}
+  >
+    <h4
+      style={{
+        marginTop: 0,
+        marginBottom: "1rem",
+        borderBottom: "1px solid #a7f3d0",
+        paddingBottom: "0.5rem",
+        color: "#15803d",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <CheckCircle size={18} style={{ marginRight: "0.5rem" }} />
+      작업 완료 요청
+    </h4>
+    <p style={{ margin: "0.5rem 0", fontSize: "0.9em" }}>{message.content}</p>
+    {isConfirmable && (
+      <button
+        onClick={onConfirm}
+        style={{
+          width: "100%",
+          padding: "0.75rem",
+          background: "#22c55e",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+          marginTop: "1rem",
+        }}
+      >
+        확인
+      </button>
+    )}
+  </div>
+);
+
 // --- Main Component ---
 
 export default function ChatTab({ initialChatId }: ChatTabProps) {
@@ -508,6 +570,18 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
     setPaymentModalOpen(false);
   };
 
+  const handleConfirmWork = (workMessage: ChatMessage) => {
+    if (!clientRef.current?.connected || !selectedChat || !workMessage.serviceId) return;
+
+    clientRef.current.publish({
+      destination: "/app/chats/confirmWorkComplete",
+      body: JSON.stringify({
+        roomId: selectedChat.id,
+        serviceId: workMessage.serviceId,
+      }),
+    });
+  };
+
   const handlePay = (paymentMessage: ChatMessage) => {
     console.log("handlePay에 전달된 메시지 객체:", paymentMessage);
     if (!selectedChat || !paymentMessage.serviceId) {
@@ -675,7 +749,11 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
                   {messages.map((msg) => {
                     const isMyMessage = msg.sender === member?.nickname;
 
-                    if (msg.messageType === "REVIEW_PROMPT" || msg.sender === "System") {
+                    if (
+                      msg.messageType === "REVIEW_PROMPT" ||
+                      msg.sender === "System" ||
+                      msg.messageType === "WORK_CONFIRMED"
+                    ) {
                       return (
                         <li
                           key={msg.id}
@@ -739,6 +817,12 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
                               />
                             ) : msg.messageType === "MEETING_REQUEST" ? (
                               <MeetingRequestMessage message={msg} onJoin={handleJoinMeeting} />
+                            ) : msg.messageType === "WORK_COMPLETE_REQUEST" ? (
+                              <WorkCompleteRequestMessage
+                                message={msg}
+                                onConfirm={() => handleConfirmWork(msg)}
+                                isConfirmable={member?.role === "client"}
+                              />
                             ) : (
                               <div>{msg.content}</div>
                             )}
