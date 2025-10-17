@@ -1,24 +1,24 @@
 // 카테고리 데이터
 import { useEffect, useState } from "react";
-import { Search, Code, Palette, Camera, PenTool, Megaphone, BarChart } from "lucide-react";
+import { Search, Code, Palette, BarChart, LockKeyholeIcon, Smartphone } from "lucide-react";
 
 const categories_mock = [
   { id: "WEB_DEVELOPMENT", name: "웹 개발", icon: Code, color: "bg-blue-100 text-blue-700" },
   {
     id: "MOBILE_DEVELOPMENT",
     name: "앱 개발",
-    icon: Palette,
+    icon: Smartphone,
     color: "bg-purple-100 text-purple-700",
   },
-  { id: "DATA_SCIENCE", name: "데이터", icon: Camera, color: "bg-green-100 text-green-700" },
+  { id: "DATA_SCIENCE", name: "데이터", icon: BarChart, color: "bg-green-100 text-green-700" },
   {
     id: "INFRA_SECURITY",
     name: "인프라 보안",
-    icon: PenTool,
+    icon: LockKeyholeIcon,
     color: "bg-orange-100 text-orange-700",
   },
-  { id: "UIUX_DESIGN", name: "디자인", icon: Megaphone, color: "bg-red-100 text-red-700" },
-  { id: "ETC", name: "기타", icon: BarChart, color: "bg-indigo-100 text-indigo-700" },
+  { id: "UIUX_DESIGN", name: "디자인", icon: Palette, color: "bg-red-100 text-red-700" },
+  { id: "ETC", name: "기타", icon: Search, color: "bg-indigo-100 text-indigo-700" },
 ];
 
 // 태그 데이터 (카테고리별)

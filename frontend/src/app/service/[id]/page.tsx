@@ -405,7 +405,7 @@ export default function ServiceDetailPage() {
                 images={review.images}
                 authorName={review.freelancerName}
                 authorId={review.freelancerEmail}
-                authorProfileImage={review.freelancerProfileImage}
+                authorProfileImage={review.FreelancerProfileImage}
                 createdAt={review.createdAt}
               />
             ))}
