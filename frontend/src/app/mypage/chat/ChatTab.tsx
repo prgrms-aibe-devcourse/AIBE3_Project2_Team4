@@ -241,7 +241,19 @@ const PaymentRequestModal = ({
   );
 };
 
-const PaymentRequestMessage = ({ message, onPay, isPayable }: PaymentRequestMessageProps) => (
+interface PaymentRequestMessageProps {
+  message: ChatMessage;
+  onPay: () => void;
+  isPayable: boolean;
+  isDisabled: boolean; // New prop
+}
+
+const PaymentRequestMessage = ({
+  message,
+  onPay,
+  isPayable,
+  isDisabled, // Destructure new prop
+}: PaymentRequestMessageProps) => (
   <div
     style={{
       border: "1px solid #ddd",
@@ -283,6 +295,7 @@ const PaymentRequestMessage = ({ message, onPay, isPayable }: PaymentRequestMess
     {isPayable && (
       <button
         onClick={onPay}
+        disabled={isDisabled} // Apply disabled prop
         style={{
           width: "100%",
           padding: "0.75rem",
@@ -290,11 +303,11 @@ const PaymentRequestMessage = ({ message, onPay, isPayable }: PaymentRequestMess
           color: "white",
           border: "none",
           borderRadius: "4px",
-          cursor: "pointer",
+          cursor: isDisabled ? "not-allowed" : "pointer", // Change cursor for disabled state
           marginTop: "1rem",
         }}
       >
-        결제
+        {isDisabled ? "결제 완료" : "결제"}
       </button>
     )}
   </div>
@@ -323,7 +336,7 @@ const MeetingRequestMessage = ({ message, onJoin }: MeetingRequestMessageProps) 
       }}
     >
       <Phone size={18} style={{ marginRight: "0.5rem" }} />
-      화상회의 요청
+      회의 요청
     </h4>
     <p style={{ margin: "0.5rem 0", fontSize: "0.9em" }}>{message.content}</p>
     <button
@@ -344,10 +357,18 @@ const MeetingRequestMessage = ({ message, onJoin }: MeetingRequestMessageProps) 
   </div>
 );
 
+interface WorkCompleteRequestMessageProps {
+  message: ChatMessage;
+  onConfirm: () => void;
+  isConfirmable: boolean;
+  isDisabled: boolean; // New prop
+}
+
 const WorkCompleteRequestMessage = ({
   message,
   onConfirm,
   isConfirmable,
+  isDisabled, // Destructure new prop
 }: WorkCompleteRequestMessageProps) => (
   <div
     style={{
@@ -377,6 +398,7 @@ const WorkCompleteRequestMessage = ({
     {isConfirmable && (
       <button
         onClick={onConfirm}
+        disabled={isDisabled} // Apply disabled prop
         style={{
           width: "100%",
           padding: "0.75rem",
@@ -384,11 +406,11 @@ const WorkCompleteRequestMessage = ({
           color: "white",
           border: "none",
           borderRadius: "4px",
-          cursor: "pointer",
+          cursor: isDisabled ? "not-allowed" : "pointer", // Change cursor for disabled state
           marginTop: "1rem",
         }}
       >
-        확인
+        {isDisabled ? "확인 완료" : "확인"}
       </button>
     )}
   </div>
@@ -411,6 +433,8 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
   const [freelancerServices, setFreelancerServices] = useState<{ id: number; title: string }[]>([]);
+  const [confirmedServiceIds, setConfirmedServiceIds] = useState<Set<number>>(new Set()); // 추가: '확인' 버튼 비활성화용
+  const [paidServiceIds, setPaidServiceIds] = useState<Set<number>>(new Set()); // 추가: '결제' 버튼 비활성화용
   const menuRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -515,7 +539,7 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
       destination: "/app/chats/sendMeetingRequest",
       body: JSON.stringify({
         roomId: selectedChat.id,
-        content: `${member.nickname}님이 화상회의를 요청했습니다.`,
+        content: `${member.nickname}님이 회의를 요청했습니다.`,
         messageType: "MEETING_REQUEST",
       }),
     });
@@ -573,13 +597,20 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
   const handleConfirmWork = (workMessage: ChatMessage) => {
     if (!clientRef.current?.connected || !selectedChat || !workMessage.serviceId) return;
 
-    clientRef.current.publish({
-      destination: "/app/chats/confirmWorkComplete",
-      body: JSON.stringify({
-        roomId: selectedChat.id,
-        serviceId: workMessage.serviceId,
-      }),
-    });
+    try {
+      clientRef.current.publish({
+        destination: "/app/chats/confirmWorkComplete",
+        body: JSON.stringify({
+          roomId: selectedChat.id,
+          serviceId: workMessage.serviceId,
+        }),
+      });
+      // 성공적으로 메시지를 보낸 후, 해당 serviceId를 confirmedServiceIds에 추가하여 버튼을 비활성화합니다.
+      setConfirmedServiceIds((prev) => new Set(prev).add(workMessage.serviceId!));
+    } catch (error) {
+      console.error("확인 메시지 전송 실패:", error);
+      alert("확인 메시지 전송에 실패했습니다.");
+    }
   };
 
   const handlePay = (paymentMessage: ChatMessage) => {
@@ -600,6 +631,8 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
     console.log("결제 페이지로 전달되는 파라미터:", params);
 
     router.push(`/payment?${new URLSearchParams(params).toString()}`);
+    // 결제 페이지로 이동하기 전에, 해당 serviceId를 paidServiceIds에 추가하여 버튼을 비활성화합니다. (낙관적 업데이트)
+    setPaidServiceIds((prev) => new Set(prev).add(paymentMessage.serviceId!));
   };
 
   const handleJoinMeeting = () => {
@@ -814,6 +847,7 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
                                 message={msg}
                                 onPay={() => handlePay(msg)}
                                 isPayable={member?.role === "client"}
+                                isDisabled={paidServiceIds.has(msg.serviceId!)} // New prop
                               />
                             ) : msg.messageType === "MEETING_REQUEST" ? (
                               <MeetingRequestMessage message={msg} onJoin={handleJoinMeeting} />
@@ -822,6 +856,7 @@ export default function ChatTab({ initialChatId }: ChatTabProps) {
                                 message={msg}
                                 onConfirm={() => handleConfirmWork(msg)}
                                 isConfirmable={member?.role === "client"}
+                                isDisabled={confirmedServiceIds.has(msg.serviceId!)} // New prop
                               />
                             ) : (
                               <div>{msg.content}</div>

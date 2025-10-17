@@ -18,9 +18,7 @@ export default function ChatCanvasPage() {
   const [color, setColor] = useState("#ff0000");
   const [lineWidth, setLineWidth] = useState(2);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [orientation, setOrientation] = useState<"landscape" | "portrait">(
-    "landscape",
-  );
+  const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
 
   const websocketService = useRef(new WebsocketService());
 
@@ -254,7 +252,7 @@ export default function ChatCanvasPage() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem" }}>그림판</h1>
+      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem" }}>회의실</h1>
 
       <div style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
         <button onClick={() => setTool("pen")}>펜</button>
@@ -281,6 +279,45 @@ export default function ChatCanvasPage() {
           style={{ backgroundColor: orientation === "portrait" ? "#4CAF50" : "#eee" }}
         >
           세로 (PDF)
+        </button>
+
+        {/* 파일 추가 */}
+        <label style={{ padding: "0.5rem 1rem", backgroundColor: "#eee", cursor: "pointer" }}>
+          파일 추가
+          <input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            style={{ display: "none" }}
+            onChange={handleFileInputChange}
+          />
+        </label>
+
+        {/* 파일로 저장 버튼 추가 */}
+        <button
+          onClick={() => {
+            const bgCanvas = bgCanvasRef.current;
+            const drawCanvas = drawCanvasRef.current;
+            if (!bgCanvas || !drawCanvas) return;
+
+            // 임시 캔버스 생성
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = bgCanvas.width;
+            tempCanvas.height = bgCanvas.height;
+            const ctx = tempCanvas.getContext("2d");
+            if (!ctx) return;
+
+            // 배경 + 드로잉 합성
+            ctx.drawImage(bgCanvas, 0, 0);
+            ctx.drawImage(drawCanvas, 0, 0);
+
+            // 이미지 다운로드
+            const link = document.createElement("a");
+            link.download = `canvas-${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL("image/png");
+            link.click();
+          }}
+        >
+          파일로 저장
         </button>
       </div>
 
