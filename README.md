@@ -56,7 +56,7 @@ IT 직종에 특화된 **클라이언트–프리랜서 매칭·협업 플랫폼
 ## 🛠 기술 스택
 
 - **Backend**: Java 21, Spring Boot, Spring Validation, Spring Security, Spring WebSocket, Spring Boot Mail
-- **Data**: JPA, Querydsl, MySQL, H2(로컬), Redis
+- **Data**: JPA, MySQL, H2, Redis
 - **Auth**: JWT, OAuth 2.0(Kakao)
 - **Infra**: AWS S3
 - **Payment**: 토스 페이먼츠 API
@@ -94,7 +94,6 @@ forward.javaqna
 ## 🧭 브랜치 전략 & 컨벤션(제안)
 
 - 브랜치: `main(배포)`, `feat/*`, `hotfix/*`
-- PR: 기본적으로 **develop** 대상 → 검수 후 main 병합
 - 커밋 타입(예시): `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `design`, `comment`
 
 
