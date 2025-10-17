@@ -129,7 +129,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ErrorResponse.of(request, message), HttpStatus.NOT_FOUND);
     }
 
-    //
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         log.warn("error at [{} {}]: {}",

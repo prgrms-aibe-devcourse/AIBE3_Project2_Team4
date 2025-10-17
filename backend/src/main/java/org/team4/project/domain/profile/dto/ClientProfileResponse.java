@@ -11,6 +11,7 @@ public class ClientProfileResponse {
     private final String nickname;
     private final String introduction;
     private final double averageRating;
+    private final String profileImageUrl;
 
     // 클라이언트 필드
     private final String companyName;
@@ -23,6 +24,7 @@ public class ClientProfileResponse {
                 .averageRating(clientProfile.getAverageRating())
                 .companyName(clientProfile.getCompanyName())
                 .teamName(clientProfile.getTeamName())
+                .profileImageUrl(clientProfile.getProfileImageUrl())
                 .build();
     }
 }
