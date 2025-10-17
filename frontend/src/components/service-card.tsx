@@ -1,8 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Edit } from "lucide-react";
+import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ServiceCardType } from "@/app/type/service";
 
 interface ServiceCardProps extends ServiceCardType {
@@ -41,12 +40,6 @@ export function ServiceCard({
 
         <div className="mb-2 flex items-center justify-between">
           <span className="text-primary text-lg font-bold">{price.toLocaleString()}원</span>
-
-          {variant === "mypage" && (
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
         <div className="flex items-center justify-between text-sm">

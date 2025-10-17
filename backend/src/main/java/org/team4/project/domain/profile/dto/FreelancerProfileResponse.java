@@ -14,6 +14,7 @@ public class FreelancerProfileResponse {
     private final String nickname;
     private final String introduction;
     private final double averageRating;
+    private final String profileImageUrl;
 
     // 프리랜서 필드
     private final List<String> techStacks;
@@ -34,6 +35,7 @@ public class FreelancerProfileResponse {
                 .portfolios(freelancerProfile.getPortfolios().stream()
                         .map(PortfolioResponseDto::from)
                         .collect(Collectors.toList()))
+                .profileImageUrl(freelancerProfile.getProfileImageUrl())
                 .build();
     }
 }
