@@ -63,7 +63,7 @@ IT 직종에 특화된 **클라이언트–프리랜서 매칭·협업 플랫폼
 - **Frontend**: TypeScript, Tailwind CSS
 - **Docs**: Swagger(OpenAPI)
 
-## 🧱 폴더 구조(예시)
+## 🧱 폴더 구조
 
 ```
 forward.javaqna
@@ -91,11 +91,9 @@ forward.javaqna
 
 ```
 
-## 🧭 브랜치 전략 & 컨벤션(제안)
+## 🧭 브랜치 전략 & 컨벤션
 
 - 브랜치: `main(배포)`, `feat/*`, `hotfix/*`
-- 커밋 타입(예시): `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `design`, `comment`
-
 
 ## 👥 팀 & 역할
 
