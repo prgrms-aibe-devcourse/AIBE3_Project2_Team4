@@ -1,8 +1,14 @@
 "use client";
+
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLoginStore } from "@/store/useLoginStore";
 import { WebsocketService, DrawingAction } from "./websocket-service";
+import * as pdfjsLib_ from "pdfjs-dist/legacy/build/pdf";
+const pdfjsLib = pdfjsLib_ as any;
+
+// PDF.js 워커 경로 설정
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function ChatCanvasPage() {
   const params = useParams();
@@ -18,9 +24,7 @@ export default function ChatCanvasPage() {
   const [color, setColor] = useState("#ff0000");
   const [lineWidth, setLineWidth] = useState(2);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [orientation, setOrientation] = useState<"landscape" | "portrait">(
-    "landscape",
-  );
+  const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
 
   const websocketService = useRef(new WebsocketService());
 
@@ -34,7 +38,7 @@ export default function ChatCanvasPage() {
       ctx.globalCompositeOperation = "source-over";
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
-    } else if (tool === "eraser") {
+    } else {
       ctx.globalCompositeOperation = "destination-out";
       ctx.lineWidth = lineWidth * 10;
     }
@@ -59,15 +63,17 @@ export default function ChatCanvasPage() {
       bgCanvas.width = container.offsetWidth;
       bgCanvas.height = container.offsetHeight;
 
-      const bgCtx = bgCanvas.getContext("2d");
-      if (bgCtx) {
-        const img = new Image();
-        img.src = "/example.jpg";
-        img.onload = () => {
-          bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-          bgCtx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
-          setImageLoaded(true);
-        };
+      if (!imageLoaded) {
+        const bgCtx = bgCanvas.getContext("2d");
+        if (bgCtx) {
+          const img = new Image();
+          img.src = "/example.jpg";
+          img.onload = () => {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            bgCtx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
+            setImageLoaded(true);
+          };
+        }
       }
     }
 
@@ -91,17 +97,13 @@ export default function ChatCanvasPage() {
   useEffect(() => {
     redrawCanvas();
     setImageLoaded(true);
-    window.addEventListener("resize", () => redrawCanvas(true));
-    return () => window.removeEventListener("resize", () => redrawCanvas(true));
+    const resizeHandler = () => redrawCanvas(true);
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
   }, []);
 
-  useEffect(() => {
-    applyToolSettings();
-  }, [tool, color, lineWidth]);
-
-  useEffect(() => {
-    redrawCanvas(true);
-  }, [orientation]);
+  useEffect(() => applyToolSettings(), [tool, color, lineWidth]);
+  useEffect(() => redrawCanvas(true), [orientation]);
 
   useEffect(() => {
     const handleRemoteDrawingAction = (action: DrawingAction) => {
@@ -110,7 +112,7 @@ export default function ChatCanvasPage() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      if (action.type == "START" || action.type == "DRAW") {
+      if (action.type === "START" || action.type === "DRAW") {
         ctx.strokeStyle = action.color;
         ctx.lineWidth = action.lineWidth;
         ctx.globalCompositeOperation = action.tool === "pen" ? "source-over" : "destination-out";
@@ -142,9 +144,7 @@ export default function ChatCanvasPage() {
       websocketService.current.connect(canvasId, accessToken, handleRemoteDrawingAction);
     }
 
-    return () => {
-      websocketService.current.disconnect();
-    };
+    return () => websocketService.current.disconnect();
   }, [canvasId, accessToken]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -158,7 +158,7 @@ export default function ChatCanvasPage() {
     ctx.beginPath();
     ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
 
-    const action: DrawingAction = {
+    websocketService.current.sendDrawingAction(canvasId, {
       canvasId,
       type: "START",
       x: e.nativeEvent.offsetX,
@@ -166,8 +166,7 @@ export default function ChatCanvasPage() {
       color,
       lineWidth,
       tool,
-    };
-    websocketService.current.sendDrawingAction(canvasId, action);
+    });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -194,7 +193,7 @@ export default function ChatCanvasPage() {
     ctx.beginPath();
     ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
 
-    const action: DrawingAction = {
+    websocketService.current.sendDrawingAction(canvasId, {
       canvasId,
       type: "DRAW",
       x: e.nativeEvent.offsetX,
@@ -202,15 +201,13 @@ export default function ChatCanvasPage() {
       color,
       lineWidth,
       tool,
-    };
-    websocketService.current.sendDrawingAction(canvasId, action);
+    });
   };
 
   const handleMouseUp = () => {
     if (!canvasId) return;
     isDrawing.current = false;
-
-    const action: DrawingAction = {
+    websocketService.current.sendDrawingAction(canvasId, {
       canvasId,
       type: "END",
       x: 0,
@@ -218,10 +215,8 @@ export default function ChatCanvasPage() {
       color: "",
       lineWidth: 0,
       tool: "pen",
-    };
-    websocketService.current.sendDrawingAction(canvasId, action);
+    });
   };
-
   const handleMouseLeave = () => {
     isDrawing.current = false;
   };
@@ -234,7 +229,7 @@ export default function ChatCanvasPage() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (sendAction && canvasId) {
-      const action: DrawingAction = {
+      websocketService.current.sendDrawingAction(canvasId, {
         canvasId,
         type: "CLEAR",
         x: 0,
@@ -242,10 +237,73 @@ export default function ChatCanvasPage() {
         color: "",
         lineWidth: 0,
         tool: "pen",
-      };
-      websocketService.current.sendDrawingAction(canvasId, action);
+      });
     }
   };
+
+  // ========================
+  // 파일 업로드
+  // ========================
+  const handleFile = async (file: File) => {
+    const bgCanvas = bgCanvasRef.current;
+    if (!bgCanvas) return;
+    const ctx = bgCanvas.getContext("2d");
+    if (!ctx) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    bgCanvas.width = container.offsetWidth;
+    bgCanvas.height = container.offsetHeight;
+
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!ext) return;
+
+    if (ext === "pdf") {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 1 });
+      const scale = Math.min(
+        container.offsetWidth / viewport.width,
+        container.offsetHeight / viewport.height,
+      );
+      const scaledViewport = page.getViewport({ scale });
+
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      if (!tempCtx) return;
+      tempCanvas.width = scaledViewport.width;
+      tempCanvas.height = scaledViewport.height;
+
+      await page.render({ canvasContext: tempCtx, viewport: scaledViewport }).promise;
+      ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      ctx.drawImage(tempCanvas, 0, 0, bgCanvas.width, bgCanvas.height);
+      setImageLoaded(true);
+    } else if (["png", "jpg", "jpeg"].includes(ext)) {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        ctx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+        ctx.drawImage(img, 0, 0, bgCanvas.width, bgCanvas.height);
+        setImageLoaded(true);
+      };
+    } else {
+      alert("지원하지 않는 파일 형식입니다. PDF 또는 이미지 파일만 가능합니다.");
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
   const containerStyle =
     orientation === "landscape"
@@ -254,7 +312,7 @@ export default function ChatCanvasPage() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem" }}>그림판</h1>
+      <h1 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem" }}>회의실</h1>
 
       <div style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
         <button onClick={() => setTool("pen")}>펜</button>
@@ -282,10 +340,46 @@ export default function ChatCanvasPage() {
         >
           세로 (PDF)
         </button>
+
+        <label style={{ padding: "0.5rem 1rem", backgroundColor: "#eee", cursor: "pointer" }}>
+          파일 추가
+          <input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            style={{ display: "none" }}
+            onChange={handleFileInputChange}
+          />
+        </label>
+
+        <button
+          onClick={() => {
+            const bgCanvas = bgCanvasRef.current;
+            const drawCanvas = drawCanvasRef.current;
+            if (!bgCanvas || !drawCanvas) return;
+
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = bgCanvas.width;
+            tempCanvas.height = bgCanvas.height;
+            const ctx = tempCanvas.getContext("2d");
+            if (!ctx) return;
+
+            ctx.drawImage(bgCanvas, 0, 0);
+            ctx.drawImage(drawCanvas, 0, 0);
+
+            const link = document.createElement("a");
+            link.download = `canvas-${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL("image/png");
+            link.click();
+          }}
+        >
+          파일로 저장
+        </button>
       </div>
 
       <div
         ref={containerRef}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
         style={{
           position: "relative",
           border: "1px solid black",
