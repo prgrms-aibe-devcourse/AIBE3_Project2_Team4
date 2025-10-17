@@ -67,7 +67,7 @@ const convert = (dto: ActionServiceDTO[]): ActiveServices => {
 };
 
 export default function ServiceTab() {
-  const { member, accessToken } = useLogin();
+  const { member } = useLogin();
   const router = useRouter();
   const {
     data: activeServices,
@@ -97,7 +97,7 @@ export default function ServiceTab() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ serviceId: parseInt(service.id, 10) }), // Ensure serviceId is a number
+            body: JSON.stringify({ serviceId: parseInt(service.id, 10) }),
           },
         );
 
@@ -105,15 +105,7 @@ export default function ServiceTab() {
           throw new Error("작업 완료 요청에 실패했습니다.");
         }
 
-        alert("클라이언트에게 작업 완료 요청을 보냈습니다. 채팅방에서 확인해주세요.");
-
-        // Optimistically move the service to the 'almost' completed state
-        // It will be fully completed when the client confirms.
-        // For the freelancer's view, we can move it.
-        setActiveServices({
-          ongoing: activeServices.ongoing.filter((s) => s.id !== serviceId),
-          completed: [...activeServices.completed, { ...service, status: "completed" }],
-        });
+        alert("클라이언트에게 작업 완료 요청을 보냈습니다.");
       } catch (error: any) {
         console.error("Error completing work:", error);
         alert(error.message);
